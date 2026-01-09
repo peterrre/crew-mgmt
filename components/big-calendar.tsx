@@ -18,6 +18,14 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
+const formats = {
+  timeGutterFormat: 'HH:mm',
+  eventTimeRangeFormat: ({ start, end }: { start: Date; end: Date }, culture: string, localizer: any) =>
+    `${localizer.format(start, 'HH:mm', culture)} - ${localizer.format(end, 'HH:mm', culture)}`,
+  agendaTimeRangeFormat: ({ start, end }: { start: Date; end: Date }, culture: string, localizer: any) =>
+    `${localizer.format(start, 'HH:mm', culture)} - ${localizer.format(end, 'HH:mm', culture)}`,
+};
+
 interface BigCalendarProps {
   events: any[];
   onSelectSlot?: (slotInfo: any) => void;
@@ -93,6 +101,7 @@ export default function BigCalendar({
           events={events}
           startAccessor="start"
           endAccessor="end"
+          formats={formats}
           titleAccessor={(event: any) => {
             const helperName = event?.helper?.name || 'Unassigned';
             return `${event?.title || 'Untitled'} - ${helperName}`;
@@ -103,6 +112,8 @@ export default function BigCalendar({
           eventPropGetter={eventStyleGetter}
           views={['month', 'week', 'day', 'agenda']}
           view={view}
+          min={new Date(1970, 0, 1, 0, 0, 0)}
+          max={new Date(1970, 0, 1, 23, 59, 59)}
           onView={onView}
           date={date}
           onNavigate={onNavigate}
