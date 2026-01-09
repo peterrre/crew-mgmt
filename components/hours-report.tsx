@@ -179,41 +179,65 @@ export default function HoursReport() {
           ) : report.length === 0 ? (
             <div className="p-8 text-center text-gray-500">No shifts found for this period</div>
           ) : (
-            <table className="w-full">
-              <thead className="bg-sky-50 border-b border-sky-100">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900">#</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900">Name</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900">Role</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-sky-900">Hours</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.map((entry, index) => (
-                  <tr key={entry.id} className="border-b border-gray-100 hover:bg-amber-50/50">
-                    <td className="px-6 py-4">
-                      {index === 0 ? (
-                        <Trophy className="w-5 h-5 text-amber-500" />
-                      ) : (
-                        <span className="text-gray-500">{index + 1}</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-gray-900">{entry.name}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(entry.role)}`}>
-                        {entry.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span className="font-semibold text-gray-900">{entry.hours}h</span>
-                      </div>
-                    </td>
+            <>
+              <table className="w-full">
+                <thead className="bg-sky-50 border-b border-sky-100">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900">#</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900">Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900">Role</th>
+                    <th className="px-6 py-4 text-right text-sm font-semibold text-sky-900">Hours</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {report.map((entry, index) => (
+                    <tr key={entry.id} className="border-b border-gray-100 hover:bg-amber-50/50">
+                      <td className="px-6 py-4">
+                        {index === 0 ? (
+                          <Trophy className="w-5 h-5 text-amber-500" />
+                        ) : (
+                          <span className="text-gray-500">{index + 1}</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 font-medium text-gray-900">{entry.name}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(entry.role)}`}>
+                          {entry.role}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Clock className="w-4 h-4 text-gray-400" />
+                          <span className="font-semibold text-gray-900">{entry.hours}h</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="bg-sky-50 border-t border-sky-100 px-6 py-4">
+                <div className="flex justify-between items-center">
+                  <div className="flex gap-8">
+                    <div>
+                      <span className="text-sm text-sky-700">Total Hours:</span>
+                      <span className="ml-2 font-bold text-sky-900">
+                        {Math.round(report.reduce((sum, entry) => sum + entry.hours, 0) * 100) / 100}h
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-sm text-sky-700">Average per Helper:</span>
+                      <span className="ml-2 font-bold text-sky-900">
+                        {Math.round((report.reduce((sum, entry) => sum + entry.hours, 0) / report.length) * 100) / 100}h
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-sm text-sky-700">Helpers:</span>
+                      <span className="ml-2 font-bold text-sky-900">{report.length}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </main>
