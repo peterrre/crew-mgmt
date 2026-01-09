@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,13 +33,19 @@ export default function EditHelperDialog({
   onClose,
   onSuccess,
 }: EditHelperDialogProps) {
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
+    name: helper.name || '',
     role: helper.role,
     password: '',
     availability: helper?.availability?.join(', ') || '',
   });
+
+  const isAdmin = (session?.user as any)?.role === 'ADMIN';
+  const isOwnProfile = (session?.user as any)?.id === helper.id;
+  const canEditName = isAdmin || isOwnProfile;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +54,10 @@ export default function EditHelperDialog({
 
     try {
       const updateData: any = { role: formData.role };
+
+      if (canEditName && formData.name) {
+        updateData.name = formData.name;
+      }
 
       if (formData.password) {
         updateData.password = formData.password;
@@ -94,8 +105,17 @@ export default function EditHelperDialog({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="space-y-2">
-            <Label>Name</Label>
-            <p className="text-sm text-gray-600">{helper?.name || 'Unnamed'}</p>
+            <Label htmlFor="name">Name</Label>
+            {canEditName ? (
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Enter name"
+              />
+            ) : (
+              <p className="text-sm text-gray-600">{helper?.name || 'Unnamed'}</p>
+            )}
           </div>
 
           <div className="space-y-2">
