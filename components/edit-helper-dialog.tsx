@@ -128,11 +128,13 @@ export default function EditHelperDialog({
             <Select
               value={formData.role}
               onValueChange={(value) => setFormData({ ...formData, role: value })}
+              disabled={!isAdmin}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="ADMIN">Admin</SelectItem>
                 <SelectItem value="CREW">Crew</SelectItem>
                 <SelectItem value="VOLUNTEER">Volunteer</SelectItem>
               </SelectContent>
