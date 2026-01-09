@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Calendar, Users, CalendarClock, LogOut, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
@@ -15,6 +15,7 @@ interface Stats {
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [stats, setStats] = useState<Stats>({
     crewCount: 0,
     volunteerCount: 0,
@@ -79,7 +80,9 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-sky-900 mb-2">Admin Dashboard</h2>
+          <h2 className="text-3xl font-bold text-sky-900 mb-2">
+            Welcome{session?.user?.name ? `, ${session.user.name}` : ''}!
+          </h2>
           <p className="text-sky-700">Manage your event crew and schedules</p>
         </div>
 
