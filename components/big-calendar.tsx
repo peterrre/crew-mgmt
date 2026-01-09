@@ -119,6 +119,7 @@ export default function BigCalendar({
           onNavigate={onNavigate}
           step={60}
           showMultiDayTimes
+          dayLayoutAlgorithm="no-overlap"
           style={{ height: '100%' }}
         />
       </div>

@@ -83,3 +83,57 @@
   background-color: #ef4444;
   height: 2px;
 }
+
+/* Minimal Agenda Styles */
+.rbc-agenda-view {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rbc-agenda-table {
+  font-size: 14px;
+  table-layout: auto;
+}
+
+.rbc-agenda-date-cell {
+  font-weight: 600;
+  color: #0c4a6e;
+  width: 15%;
+}
+
+.rbc-agenda-time-cell {
+  color: #64748b;
+  width: 25%;
+}
+
+.rbc-agenda-event-cell {
+  padding: 8px 12px;
+  width: 60%;
+}
+
+/* Overlapping events */
+.rbc-event {
+  min-height: 20px;
+}
+
+.rbc-row-segment {
+  padding: 0 2px;
+}
+
+.rbc-event-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rbc-events-container {
+  margin-right: 0 !important;
+}
+
+.rbc-event-overlaps {
+  box-shadow: -1px 1px 3px rgba(0,0,0,0.2);
+}
+
+.rbc-agenda-event-cell {
+  padding: 8px 12px;
+}
