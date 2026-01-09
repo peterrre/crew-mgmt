@@ -24,22 +24,29 @@ export async function GET(request: Request) {
 
     if (period === 'week') {
       startDate = new Date(now);
-      startDate.setDate(now.getDate() - 7);
+      startDate.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 6);
+      endDate.setHours(23, 59, 59, 999);
     } else if (period === 'month') {
-      startDate = new Date(now);
-      startDate.setMonth(now.getMonth() - 1);
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      endDate.setHours(23, 59, 59, 999);
     } else if (period === 'custom' && customStartDate && customEndDate) {
       startDate = new Date(customStartDate);
+      startDate.setHours(0, 0, 0, 0);
       endDate = new Date(customEndDate);
       endDate.setHours(23, 59, 59, 999);
     }
 
     const whereClause: any = {};
-    if (startDate) {
-      whereClause.start = { gte: startDate };
-    }
-    if (endDate) {
-      whereClause.start = { ...whereClause.start, lte: endDate };
+    if (startDate && endDate) {
+      whereClause.start = {
+        gte: startDate,
+        lte: endDate,
+      };
     }
 
     const shifts = await prisma.shift.findMany({
@@ -61,7 +68,7 @@ export async function GET(request: Request) {
       if (!shift.helper) continue;
 
       const duration = (new Date(shift.end).getTime() - new Date(shift.start).getTime()) / (1000 * 60 * 60);
-      
+
       if (hoursMap.has(shift.helper.id)) {
         const existing = hoursMap.get(shift.helper.id)!;
         existing.hours += duration;

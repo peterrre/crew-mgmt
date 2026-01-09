@@ -30,11 +30,11 @@ export default function HoursReport() {
   const fetchReport = async () => {
     setLoading(true);
     try {
-      let url = `/api/reports/hours?period=${period}`;
+      let url = `/api/reports/hours?period=${period}&t=${Date.now()}`;
       if (period === 'custom' && startDate && endDate) {
-        url = `/api/reports/hours?period=custom&startDate=${startDate}&endDate=${endDate}`;
+        url = `/api/reports/hours?period=custom&startDate=${startDate}&endDate=${endDate}&t=${Date.now()}`;
       }
-      const response = await fetch(url);
+      const response = await fetch(url, { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         setReport(data.report || []);
@@ -50,6 +50,24 @@ export default function HoursReport() {
     if (startDate && endDate) {
       fetchReport();
     }
+  };
+
+  const getDateRangeText = () => {
+    const now = new Date();
+    if (period === 'week') {
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6);
+      return `${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}`;
+    } else if (period === 'month') {
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      return `${monthStart.toLocaleDateString()} - ${monthEnd.toLocaleDateString()}`;
+    } else if (period === 'custom' && startDate && endDate) {
+      return `${new Date(startDate).toLocaleDateString()} - ${new Date(endDate).toLocaleDateString()}`;
+    }
+    return '';
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -114,6 +132,12 @@ export default function HoursReport() {
             Custom Range
           </Button>
         </div>
+
+        {getDateRangeText() && (
+          <div className="mb-4 text-sm text-sky-700 bg-sky-50 px-4 py-2 rounded-lg inline-block">
+            Showing data from: <span className="font-semibold">{getDateRangeText()}</span>
+          </div>
+        )}
 
         {period === 'custom' && (
           <div className="mb-6 p-4 bg-white rounded-xl border border-amber-100 shadow-sm">
