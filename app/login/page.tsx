@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar, Loader2 } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,7 +45,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex justify-center mb-4">
@@ -52,16 +56,16 @@ export default function LoginPage() {
               <Calendar className="w-8 h-8 text-white" />
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-sky-900">Welcome back</h2>
-          <p className="mt-2 text-sm text-sky-700">
+          <h2 className="text-3xl font-bold text-sky-900 dark:text-white">Welcome back</h2>
+          <p className="mt-2 text-sm text-sky-700 dark:text-slate-400">
             Sign in to manage your event crew
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-amber-100">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-amber-100 dark:border-slate-700">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="dark:text-slate-200">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -70,13 +74,13 @@ export default function LoginPage() {
                   setFormData({ ...formData, email: e.target.value })
                 }
                 required
-                className="h-11"
+                className="h-11 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                 placeholder="you@example.com"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="dark:text-slate-200">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -85,13 +89,13 @@ export default function LoginPage() {
                   setFormData({ ...formData, password: e.target.value })
                 }
                 required
-                className="h-11"
+                className="h-11 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                 placeholder="••••••••"
               />
             </div>
 
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+              <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 p-3 rounded-lg">
                 {error}
               </div>
             )}
@@ -113,20 +117,20 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-sky-700">
+            <p className="text-sm text-sky-700 dark:text-slate-400">
               Don't have an account?{' '}
               <Link
                 href="/register"
-                className="font-medium text-sky-600 hover:text-sky-700"
+                className="font-medium text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300"
               >
                 Register
               </Link>
             </p>
-            <p className="mt-2 text-sm text-sky-700">
+            <p className="mt-2 text-sm text-sky-700 dark:text-slate-400">
               Volunteer?{' '}
               <Link
                 href="/signup-volunteer"
-                className="font-medium text-amber-600 hover:text-amber-700"
+                className="font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
               >
                 Sign up here
               </Link>

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Clock, Trophy } from 'lucide-react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 interface ReportEntry {
   id: string;
@@ -73,93 +74,94 @@ export default function HoursReport() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'ADMIN':
-        return 'bg-purple-100 text-purple-700';
+        return 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300';
       case 'CREW':
-        return 'bg-sky-100 text-sky-700';
+        return 'bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300';
       case 'VOLUNTEER':
-        return 'bg-amber-100 text-amber-700';
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100">
-      <header className="sticky top-0 z-50 bg-amber-50/80 backdrop-blur-md border-b border-amber-200 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <header className="sticky top-0 z-50 bg-amber-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-amber-200 dark:border-slate-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center space-x-2 text-sky-700 hover:text-sky-900">
+            <Link href="/" className="flex items-center space-x-2 text-sky-700 hover:text-sky-900 dark:text-sky-400 dark:hover:text-sky-300">
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Dashboard</span>
             </Link>
+            <ThemeToggle />
           </div>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-sky-900 mb-2">Hours Worked Report</h2>
-          <p className="text-sky-700">View total hours worked by each helper</p>
+          <h2 className="text-3xl font-bold text-sky-900 dark:text-white mb-2">Hours Worked Report</h2>
+          <p className="text-sky-700 dark:text-slate-400">View total hours worked by each helper</p>
         </div>
 
         <div className="mb-6 flex flex-wrap gap-2">
           <Button
             variant={period === 'week' ? 'default' : 'outline'}
             onClick={() => setPeriod('week')}
-            className={period === 'week' ? 'bg-amber-500 hover:bg-orange-600' : ''}
+            className={period === 'week' ? 'bg-amber-500 hover:bg-orange-600' : 'dark:border-slate-600 dark:text-slate-300'}
           >
             This Week
           </Button>
           <Button
             variant={period === 'month' ? 'default' : 'outline'}
             onClick={() => setPeriod('month')}
-            className={period === 'month' ? 'bg-amber-500 hover:bg-orange-600' : ''}
+            className={period === 'month' ? 'bg-amber-500 hover:bg-orange-600' : 'dark:border-slate-600 dark:text-slate-300'}
           >
             This Month
           </Button>
           <Button
             variant={period === 'all' ? 'default' : 'outline'}
             onClick={() => setPeriod('all')}
-            className={period === 'all' ? 'bg-amber-500 hover:bg-orange-600' : ''}
+            className={period === 'all' ? 'bg-amber-500 hover:bg-orange-600' : 'dark:border-slate-600 dark:text-slate-300'}
           >
             All Time
           </Button>
           <Button
             variant={period === 'custom' ? 'default' : 'outline'}
             onClick={() => setPeriod('custom')}
-            className={period === 'custom' ? 'bg-amber-500 hover:bg-orange-600' : ''}
+            className={period === 'custom' ? 'bg-amber-500 hover:bg-orange-600' : 'dark:border-slate-600 dark:text-slate-300'}
           >
             Custom Range
           </Button>
         </div>
 
         {getDateRangeText() && (
-          <div className="mb-4 text-sm text-sky-700 bg-sky-50 px-4 py-2 rounded-lg inline-block">
+          <div className="mb-4 text-sm text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-slate-800 px-4 py-2 rounded-lg inline-block">
             Showing data from: <span className="font-semibold">{getDateRangeText()}</span>
           </div>
         )}
 
         {period === 'custom' && (
-          <div className="mb-6 p-4 bg-white rounded-xl border border-amber-100 shadow-sm">
+          <div className="mb-6 p-4 bg-white dark:bg-slate-800 rounded-xl border border-amber-100 dark:border-slate-700 shadow-sm">
             <div className="flex flex-wrap items-end gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date</Label>
+                <Label htmlFor="startDate" className="dark:text-slate-200">Start Date</Label>
                 <Input
                   id="startDate"
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-40"
+                  className="w-40 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="endDate">End Date</Label>
+                <Label htmlFor="endDate" className="dark:text-slate-200">End Date</Label>
                 <Input
                   id="endDate"
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-40"
+                  className="w-40 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                 />
               </div>
               <Button
@@ -173,33 +175,33 @@ export default function HoursReport() {
           </div>
         )}
 
-        <div className="bg-white rounded-2xl shadow-lg border border-amber-100 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-amber-100 dark:border-slate-700 overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-gray-500">Loading...</div>
+            <div className="p-8 text-center text-gray-500 dark:text-slate-400">Loading...</div>
           ) : report.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">No shifts found for this period</div>
+            <div className="p-8 text-center text-gray-500 dark:text-slate-400">No shifts found for this period</div>
           ) : (
             <>
               <table className="w-full">
-                <thead className="bg-sky-50 border-b border-sky-100">
+                <thead className="bg-sky-50 dark:bg-slate-700 border-b border-sky-100 dark:border-slate-600">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900">#</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900">Name</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900">Role</th>
-                    <th className="px-6 py-4 text-right text-sm font-semibold text-sky-900">Hours</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900 dark:text-white">#</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900 dark:text-white">Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900 dark:text-white">Role</th>
+                    <th className="px-6 py-4 text-right text-sm font-semibold text-sky-900 dark:text-white">Hours</th>
                   </tr>
                 </thead>
                 <tbody>
                   {report.map((entry, index) => (
-                    <tr key={entry.id} className="border-b border-gray-100 hover:bg-amber-50/50">
+                    <tr key={entry.id} className="border-b border-gray-100 dark:border-slate-700 hover:bg-amber-50/50 dark:hover:bg-slate-700/50">
                       <td className="px-6 py-4">
                         {index === 0 ? (
                           <Trophy className="w-5 h-5 text-amber-500" />
                         ) : (
-                          <span className="text-gray-500">{index + 1}</span>
+                          <span className="text-gray-500 dark:text-slate-400">{index + 1}</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 font-medium text-gray-900">{entry.name}</td>
+                      <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{entry.name}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(entry.role)}`}>
                           {entry.role}
@@ -207,32 +209,32 @@ export default function HoursReport() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Clock className="w-4 h-4 text-gray-400" />
-                          <span className="font-semibold text-gray-900">{entry.hours}h</span>
+                          <Clock className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+                          <span className="font-semibold text-gray-900 dark:text-white">{entry.hours}h</span>
                         </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <div className="bg-sky-50 border-t border-sky-100 px-6 py-4">
+              <div className="bg-sky-50 dark:bg-slate-700 border-t border-sky-100 dark:border-slate-600 px-6 py-4">
                 <div className="flex justify-between items-center">
                   <div className="flex gap-8">
                     <div>
-                      <span className="text-sm text-sky-700">Total Hours:</span>
-                      <span className="ml-2 font-bold text-sky-900">
+                      <span className="text-sm text-sky-700 dark:text-slate-300">Total Hours:</span>
+                      <span className="ml-2 font-bold text-sky-900 dark:text-white">
                         {Math.round(report.reduce((sum, entry) => sum + entry.hours, 0) * 100) / 100}h
                       </span>
                     </div>
                     <div>
-                      <span className="text-sm text-sky-700">Average per Helper:</span>
-                      <span className="ml-2 font-bold text-sky-900">
+                      <span className="text-sm text-sky-700 dark:text-slate-300">Average per Helper:</span>
+                      <span className="ml-2 font-bold text-sky-900 dark:text-white">
                         {Math.round((report.reduce((sum, entry) => sum + entry.hours, 0) / report.length) * 100) / 100}h
                       </span>
                     </div>
                     <div>
-                      <span className="text-sm text-sky-700">Helpers:</span>
-                      <span className="ml-2 font-bold text-sky-900">{report.length}</span>
+                      <span className="text-sm text-sky-700 dark:text-slate-300">Helpers:</span>
+                      <span className="ml-2 font-bold text-sky-900 dark:text-white">{report.length}</span>
                     </div>
                   </div>
                 </div>
