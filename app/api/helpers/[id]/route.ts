@@ -12,18 +12,29 @@ export async function PATCH(
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const { id } = params;
 
-    if (!session?.user || (session.user as any).role !== 'ADMIN') {
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const isAdmin = (session.user as any).role === 'ADMIN';
+    const isOwnProfile = (session.user as any).id === id;
+
+    if (!isAdmin && !isOwnProfile) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    const { role, password, availability } = body;
-    const { id } = params;
+    const { name, role, password, availability } = body;
 
     const updateData: any = {};
 
-    if (role) {
+    if (name !== undefined && (isAdmin || isOwnProfile)) {
+      updateData.name = name;
+    }
+
+    if (role && isAdmin) {
       updateData.role = role;
     }
 
@@ -31,7 +42,7 @@ export async function PATCH(
       updateData.passwordHash = await bcrypt.hash(password, 10);
     }
 
-    if (availability !== undefined) {
+    if (availability !== undefined && isAdmin) {
       updateData.availability = availability;
     }
 

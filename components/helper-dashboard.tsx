@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Calendar, LogOut, Edit } from 'lucide-react';
+import { Calendar, LogOut, Edit, User } from 'lucide-react';
 import PersonalCalendar from '@/components/personal-calendar';
 import EditAvailability from '@/components/edit-availability';
 
@@ -35,6 +36,16 @@ export default function HelperDashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-2">
+              <Link href="/profile">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-sky-600 border-sky-600 hover:bg-sky-50"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </Button>
+              </Link>
               {isVolunteer && (
                 <Button
                   variant="outline"

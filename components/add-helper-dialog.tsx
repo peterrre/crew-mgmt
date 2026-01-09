@@ -121,6 +121,7 @@ export default function AddHelperDialog({ onClose, onSuccess }: AddHelperDialogP
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="ADMIN">Admin</SelectItem>
                 <SelectItem value="CREW">Crew</SelectItem>
                 <SelectItem value="VOLUNTEER">Volunteer</SelectItem>
               </SelectContent>
