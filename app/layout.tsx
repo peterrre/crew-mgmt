@@ -9,14 +9,14 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
-  title: 'Event Crew Management',
+  title: 'Pablos Crew Management',
   description: 'Manage your event crew and volunteers efficiently',
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
   },
   openGraph: {
-    title: 'Event Crew Management',
+    title: 'Pablos Crew Management',
     description: 'Manage your event crew and volunteers efficiently',
     images: ['/og-image.png'],
   },

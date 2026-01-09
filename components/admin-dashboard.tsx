@@ -62,7 +62,7 @@ export default function AdminDashboard() {
               <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-amber-500 rounded-xl flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-sky-900">Event Crew Manager</h1>
+              <h1 className="text-xl font-bold text-sky-900">Pablos Crew Manager</h1>
             </div>
             <Button
               variant="ghost"
