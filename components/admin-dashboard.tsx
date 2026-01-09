@@ -129,9 +129,9 @@ export default function AdminDashboard() {
         </div>
 
         {/* Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Link href="/helpers">
-            <div className="bg-gradient-to-br from-sky-400 to-sky-600 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Link href="/helpers" className="h-full">
+            <div className="bg-gradient-to-br from-sky-400 to-sky-600 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer h-full">
               <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
                 <Users className="w-7 h-7 text-white" />
               </div>
@@ -142,14 +142,26 @@ export default function AdminDashboard() {
             </div>
           </Link>
 
-          <Link href="/schedules">
-            <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer">
+          <Link href="/schedules" className="h-full">
+            <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer h-full">
               <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
                 <CalendarClock className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">Schedule Editor</h3>
               <p className="text-amber-100">
                 Create and manage event shifts and schedules
+              </p>
+            </div>
+          </Link>
+
+          <Link href="/reports" className="h-full">
+            <div className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer h-full">
+              <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+                <TrendingUp className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">Hours Report</h3>
+              <p className="text-purple-100">
+                View working hours per helper
               </p>
             </div>
           </Link>
