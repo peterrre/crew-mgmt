@@ -71,29 +71,46 @@ export default function BigCalendar({
   const CalendarComponent = Calendar as any;
 
   return (
-    <div style={{ height: '700px' }}>
-      <CalendarComponent
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        titleAccessor={(event: any) => {
-          const helperName = event?.helper?.name || 'Unassigned';
-          return `${event?.title || 'Untitled'} - ${helperName}`;
-        }}
-        onSelectSlot={selectable ? onSelectSlot : undefined}
-        onSelectEvent={onSelectEvent}
-        selectable={selectable}
-        eventPropGetter={eventStyleGetter}
-        views={['month', 'week', 'day', 'agenda']}
-        view={view}
-        onView={onView}
-        date={date}
-        onNavigate={onNavigate}
-        step={60}
-        showMultiDayTimes
-        style={{ height: '100%' }}
-      />
+    <div>
+      <div className="flex items-center gap-6 mb-4 p-3 bg-amber-50 rounded-lg border border-amber-100">
+        <span className="text-sm font-medium text-sky-900">Legend:</span>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-sky-500"></div>
+          <span className="text-sm text-sky-800">Crew</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-amber-500"></div>
+          <span className="text-sm text-sky-800">Volunteer</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-red-500"></div>
+          <span className="text-sm text-sky-800">Unassigned</span>
+        </div>
+      </div>
+      <div style={{ height: '700px' }}>
+        <CalendarComponent
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          titleAccessor={(event: any) => {
+            const helperName = event?.helper?.name || 'Unassigned';
+            return `${event?.title || 'Untitled'} - ${helperName}`;
+          }}
+          onSelectSlot={selectable ? onSelectSlot : undefined}
+          onSelectEvent={onSelectEvent}
+          selectable={selectable}
+          eventPropGetter={eventStyleGetter}
+          views={['month', 'week', 'day', 'agenda']}
+          view={view}
+          onView={onView}
+          date={date}
+          onNavigate={onNavigate}
+          step={60}
+          showMultiDayTimes
+          style={{ height: '100%' }}
+        />
+      </div>
     </div>
   );
 }

@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -18,7 +18,7 @@ export async function PATCH(
 
     const body = await request.json();
     const { title, start, end, helperId } = body;
-    const { id } = params;
+    const { id } = await params;
 
     const updateData: any = {};
 
@@ -54,7 +54,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -63,7 +63,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     await prisma.shift.delete({
       where: { id },

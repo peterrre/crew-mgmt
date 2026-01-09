@@ -31,6 +31,8 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
+  position: relative;
+  z-index: 10;
 }
 
 .rbc-toolbar button {
@@ -41,6 +43,9 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
 }
 
 .rbc-toolbar button:hover {
@@ -49,9 +54,14 @@
 }
 
 .rbc-toolbar button.rbc-active {
-  background-color: #3b82f6;
+  background-color: #0ea5e9;
   color: white;
-  border-color: #3b82f6;
+  border-color: #0ea5e9;
+}
+
+.rbc-btn-group {
+  position: relative;
+  z-index: 10;
 }
 
 .rbc-month-view,
