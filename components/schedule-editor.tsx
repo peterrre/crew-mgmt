@@ -14,7 +14,7 @@ const BigCalendar = dynamic(() => import('@/components/big-calendar'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-96">
-      <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className="inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
     </div>
   ),
 });
@@ -78,9 +78,9 @@ export default function ScheduleEditor() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
+      <header className="sticky top-0 z-50 bg-amber-50/80 backdrop-blur-md border-b border-amber-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
@@ -90,16 +90,16 @@ export default function ScheduleEditor() {
                   Back
                 </Button>
               </Link>
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-green-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-amber-500 rounded-xl flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-gray-900">Schedule Editor</h1>
+              <h1 className="text-xl font-bold text-sky-900">Schedule Editor</h1>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleSignOut}
-              className="text-gray-600 hover:text-gray-900"
+              className="text-sky-700 hover:text-sky-900"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sign out
@@ -111,14 +111,14 @@ export default function ScheduleEditor() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Festival 2026 Schedule</h2>
-          <p className="text-gray-600">July 10-12, 2026 - Click and drag to create shifts</p>
+          <h2 className="text-2xl font-bold text-sky-900 mb-2">Festival 2026 Schedule</h2>
+          <p className="text-sky-700">July 10-12, 2026 - Click and drag to create shifts</p>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-lg">
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-amber-100">
           {loading ? (
             <div className="flex items-center justify-center h-96">
-              <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
             <BigCalendar

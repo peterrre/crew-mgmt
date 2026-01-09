@@ -31,6 +31,8 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
+  position: relative;
+  z-index: 10;
 }
 
 .rbc-toolbar button {
@@ -41,6 +43,9 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
 }
 
 .rbc-toolbar button:hover {
@@ -49,9 +54,14 @@
 }
 
 .rbc-toolbar button.rbc-active {
-  background-color: #3b82f6;
+  background-color: #0ea5e9;
   color: white;
-  border-color: #3b82f6;
+  border-color: #0ea5e9;
+}
+
+.rbc-btn-group {
+  position: relative;
+  z-index: 10;
 }
 
 .rbc-month-view,
@@ -72,4 +82,80 @@
 .rbc-current-time-indicator {
   background-color: #ef4444;
   height: 2px;
+}
+
+/* Agenda Styles */
+.rbc-agenda-view {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.rbc-agenda-view table.rbc-agenda-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+
+.rbc-agenda-view table.rbc-agenda-table thead > tr > th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
+  padding: 10px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+}
+
+.rbc-agenda-view table.rbc-agenda-table tbody > tr > td.rbc-agenda-date-cell {
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
+  font-weight: 600;
+  color: #0c4a6e;
+  white-space: nowrap;
+}
+
+.rbc-agenda-view table.rbc-agenda-table tbody > tr > td.rbc-agenda-time-cell {
+  width: 140px;
+  min-width: 140px;
+  max-width: 140px;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.rbc-agenda-view table.rbc-agenda-table tbody > tr > td.rbc-agenda-event-cell {
+  color: #1e293b;
+}
+
+/* Overlapping events */
+.rbc-event {
+  min-height: 20px;
+}
+
+.rbc-row-segment {
+  padding: 0 2px;
+}
+
+.rbc-event-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rbc-events-container {
+  margin-right: 0 !important;
+}
+
+.rbc-event-overlaps {
+  box-shadow: -1px 1px 3px rgba(0,0,0,0.2);
+}
+
+.rbc-agenda-event-cell {
+  padding: 8px 12px;
 }

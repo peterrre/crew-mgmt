@@ -46,10 +46,21 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
   const [helpers, setHelpers] = useState<Helper[]>([]);
+
+  const formatLocalDateTime = (date: Date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   const [formData, setFormData] = useState({
     title: shift.title,
-    start: new Date(shift.start).toISOString().slice(0, 16),
-    end: new Date(shift.end).toISOString().slice(0, 16),
+    start: formatLocalDateTime(shift.start),
+    end: formatLocalDateTime(shift.end),
     helperId: shift.helperId || '',
   });
 
@@ -75,6 +86,8 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
     setError('');
 
     try {
+      const helperIdToSend = formData.helperId === 'unassigned' || formData.helperId === '' ? null : formData.helperId;
+
       const response = await fetch(`/api/shifts/${shift.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -82,7 +95,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
           title: formData.title,
           start: new Date(formData.start).toISOString(),
           end: new Date(formData.end).toISOString(),
-          helperId: formData.helperId || null,
+          helperId: helperIdToSend,
         }),
       });
 
@@ -236,7 +249,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+              className="flex-1 bg-amber-500 hover:bg-orange-600"
             >
               {loading ? (
                 <>
