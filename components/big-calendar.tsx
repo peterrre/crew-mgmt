@@ -1,6 +1,7 @@
 'use client';
 
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { useState, useCallback } from 'react';
+import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './big-calendar.css';
@@ -30,16 +31,27 @@ export default function BigCalendar({
   onSelectEvent,
   selectable = true,
 }: BigCalendarProps) {
+  const [date, setDate] = useState(new Date(2026, 6, 10));
+  const [view, setView] = useState<View>('week');
+
+  const onNavigate = useCallback((newDate: Date) => {
+    setDate(newDate);
+  }, []);
+
+  const onView = useCallback((newView: View) => {
+    setView(newView);
+  }, []);
+
   const eventStyleGetter = (event: any) => {
     const role = event?.helper?.role;
-    let backgroundColor = '#3b82f6'; // Default blue
+    let backgroundColor = '#3b82f6';
 
     if (role === 'CREW') {
-      backgroundColor = '#3b82f6'; // Blue for crew
+      backgroundColor = '#0ea5e9';
     } else if (role === 'VOLUNTEER') {
-      backgroundColor = '#10b981'; // Green for volunteers
+      backgroundColor = '#f59e0b';
     } else {
-      backgroundColor = '#6b7280'; // Gray for unassigned
+      backgroundColor = '#ef4444';
     }
 
     return {
@@ -74,8 +86,10 @@ export default function BigCalendar({
         selectable={selectable}
         eventPropGetter={eventStyleGetter}
         views={['month', 'week', 'day', 'agenda']}
-        defaultView="week"
-        defaultDate={new Date(2026, 6, 10)} // July 10, 2026
+        view={view}
+        onView={onView}
+        date={date}
+        onNavigate={onNavigate}
         step={60}
         showMultiDayTimes
         style={{ height: '100%' }}
