@@ -44,21 +44,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-green-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-sky-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg">
               <Calendar className="w-8 h-8 text-white" />
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <h2 className="text-3xl font-bold text-sky-900">Welcome back</h2>
+          <p className="mt-2 text-sm text-sky-700">
             Sign in to manage your event crew
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-amber-100">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -99,7 +99,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+              className="w-full h-11 bg-amber-500 hover:bg-orange-600"
             >
               {loading ? (
                 <>
@@ -113,20 +113,20 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-sky-700">
               Don't have an account?{' '}
               <Link
                 href="/register"
-                className="font-medium text-blue-600 hover:text-blue-700"
+                className="font-medium text-sky-600 hover:text-sky-700"
               >
                 Register
               </Link>
             </p>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-sky-700">
               Volunteer?{' '}
               <Link
                 href="/signup-volunteer"
-                className="font-medium text-green-600 hover:text-green-700"
+                className="font-medium text-amber-600 hover:text-amber-700"
               >
                 Sign up here
               </Link>

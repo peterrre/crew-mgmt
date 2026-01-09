@@ -236,7 +236,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+              className="flex-1 bg-amber-500 hover:bg-orange-600"
             >
               {loading ? (
                 <>
