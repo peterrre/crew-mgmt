@@ -20,13 +20,8 @@ export async function GET() {
           in: ['ADMIN', 'CREW', 'VOLUNTEER'],
         },
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        availability: true,
-        createdAt: true,
+      include: {
+        availabilitySlots: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -52,7 +47,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { email, name, password, role, availability } = body;
+    const { email, name, password, role } = body;
 
     if (!email || !name || !password || !role) {
       return NextResponse.json(
@@ -81,7 +76,6 @@ export async function POST(request: Request) {
         name,
         passwordHash,
         role,
-        availability: availability || [],
       },
     });
 
@@ -92,7 +86,6 @@ export async function POST(request: Request) {
           email: helper.email,
           name: helper.name,
           role: helper.role,
-          availability: helper.availability,
         },
       },
       { status: 201 }

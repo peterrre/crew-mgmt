@@ -18,6 +18,7 @@ interface Helper {
   email: string;
   role: string;
   availability: string[];
+  availabilitySlots: any[];
 }
 
 export default function HelpersManagement() {
@@ -186,10 +187,20 @@ export default function HelpersManagement() {
                       </span>
                     </div>
                     <p className="text-sm text-sky-700 dark:text-slate-400">{helper?.email}</p>
-                    {helper?.role === 'VOLUNTEER' && helper?.availability?.length > 0 && (
-                      <p className="text-xs text-sky-600 dark:text-slate-500 mt-2">
-                        Available: {helper.availability.join(', ')}
-                      </p>
+                    {helper?.role === 'VOLUNTEER' && (
+                      <>
+                        {helper?.availabilitySlots?.length > 0 ? (
+                          <p className="text-xs text-sky-600 dark:text-slate-500 mt-2">
+                            Available times: {helper.availabilitySlots.map((slot: any) =>
+                              `${new Date(slot.start).toLocaleDateString()} ${new Date(slot.start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(slot.end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`
+                            ).join(', ')}
+                          </p>
+                        ) : helper?.availability?.length > 0 ? (
+                          <p className="text-xs text-sky-600 dark:text-slate-500 mt-2">
+                            Available: {helper.availability.join(', ')}
+                          </p>
+                        ) : null}
+                      </>
                     )}
                   </div>
                   <div className="flex items-center space-x-2">

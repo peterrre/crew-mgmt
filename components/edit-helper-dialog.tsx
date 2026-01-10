@@ -20,6 +20,7 @@ interface Helper {
   email: string;
   role: string;
   availability: string[];
+  availabilitySlots: any[];
 }
 
 interface EditHelperDialogProps {
@@ -154,18 +155,47 @@ export default function EditHelperDialog({
           </div>
 
           {formData.role === 'VOLUNTEER' && (
-            <div className="space-y-2">
-              <Label htmlFor="availability">Availability</Label>
-              <Input
-                id="availability"
-                value={formData.availability}
-                onChange={(e) =>
-                  setFormData({ ...formData, availability: e.target.value })
-                }
-                placeholder="e.g., Weekends, Evenings"
-              />
-              <p className="text-xs text-muted-foreground">Separate with commas</p>
-            </div>
+            <>
+              {helper?.availabilitySlots?.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Current Availability Times</Label>
+                  <div className="border rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted">
+                        <tr>
+                          <th className="px-3 py-2 text-left">Date</th>
+                          <th className="px-3 py-2 text-left">Start</th>
+                          <th className="px-3 py-2 text-left">End</th>
+                          <th className="px-3 py-2 text-left">Recurring</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {helper.availabilitySlots.map((slot: any, index: number) => (
+                          <tr key={index} className="border-t">
+                            <td className="px-3 py-2">{new Date(slot.start).toLocaleDateString()}</td>
+                            <td className="px-3 py-2">{new Date(slot.start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+                            <td className="px-3 py-2">{new Date(slot.end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
+                            <td className="px-3 py-2">{slot.isRecurring ? slot.recurrencePattern || 'Yes' : 'No'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="availability">Availability</Label>
+                <Input
+                  id="availability"
+                  value={formData.availability}
+                  onChange={(e) =>
+                    setFormData({ ...formData, availability: e.target.value })
+                  }
+                  placeholder="e.g., Weekends, Evenings"
+                />
+                <p className="text-xs text-muted-foreground">Separate with commas</p>
+              </div>
+            </>
           )}
 
           {error && (

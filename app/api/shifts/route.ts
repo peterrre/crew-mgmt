@@ -114,3 +114,66 @@ export async function POST(request: Request) {
     );
   }
 }
+
+// Auto-assign shifts to available volunteers
+export async function PATCH(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user || (session.user as any).role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { eventId } = body;
+
+    // Find unassigned shifts
+    const unassignedShifts = await prisma.shift.findMany({
+      where: {
+        helperId: null,
+        eventId: eventId || undefined,
+      },
+      orderBy: { start: 'asc' },
+    });
+
+    if (unassignedShifts.length === 0) {
+      return NextResponse.json({ message: 'No unassigned shifts found' });
+    }
+
+    // Get all volunteers with their availability
+    const volunteers = await prisma.user.findMany({
+      where: { role: 'VOLUNTEER' },
+      include: { availabilitySlots: true },
+    });
+
+    let assignments = 0;
+
+    for (const shift of unassignedShifts) {
+      // Find volunteers available for this shift
+      const availableVolunteers = volunteers.filter(volunteer => {
+        return volunteer.availabilitySlots.some((slot: any) => {
+          const slotStart = new Date(slot.start);
+          const slotEnd = new Date(slot.end);
+          return shift.start >= slotStart && shift.end <= slotEnd;
+        });
+      });
+
+      if (availableVolunteers.length > 0) {
+        // Assign to first available volunteer (could be improved with scoring)
+        await prisma.shift.update({
+          where: { id: shift.id },
+          data: { helperId: availableVolunteers[0].id },
+        });
+        assignments++;
+      }
+    }
+
+    return NextResponse.json({ message: `Assigned ${assignments} shifts` });
+  } catch (error) {
+    console.error('Error auto-assigning shifts:', error);
+    return NextResponse.json(
+      { error: 'Failed to auto-assign shifts' },
+      { status: 500 }
+    );
+  }
+}

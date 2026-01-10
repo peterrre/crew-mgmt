@@ -26,7 +26,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { name, role, password, availability } = body;
+    const { name, role, password } = body;
 
     const updateData: any = {};
 
@@ -42,10 +42,6 @@ export async function PATCH(
       updateData.passwordHash = await bcrypt.hash(password, 10);
     }
 
-    if (availability !== undefined && isAdmin) {
-      updateData.availability = availability;
-    }
-
     const helper = await prisma.user.update({
       where: { id },
       data: updateData,
@@ -54,7 +50,6 @@ export async function PATCH(
         email: true,
         name: true,
         role: true,
-        availability: true,
       },
     });
 
