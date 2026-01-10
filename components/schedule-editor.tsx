@@ -86,7 +86,11 @@ export default function ScheduleEditor() {
       case 'availability':
         return shifts.filter(s => s.isAvailability);
       case 'matching':
-        return shifts.filter(s => s.isAvailability || (!s.helperId && !s.isAvailability));
+        const unassigned = shifts.filter(s => !s.isAvailability && !s.helperId);
+        const availability = shifts.filter(s => s.isAvailability);
+        const matchingUnassigned = unassigned.filter(u => availability.some(a => u.start < a.end && u.end > a.start));
+        const matchingAvailability = availability.filter(a => unassigned.some(u => a.start < u.end && a.end > u.start));
+        return [...matchingUnassigned, ...matchingAvailability];
       case 'event-period':
         const eventStart = new Date(2026, 6, 10);
         const eventEnd = new Date(2026, 6, 12, 23, 59, 59);
@@ -158,12 +162,12 @@ export default function ScheduleEditor() {
           <h2 className="text-2xl font-bold text-sky-900 dark:text-white mb-2">Festival 2026 Schedule</h2>
           <p className="text-sky-700 dark:text-slate-400">July 10-12, 2026 - Click and drag to create shifts</p>
           <div className="flex flex-wrap gap-2 mt-4">
-            <Button variant={filter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('all'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }}>All</Button>
-            <Button variant={filter === 'assigned' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('assigned'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }}>Assigned</Button>
-            <Button variant={filter === 'unassigned' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('unassigned'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }}>Unassigned</Button>
-            <Button variant={filter === 'availability' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('availability'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }}>Availability</Button>
-            <Button variant={filter === 'matching' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('matching'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }}>Matching</Button>
-            <Button variant={filter === 'event-period' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('event-period'); setCalendarDate(new Date(2026, 6, 10)); setCalendarView('day'); }}>Event Period</Button>
+            <Button variant={filter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('all'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }} title="Show all shifts and availability slots">All</Button>
+            <Button variant={filter === 'assigned' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('assigned'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }} title="Show only assigned shifts">Assigned</Button>
+            <Button variant={filter === 'unassigned' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('unassigned'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }} title="Show only unassigned shifts">Unassigned</Button>
+            <Button variant={filter === 'availability' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('availability'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }} title="Show only volunteer availability times">Availability</Button>
+            <Button variant={filter === 'matching' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('matching'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }} title="Show unassigned shifts and overlapping volunteer availability for potential assignments">Matching</Button>
+            <Button variant={filter === 'event-period' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('event-period'); setCalendarDate(new Date(2026, 6, 10)); setCalendarView('day'); }} title="Show only shifts during the event period (July 10-12, 2026)">Event Period</Button>
           </div>
         </div>
 
