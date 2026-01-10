@@ -9,6 +9,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import CreateShiftDialog from '@/components/create-shift-dialog';
 import EditShiftDialog from '@/components/edit-shift-dialog';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const BigCalendar = dynamic(() => import('@/components/big-calendar'), {
   ssr: false,
@@ -78,14 +79,14 @@ export default function ScheduleEditor() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-amber-50/80 backdrop-blur-md border-b border-amber-200 shadow-sm">
+      <header className="sticky top-0 z-50 bg-amber-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-amber-200 dark:border-slate-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <Link href="/">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="dark:text-slate-300 dark:hover:text-white">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>
@@ -93,17 +94,20 @@ export default function ScheduleEditor() {
               <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-amber-500 rounded-xl flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-sky-900">Schedule Editor</h1>
+              <h1 className="text-xl font-bold text-sky-900 dark:text-white">Schedule Editor</h1>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-              className="text-sky-700 hover:text-sky-900"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign out
-            </Button>
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSignOut}
+                className="text-sky-700 hover:text-sky-900 dark:text-slate-300 dark:hover:text-white"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign out
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -111,11 +115,11 @@ export default function ScheduleEditor() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-sky-900 mb-2">Festival 2026 Schedule</h2>
-          <p className="text-sky-700">July 10-12, 2026 - Click and drag to create shifts</p>
+          <h2 className="text-2xl font-bold text-sky-900 dark:text-white mb-2">Festival 2026 Schedule</h2>
+          <p className="text-sky-700 dark:text-slate-400">July 10-12, 2026 - Click and drag to create shifts</p>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-amber-100">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-amber-100 dark:border-slate-700">
           {loading ? (
             <div className="flex items-center justify-center h-96">
               <div className="inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>

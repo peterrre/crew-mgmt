@@ -63,12 +63,12 @@ export default function AddHelperDialog({ onClose, onSuccess }: AddHelperDialogP
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-900">Add Helper</h2>
+      <div className="bg-card rounded-2xl max-w-md w-full shadow-2xl border">
+        <div className="flex items-center justify-between p-6 border-b border-border">
+          <h2 className="text-xl font-bold text-card-foreground">Add Helper</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -139,12 +139,12 @@ export default function AddHelperDialog({ onClose, onSuccess }: AddHelperDialogP
                 }
                 placeholder="e.g., Weekends, Evenings"
               />
-              <p className="text-xs text-gray-500">Separate with commas</p>
+              <p className="text-xs text-muted-foreground">Separate with commas</p>
             </div>
           )}
 
           {error && (
-            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</div>
+            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">{error}</div>
           )}
 
           <div className="flex space-x-3 pt-4">
