@@ -12,6 +12,72 @@ import CreateShiftDialog from '@/components/create-shift-dialog';
 import EditShiftDialog from '@/components/edit-shift-dialog';
 import { ThemeToggle } from '@/components/theme-toggle';
 
+// Function to subtract overlapping intervals from an availability slot
+function subtractIntervals(slot: { start: Date; end: Date }, subtractions: { start: Date; end: Date }[]): { start: Date; end: Date }[] {
+  if (subtractions.length === 0) return [slot];
+
+  // Sort subtractions by start time
+  const sortedSubs = subtractions.sort((a, b) => a.start.getTime() - b.start.getTime());
+
+  const result: { start: Date; end: Date }[] = [];
+  let currentStart = slot.start;
+
+  for (const sub of sortedSubs) {
+    // If subtraction starts after current slot end, skip
+    if (sub.start >= slot.end) continue;
+    // If subtraction ends before current start, skip
+    if (sub.end <= currentStart) continue;
+
+    // If there's a gap before subtraction, add it
+    if (currentStart < sub.start) {
+      result.push({ start: currentStart, end: sub.start });
+    }
+
+    // Move current start to end of subtraction, but not beyond slot end
+    currentStart = new Date(Math.max(currentStart.getTime(), sub.end.getTime()));
+    if (currentStart >= slot.end) break;
+  }
+
+  // Add remaining part if any
+  if (currentStart < slot.end) {
+    result.push({ start: currentStart, end: slot.end });
+  }
+
+  return result;
+}
+
+// Function to adjust availability slots based on assigned shifts for the same helper
+function adjustAvailabilitySlots(availabilitySlots: Shift[], assignedShifts: Shift[]): Shift[] {
+  const adjusted: Shift[] = [];
+
+  // Group availability by helper
+  const availByHelper = new Map<string, Shift[]>();
+  availabilitySlots.forEach(slot => {
+    const helperId = slot.helper?.id;
+    if (helperId) {
+      if (!availByHelper.has(helperId)) availByHelper.set(helperId, []);
+      availByHelper.get(helperId)!.push(slot);
+    }
+  });
+
+  // For each helper, adjust their availability
+  availByHelper.forEach((slots, helperId) => {
+    const helperAssigned = assignedShifts.filter(s => s.helperId === helperId);
+    slots.forEach(slot => {
+      const remaining = subtractIntervals(slot, helperAssigned);
+      remaining.forEach(rem => {
+        adjusted.push({
+          ...slot,
+          start: rem.start,
+          end: rem.end,
+        });
+      });
+    });
+  });
+
+  return adjusted;
+}
+
 const BigCalendar = dynamic(() => import('@/components/big-calendar'), {
   ssr: false,
   loading: () => (
@@ -66,7 +132,10 @@ export default function ScheduleEditor() {
           start: new Date(slot.start),
           end: new Date(slot.end),
         }));
-        setShifts([...shiftsData, ...availabilityData]);
+        // Adjust availability slots based on assigned shifts
+        const assignedShifts = shiftsData.filter((s: Shift) => s.helperId);
+        const adjustedAvailability = adjustAvailabilitySlots(availabilityData, assignedShifts);
+        setShifts([...shiftsData, ...adjustedAvailability]);
       }
     } catch (error) {
       console.error('Error fetching shifts:', error);
