@@ -32,6 +32,7 @@ interface Shift {
     email: string;
     role: string;
   } | null;
+  isAvailability?: boolean;
 }
 
 export default function ScheduleEditor() {
@@ -56,7 +57,12 @@ export default function ScheduleEditor() {
           start: new Date(shift.start),
           end: new Date(shift.end),
         }));
-        setShifts(shiftsData);
+        const availabilityData = (data?.availabilitySlots || []).map((slot: any) => ({
+          ...slot,
+          start: new Date(slot.start),
+          end: new Date(slot.end),
+        }));
+        setShifts([...shiftsData, ...availabilityData]);
       }
     } catch (error) {
       console.error('Error fetching shifts:', error);
@@ -70,7 +76,8 @@ export default function ScheduleEditor() {
     setShowCreateDialog(true);
   }, []);
 
-  const handleSelectEvent = useCallback((event: Shift) => {
+  const handleSelectEvent = useCallback((event: any) => {
+    console.log('Selected event:', event.title, event.isAvailability);
     setEditingShift(event);
   }, []);
 

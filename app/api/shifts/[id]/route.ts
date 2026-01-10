@@ -20,12 +20,26 @@ export async function PATCH(
     const { title, start, end, helperId } = body;
     const { id } = await params;
 
+    console.log('Received id:', id);
+
     const updateData: any = {};
 
     if (title !== undefined) updateData.title = title;
     if (start !== undefined) updateData.start = new Date(start);
     if (end !== undefined) updateData.end = new Date(end);
     if (helperId !== undefined) updateData.helperId = helperId || null;
+
+    // Check if shift exists first
+    const existingShift = await prisma.shift.findUnique({
+      where: { id },
+    });
+
+    if (!existingShift) {
+      return NextResponse.json(
+        { error: 'Shift not found' },
+        { status: 404 }
+      );
+    }
 
     const shift = await prisma.shift.update({
       where: { id },
@@ -64,6 +78,18 @@ export async function DELETE(
     }
 
     const { id } = await params;
+
+    // Check if shift exists first
+    const existingShift = await prisma.shift.findUnique({
+      where: { id },
+    });
+
+    if (!existingShift) {
+      return NextResponse.json(
+        { error: 'Shift not found' },
+        { status: 404 }
+      );
+    }
 
     await prisma.shift.delete({
       where: { id },

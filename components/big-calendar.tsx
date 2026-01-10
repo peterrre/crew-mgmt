@@ -45,9 +45,10 @@ const CustomAgenda = ({ events, onSelectEvent }: { events: any[]; onSelectEvent?
     groupedByDate[dateKey].push(event);
   });
 
-  const getRoleColor = (role: string) => {
-    if (role === 'CREW') return 'bg-sky-500';
-    if (role === 'VOLUNTEER') return 'bg-amber-500';
+  const getRoleColor = (event: any) => {
+    if (event.isAvailability) return 'bg-green-500 opacity-60 border-2 border-dashed border-green-800';
+    if (event?.helper?.role === 'CREW') return 'bg-sky-500';
+    if (event?.helper?.role === 'VOLUNTEER') return 'bg-amber-500';
     return 'bg-red-500';
   };
 
@@ -75,7 +76,7 @@ const CustomAgenda = ({ events, onSelectEvent }: { events: any[]; onSelectEvent?
                 onClick={() => onSelectEvent?.(event)}
                 className="flex items-center gap-4 px-4 py-3 hover:bg-amber-50 cursor-pointer transition-colors"
               >
-                <div className={`w-3 h-3 rounded-full ${getRoleColor(event?.helper?.role)}`} />
+                <div className={`w-3 h-3 rounded-full ${getRoleColor(event)}`} />
                 <div className="w-32 text-sm text-gray-600 font-medium">
                   {format(new Date(event.start), 'HH:mm')} - {format(new Date(event.end), 'HH:mm')}
                 </div>
@@ -112,24 +113,31 @@ export default function BigCalendar({
   }, []);
 
   const eventStyleGetter = (event: any) => {
-    const role = event?.helper?.role;
     let backgroundColor = '#3b82f6';
+    let opacity = 0.9;
 
-    if (role === 'CREW') {
-      backgroundColor = '#0ea5e9';
-    } else if (role === 'VOLUNTEER') {
-      backgroundColor = '#f59e0b';
+    if (event.isAvailability) {
+      // Availability slots - lighter, striped pattern
+      backgroundColor = '#10b981'; // green for availability
+      opacity = 0.6;
     } else {
-      backgroundColor = '#ef4444';
+      const role = event?.helper?.role;
+      if (role === 'CREW') {
+        backgroundColor = '#0ea5e9';
+      } else if (role === 'VOLUNTEER') {
+        backgroundColor = '#f59e0b';
+      } else {
+        backgroundColor = '#ef4444';
+      }
     }
 
     return {
       style: {
         backgroundColor,
         borderRadius: '8px',
-        opacity: 0.9,
+        opacity,
         color: 'white',
-        border: '0px',
+        border: event.isAvailability ? '2px dashed #065f46' : '0px',
         display: 'block',
         fontSize: '13px',
         padding: '4px 8px',
@@ -155,6 +163,10 @@ export default function BigCalendar({
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-red-500"></div>
             <span className="text-sm text-sky-800">Unassigned</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-green-500 opacity-60 border-2 border-dashed border-green-800"></div>
+            <span className="text-sm text-sky-800">Available</span>
           </div>
         </div>
         <div className="rbc-toolbar" style={{ padding: '16px 0', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
@@ -193,6 +205,10 @@ export default function BigCalendar({
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-red-500"></div>
           <span className="text-sm text-sky-800">Unassigned</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-green-500 opacity-60 border-2 border-dashed border-green-800"></div>
+          <span className="text-sm text-sky-800">Available</span>
         </div>
       </div>
       <div style={{ height: '700px' }}>

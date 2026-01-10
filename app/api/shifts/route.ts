@@ -17,6 +17,7 @@ export async function GET() {
     const userId = (session.user as any).id;
 
     let shifts;
+    let availabilitySlots = [];
 
     if (userRole === 'ADMIN') {
       // Admin sees all shifts
@@ -35,6 +36,28 @@ export async function GET() {
           start: 'asc',
         },
       });
+
+      // Also get all availability slots for display
+      const volunteers = await prisma.user.findMany({
+        where: { role: 'VOLUNTEER' },
+        include: { availabilitySlots: true },
+      }) as any;
+
+      availabilitySlots = volunteers.flatMap((volunteer: any) =>
+        volunteer.availabilitySlots.map((slot: any) => ({
+          ...slot,
+          start: new Date(slot.start),
+          end: new Date(slot.end),
+          helper: {
+            id: volunteer.id,
+            name: volunteer.name,
+            email: volunteer.email,
+            role: volunteer.role,
+          },
+          isAvailability: true,
+          title: `Available: ${volunteer.name || 'Unnamed'}`,
+        }))
+      );
     } else {
       // Crew and Volunteers see only their own shifts
       shifts = await prisma.shift.findMany({
@@ -57,7 +80,8 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json({ shifts });
+    console.log('Returning shifts:', shifts.map((s: any) => ({ id: s.id, title: s.title })));
+    return NextResponse.json({ shifts, availabilitySlots });
   } catch (error) {
     console.error('Error fetching shifts:', error);
     return NextResponse.json(
@@ -144,13 +168,13 @@ export async function PATCH(request: Request) {
     const volunteers = await prisma.user.findMany({
       where: { role: 'VOLUNTEER' },
       include: { availabilitySlots: true },
-    });
+    }) as any;
 
     let assignments = 0;
 
     for (const shift of unassignedShifts) {
       // Find volunteers available for this shift
-      const availableVolunteers = volunteers.filter(volunteer => {
+      const availableVolunteers = volunteers.filter((volunteer: any) => {
         return volunteer.availabilitySlots.some((slot: any) => {
           const slotStart = new Date(slot.start);
           const slotEnd = new Date(slot.end);
