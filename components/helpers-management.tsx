@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, LogOut, Plus, ArrowLeft, Edit, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import AddHelperDialog from '@/components/add-helper-dialog';
@@ -24,6 +26,8 @@ export default function HelpersManagement() {
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingHelper, setEditingHelper] = useState<Helper | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRole, setSelectedRole] = useState('all');
 
   useEffect(() => {
     fetchHelpers();
@@ -76,6 +80,14 @@ export default function HelpersManagement() {
     }
   };
 
+  const filteredHelpers = helpers.filter(helper => {
+    const matchesSearch = searchTerm === '' ||
+      helper.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      helper.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = selectedRole === 'all' || helper.role === selectedRole;
+    return matchesSearch && matchesRole;
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Header */}
@@ -126,17 +138,39 @@ export default function HelpersManagement() {
           </Button>
         </div>
 
+        <div className="flex space-x-4 mb-6">
+          <Input
+            placeholder="Search by name or email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1"
+          />
+          <Select value={selectedRole} onValueChange={setSelectedRole}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="ADMIN">Admin</SelectItem>
+              <SelectItem value="CREW">Crew</SelectItem>
+              <SelectItem value="VOLUNTEER">Volunteer</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
-        ) : helpers.length === 0 ? (
+        ) : filteredHelpers.length === 0 ? (
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-12 text-center shadow-lg border border-amber-100 dark:border-slate-700">
-            <p className="text-sky-700 dark:text-slate-400">No helpers yet. Add your first helper!</p>
+            <p className="text-sky-700 dark:text-slate-400">
+              {helpers.length === 0 ? 'No helpers yet. Add your first helper!' : 'No helpers match your search criteria.'}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
-            {helpers.map((helper) => (
+            {filteredHelpers.map((helper) => (
               <div
                 key={helper.id}
                 className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-amber-100 dark:border-slate-700"
