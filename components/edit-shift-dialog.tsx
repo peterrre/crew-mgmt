@@ -92,7 +92,15 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
       const response = await fetch('/api/shifts');
       if (response.ok) {
         const data = await response.json();
-        const unassigned = (data?.shifts || []).filter((s: any) => !s.helperId);
+        let unassigned = (data?.shifts || []).filter((s: any) => !s.helperId);
+        // Filter to only shifts that are within the volunteer's availability slot
+        if (shift.isAvailability) {
+          unassigned = unassigned.filter((s: any) => {
+            const shiftStart = new Date(s.start);
+            const shiftEnd = new Date(s.end);
+            return shiftStart >= shift.start && shiftEnd <= shift.end;
+          });
+        }
         setUnassignedShifts(unassigned);
       }
     } catch (error) {
@@ -221,18 +229,22 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
           {shift.isAvailability ? (
             <div className="space-y-2">
               <Label htmlFor="shift">Select Shift to Assign</Label>
-              <Select value={selectedShiftId} onValueChange={setSelectedShiftId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an unassigned shift" />
-                </SelectTrigger>
-                <SelectContent>
-                  {unassignedShifts.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {s.title} - {new Date(s.start).toLocaleString()}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {unassignedShifts.length === 0 ? (
+                <p className="text-gray-500 text-sm">No unassigned shifts available for assignment.</p>
+              ) : (
+                <Select value={selectedShiftId} onValueChange={setSelectedShiftId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an unassigned shift" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {unassignedShifts.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.title} - {new Date(s.start).toLocaleString()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           ) : (
             <>
@@ -317,7 +329,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
               <Button
                 type="button"
                 onClick={handleAssign}
-                disabled={loading}
+                disabled={loading || unassignedShifts.length === 0}
                 className="flex-1 bg-amber-500 hover:bg-orange-600"
               >
                 {loading ? (
