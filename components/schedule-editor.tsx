@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Calendar, LogOut, ArrowLeft } from 'lucide-react';
+import { View } from 'react-big-calendar';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import CreateShiftDialog from '@/components/create-shift-dialog';
@@ -42,6 +43,9 @@ export default function ScheduleEditor() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingShift, setEditingShift] = useState<Shift | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
+  const [filter, setFilter] = useState<'all' | 'assigned' | 'unassigned' | 'availability' | 'matching' | 'event-period'>('all');
+  const [calendarDate, setCalendarDate] = useState(new Date(2026, 6, 10));
+  const [calendarView, setCalendarView] = useState<View>('week');
 
   useEffect(() => {
     fetchShifts();
@@ -70,6 +74,35 @@ export default function ScheduleEditor() {
       setLoading(false);
     }
   };
+
+  const filteredShifts = useMemo(() => {
+    switch (filter) {
+      case 'all':
+        return shifts;
+      case 'assigned':
+        return shifts.filter(s => !s.isAvailability && s.helperId);
+      case 'unassigned':
+        return shifts.filter(s => !s.isAvailability && !s.helperId);
+      case 'availability':
+        return shifts.filter(s => s.isAvailability);
+      case 'matching':
+        return shifts.filter(s => s.isAvailability || (!s.helperId && !s.isAvailability));
+      case 'event-period':
+        const eventStart = new Date(2026, 6, 10);
+        const eventEnd = new Date(2026, 6, 12, 23, 59, 59);
+        return shifts.filter(s => s.start >= eventStart && s.end <= eventEnd);
+      default:
+        return shifts;
+    }
+  }, [shifts, filter]);
+
+  const counts = useMemo(() => {
+    const crew = shifts.filter(s => !s.isAvailability && s.helper?.role === 'CREW').length;
+    const volunteer = shifts.filter(s => !s.isAvailability && s.helper?.role === 'VOLUNTEER').length;
+    const unassigned = shifts.filter(s => !s.isAvailability && !s.helperId).length;
+    const availability = shifts.filter(s => s.isAvailability).length;
+    return { crew, volunteer, unassigned, availability };
+  }, [shifts]);
 
   const handleSelectSlot = useCallback((slotInfo: any) => {
     setSelectedSlot(slotInfo);
@@ -124,6 +157,14 @@ export default function ScheduleEditor() {
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-sky-900 dark:text-white mb-2">Festival 2026 Schedule</h2>
           <p className="text-sky-700 dark:text-slate-400">July 10-12, 2026 - Click and drag to create shifts</p>
+          <div className="flex flex-wrap gap-2 mt-4">
+            <Button variant={filter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('all'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }}>All</Button>
+            <Button variant={filter === 'assigned' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('assigned'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }}>Assigned</Button>
+            <Button variant={filter === 'unassigned' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('unassigned'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }}>Unassigned</Button>
+            <Button variant={filter === 'availability' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('availability'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }}>Availability</Button>
+            <Button variant={filter === 'matching' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('matching'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }}>Matching</Button>
+            <Button variant={filter === 'event-period' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('event-period'); setCalendarDate(new Date(2026, 6, 10)); setCalendarView('day'); }}>Event Period</Button>
+          </div>
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-amber-100 dark:border-slate-700">
@@ -133,9 +174,14 @@ export default function ScheduleEditor() {
             </div>
           ) : (
             <BigCalendar
-              events={shifts}
+              events={filteredShifts}
               onSelectSlot={handleSelectSlot}
               onSelectEvent={handleSelectEvent}
+              counts={counts}
+              date={calendarDate}
+              onNavigate={setCalendarDate}
+              view={calendarView}
+              onView={setCalendarView}
             />
           )}
         </div>
