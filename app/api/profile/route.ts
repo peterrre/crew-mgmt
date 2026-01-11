@@ -15,12 +15,8 @@ export async function GET() {
 
     const user = await prisma.user.findUnique({
       where: { id: (session.user as any).id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        availability: true,
+      include: {
+        availabilitySlots: true,
       },
     });
 
@@ -43,17 +39,33 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { availability } = body;
+    const { availability } = body; // Array of { start, end, isRecurring, recurrencePattern, recurrenceEnd }
 
-    const user = await prisma.user.update({
-      where: { id: (session.user as any).id },
-      data: { availability: availability || [] },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        availability: true,
+    const userId = (session.user as any).id;
+
+    // Delete existing availability slots
+    await prisma.availabilitySlot.deleteMany({
+      where: { userId },
+    });
+
+    // Create new availability slots
+    if (availability && availability.length > 0) {
+      await prisma.availabilitySlot.createMany({
+        data: availability.map((slot: any) => ({
+          userId,
+          start: new Date(slot.start),
+          end: new Date(slot.end),
+          isRecurring: slot.isRecurring || false,
+          recurrencePattern: slot.recurrencePattern || null,
+          recurrenceEnd: slot.recurrenceEnd ? new Date(slot.recurrenceEnd) : null,
+        })),
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        availabilitySlots: true,
       },
     });
 

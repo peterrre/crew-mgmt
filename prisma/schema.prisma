@@ -20,6 +20,10 @@ model User {
   shifts        Shift[]
   accounts      Account[]
   sessions      Session[]
+  availabilitySlots  AvailabilitySlot[]
+  requests      ShiftRequest[] @relation("Requester")
+  reviewedRequests ShiftRequest[] @relation("Reviewer")
+  newHelperRequests ShiftRequest[] @relation("NewHelper")
 }
 
 enum Role {
@@ -36,6 +40,7 @@ model Shift {
   eventId   String?
   helperId  String?
   helper    User?    @relation(fields: [helperId], references: [id], onDelete: SetNull)
+  requests  ShiftRequest[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -74,6 +79,51 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AvailabilitySlot {
+  id              String   @id @default(cuid())
+  userId          String
+  start           DateTime
+  end             DateTime
+  isRecurring     Boolean  @default(false)
+  recurrencePattern String? // e.g., "weekly", "monthly"
+  recurrenceEnd   DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum RequestType {
+  SWAP
+  CANCEL
+  MODIFY
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model ShiftRequest {
+  id          String       @id @default(cuid())
+  shiftId     String
+  requesterId String
+  type        RequestType
+  status      RequestStatus @default(PENDING)
+  reason      String?
+  newHelperId String?      // For swap requests
+  newStart    DateTime?    // For modify requests
+  newEnd      DateTime?    // For modify requests
+  reviewedBy  String?      // Admin who reviewed
+  reviewedAt  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  shift       Shift        @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  requester   User         @relation("Requester", fields: [requesterId], references: [id])
+  newHelper   User?        @relation("NewHelper", fields: [newHelperId], references: [id])
+  reviewer    User?        @relation("Reviewer", fields: [reviewedBy], references: [id])
 }
 
 model VerificationToken {

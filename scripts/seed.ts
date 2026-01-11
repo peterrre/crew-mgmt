@@ -7,6 +7,7 @@ async function main() {
   console.log('🌱 Seeding database...');
 
   // Clear existing data
+  await prisma.availabilitySlot.deleteMany();
   await prisma.shift.deleteMany();
   await prisma.event.deleteMany();
   await prisma.user.deleteMany();
@@ -61,7 +62,6 @@ async function main() {
       name: 'David Lee',
       passwordHash: volunteerPassword,
       role: 'VOLUNTEER',
-      availability: ['Weekends', 'July 10-12'],
     },
   });
 
@@ -71,7 +71,6 @@ async function main() {
       name: 'Emma Wilson',
       passwordHash: volunteerPassword,
       role: 'VOLUNTEER',
-      availability: ['Evenings', 'July 11-12'],
     },
   });
 
@@ -81,7 +80,6 @@ async function main() {
       name: 'Frank Miller',
       passwordHash: volunteerPassword,
       role: 'VOLUNTEER',
-      availability: ['Full-time', 'All dates'],
     },
   });
 
@@ -91,10 +89,57 @@ async function main() {
       name: 'Grace Taylor',
       passwordHash: volunteerPassword,
       role: 'VOLUNTEER',
-      availability: ['Mornings', 'July 10'],
     },
   });
   console.log('✅ Created 4 volunteers');
+
+  // Create availability slots for volunteers
+  const availabilitySlots = [
+    // David - Weekends
+    {
+      userId: volunteer1.id,
+      start: new Date('2026-07-10T08:00:00Z'),
+      end: new Date('2026-07-10T23:59:59Z'),
+    },
+    {
+      userId: volunteer1.id,
+      start: new Date('2026-07-11T08:00:00Z'),
+      end: new Date('2026-07-11T23:59:59Z'),
+    },
+    {
+      userId: volunteer1.id,
+      start: new Date('2026-07-12T08:00:00Z'),
+      end: new Date('2026-07-12T23:59:59Z'),
+    },
+    // Emma - Evenings
+    {
+      userId: volunteer2.id,
+      start: new Date('2026-07-11T18:00:00Z'),
+      end: new Date('2026-07-11T23:59:59Z'),
+    },
+    {
+      userId: volunteer2.id,
+      start: new Date('2026-07-12T18:00:00Z'),
+      end: new Date('2026-07-12T23:59:59Z'),
+    },
+    // Frank - Full-time
+    {
+      userId: volunteer3.id,
+      start: new Date('2026-07-10T08:00:00Z'),
+      end: new Date('2026-07-12T23:59:59Z'),
+    },
+    // Grace - Mornings
+    {
+      userId: volunteer4.id,
+      start: new Date('2026-07-10T08:00:00Z'),
+      end: new Date('2026-07-10T12:00:00Z'),
+    },
+  ];
+
+  for (const slot of availabilitySlots) {
+    await prisma.availabilitySlot.create({ data: slot });
+  }
+  console.log(`✅ Created ${availabilitySlots.length} availability slots`);
 
   // Create event
   const event = await prisma.event.create({

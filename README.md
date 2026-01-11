@@ -8,35 +8,42 @@ A comprehensive web application for managing event crews, volunteers, and shift 
 - **User Authentication**: Secure login and registration with role-based access control
 - **Role Management**: Support for Admin, Crew, and Volunteer roles with different permissions
 - **Shift Scheduling**: Create and manage shifts for events with drag-and-drop calendar interface
+- **Structured Availability Management**: Volunteers can set detailed availability slots with recurring patterns
 - **Volunteer Signup**: Volunteers can register and set their availability preferences
 - **Profile Management**: Users can manage their profiles and update personal information
+- **Shift Change Requests**: Volunteers can request changes to their assigned shifts (swap, cancel, modify)
 
 ### Advanced Management Tools
 - **Admin Dashboard**: Overview with statistics on crew members, volunteers, and total helpers
 - **Helpers Management**: Add, edit, and delete crew members and volunteers with role assignments
-- **Schedule Editor**: Interactive calendar for creating and editing shifts, assigning helpers to shifts
+- **Enhanced Schedule Editor**: Interactive calendar with advanced filtering (all, assigned, unassigned, availability, matching, event-period), drag-and-drop interface, and visual availability matching
+- **Auto-Assignment System**: Automatically assign unassigned shifts to available volunteers based on their availability slots
 - **Hours Report**: Detailed reporting on hours worked by each helper with filtering by week, month, or custom date ranges
 - **Personal Calendar**: Individual calendar views for helpers to see their assigned shifts
-- **Availability Management**: Volunteers can edit their availability for better shift assignments
+- **Availability Management**: Volunteers can edit their structured availability slots with recurring patterns
+- **Shift Request Management**: Handle volunteer requests for shift changes, swaps, and cancellations
 
 ### API Endpoints
 - **Authentication API**: Secure login/logout with NextAuth.js
 - **Helpers API**: CRUD operations for managing users/helpers
-- **Shifts API**: Create, read, update, delete shifts with helper assignments
+- **Shifts API**: Create, read, update, delete shifts with helper assignments and auto-assignment functionality
+- **Shift Requests API**: Manage volunteer requests for shift changes (swap, cancel, modify)
+- **Availability API**: Manage structured availability slots with recurring patterns
 - **Reports API**: Generate hours worked reports with flexible filtering
 - **Profile API**: User profile management
 
 ## Tech Stack
 
-- **Framework**: [Next.js](https://nextjs.org/) 15 with App Router
+- **Framework**: [Next.js](https://nextjs.org/) 14 with App Router
 - **Language**: TypeScript
 - **Database**: PostgreSQL
 - **ORM**: [Prisma](https://www.prisma.io/)
 - **Authentication**: NextAuth.js with secure session management
 - **Styling**: Tailwind CSS with custom gradients and responsive design
 - **UI Components**: Radix UI, Headless UI, and custom components
-- **Calendar**: React Big Calendar for interactive scheduling
+- **Calendar**: React Big Calendar with custom agenda view and advanced filtering
 - **Forms**: React Hook Form with validation
+- **Date Handling**: date-fns for robust date manipulation and formatting
 
 ## Prerequisites
 

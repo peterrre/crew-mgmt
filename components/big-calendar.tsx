@@ -31,6 +31,11 @@ interface BigCalendarProps {
   onSelectSlot?: (slotInfo: any) => void;
   onSelectEvent?: (event: any) => void;
   selectable?: boolean;
+  counts?: { crew: number; volunteer: number; unassigned: number; availability: number };
+  date?: Date;
+  onNavigate?: (date: Date) => void;
+  view?: View;
+  onView?: (view: View) => void;
 }
 
 const CustomAgenda = ({ events, onSelectEvent }: { events: any[]; onSelectEvent?: (event: any) => void }) => {
@@ -45,9 +50,10 @@ const CustomAgenda = ({ events, onSelectEvent }: { events: any[]; onSelectEvent?
     groupedByDate[dateKey].push(event);
   });
 
-  const getRoleColor = (role: string) => {
-    if (role === 'CREW') return 'bg-sky-500';
-    if (role === 'VOLUNTEER') return 'bg-amber-500';
+  const getRoleColor = (event: any) => {
+    if (event.isAvailability) return 'bg-green-500 opacity-60 border-2 border-dashed border-green-800';
+    if (event?.helper?.role === 'CREW') return 'bg-sky-500';
+    if (event?.helper?.role === 'VOLUNTEER') return 'bg-amber-500';
     return 'bg-red-500';
   };
 
@@ -75,7 +81,7 @@ const CustomAgenda = ({ events, onSelectEvent }: { events: any[]; onSelectEvent?
                 onClick={() => onSelectEvent?.(event)}
                 className="flex items-center gap-4 px-4 py-3 hover:bg-amber-50 cursor-pointer transition-colors"
               >
-                <div className={`w-3 h-3 rounded-full ${getRoleColor(event?.helper?.role)}`} />
+                <div className={`w-3 h-3 rounded-full ${getRoleColor(event)}`} />
                 <div className="w-32 text-sm text-gray-600 font-medium">
                   {format(new Date(event.start), 'HH:mm')} - {format(new Date(event.end), 'HH:mm')}
                 </div>
@@ -99,37 +105,59 @@ export default function BigCalendar({
   onSelectSlot,
   onSelectEvent,
   selectable = true,
+  counts,
+  date: propDate,
+  onNavigate: propOnNavigate,
+  view: propView,
+  onView: propOnView,
 }: BigCalendarProps) {
-  const [date, setDate] = useState(new Date(2026, 6, 10));
-  const [view, setView] = useState<View>('week');
+  const [localDate, setLocalDate] = useState(propDate || new Date(2026, 6, 10));
+  const [localView, setLocalView] = useState<View>(propView || 'week');
+  const currentDate = propDate !== undefined ? propDate : localDate;
+  const currentView = propView !== undefined ? propView : localView;
 
-  const onNavigate = useCallback((newDate: Date) => {
-    setDate(newDate);
-  }, []);
+  const handleNavigate = useCallback((newDate: Date) => {
+    if (propOnNavigate) {
+      propOnNavigate(newDate);
+    } else {
+      setLocalDate(newDate);
+    }
+  }, [propOnNavigate]);
 
-  const onView = useCallback((newView: View) => {
-    setView(newView);
-  }, []);
+  const handleView = useCallback((newView: View) => {
+    if (propOnView) {
+      propOnView(newView);
+    } else {
+      setLocalView(newView);
+    }
+  }, [propOnView]);
 
   const eventStyleGetter = (event: any) => {
-    const role = event?.helper?.role;
     let backgroundColor = '#3b82f6';
+    let opacity = 0.9;
 
-    if (role === 'CREW') {
-      backgroundColor = '#0ea5e9';
-    } else if (role === 'VOLUNTEER') {
-      backgroundColor = '#f59e0b';
+    if (event.isAvailability) {
+      // Availability slots - lighter, striped pattern
+      backgroundColor = '#10b981'; // green for availability
+      opacity = 0.6;
     } else {
-      backgroundColor = '#ef4444';
+      const role = event?.helper?.role;
+      if (role === 'CREW') {
+        backgroundColor = '#0ea5e9';
+      } else if (role === 'VOLUNTEER') {
+        backgroundColor = '#f59e0b';
+      } else {
+        backgroundColor = '#ef4444';
+      }
     }
 
     return {
       style: {
         backgroundColor,
         borderRadius: '8px',
-        opacity: 0.9,
+        opacity,
         color: 'white',
-        border: '0px',
+        border: event.isAvailability ? '2px dashed #065f46' : '0px',
         display: 'block',
         fontSize: '13px',
         padding: '4px 8px',
@@ -139,38 +167,42 @@ export default function BigCalendar({
 
   const CalendarComponent = Calendar as any;
 
-  if (view === 'agenda') {
+  if (currentView === 'agenda') {
     return (
       <div>
         <div className="flex items-center gap-6 mb-4 p-3 bg-amber-50 rounded-lg border border-amber-100">
           <span className="text-sm font-medium text-sky-900">Legend:</span>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-sky-500"></div>
-            <span className="text-sm text-sky-800">Crew</span>
+            <span className="text-sm text-sky-800">Crew ({counts?.crew || 0})</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-amber-500"></div>
-            <span className="text-sm text-sky-800">Volunteer</span>
+            <span className="text-sm text-sky-800">Volunteer ({counts?.volunteer || 0})</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-red-500"></div>
-            <span className="text-sm text-sky-800">Unassigned</span>
+            <span className="text-sm text-sky-800">Unassigned ({counts?.unassigned || 0})</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-green-500 opacity-60 border-2 border-dashed border-green-800"></div>
+            <span className="text-sm text-sky-800">Available ({counts?.availability || 0})</span>
           </div>
         </div>
         <div className="rbc-toolbar" style={{ padding: '16px 0', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
           <div className="rbc-btn-group">
-            <button type="button" onClick={() => setDate(new Date())}>Today</button>
-            <button type="button" onClick={() => setDate(new Date(date.getTime() - 7 * 24 * 60 * 60 * 1000))}>Back</button>
-            <button type="button" onClick={() => setDate(new Date(date.getTime() + 7 * 24 * 60 * 60 * 1000))}>Next</button>
+            <button type="button" onClick={() => handleNavigate(new Date())}>Today</button>
+            <button type="button" onClick={() => handleNavigate(new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000))}>Back</button>
+            <button type="button" onClick={() => handleNavigate(new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000))}>Next</button>
           </div>
           <span className="rbc-toolbar-label font-semibold">
-            {format(date, 'MMMM yyyy')}
+            {format(currentDate, 'MMMM yyyy')}
           </span>
           <div className="rbc-btn-group">
-            <button type="button" onClick={() => setView('month')}>Month</button>
-            <button type="button" onClick={() => setView('week')}>Week</button>
-            <button type="button" onClick={() => setView('day')}>Day</button>
-            <button type="button" className="rbc-active" onClick={() => setView('agenda')}>Agenda</button>
+            <button type="button" onClick={() => handleView('month')}>Month</button>
+            <button type="button" onClick={() => handleView('week')}>Week</button>
+            <button type="button" onClick={() => handleView('day')}>Day</button>
+            <button type="button" className="rbc-active" onClick={() => handleView('agenda')}>Agenda</button>
           </div>
         </div>
         <CustomAgenda events={events} onSelectEvent={onSelectEvent} />
@@ -184,15 +216,19 @@ export default function BigCalendar({
         <span className="text-sm font-medium text-sky-900">Legend:</span>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-sky-500"></div>
-          <span className="text-sm text-sky-800">Crew</span>
+          <span className="text-sm text-sky-800">Crew ({counts?.crew || 0})</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-amber-500"></div>
-          <span className="text-sm text-sky-800">Volunteer</span>
+          <span className="text-sm text-sky-800">Volunteer ({counts?.volunteer || 0})</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-red-500"></div>
-          <span className="text-sm text-sky-800">Unassigned</span>
+          <span className="text-sm text-sky-800">Unassigned ({counts?.unassigned || 0})</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-green-500 opacity-60 border-2 border-dashed border-green-800"></div>
+          <span className="text-sm text-sky-800">Available ({counts?.availability || 0})</span>
         </div>
       </div>
       <div style={{ height: '700px' }}>
@@ -211,12 +247,12 @@ export default function BigCalendar({
           selectable={selectable}
           eventPropGetter={eventStyleGetter}
           views={['month', 'week', 'day', 'agenda']}
-          view={view}
+          view={currentView}
           min={new Date(1970, 0, 1, 0, 0, 0)}
           max={new Date(1970, 0, 1, 23, 59, 59)}
-          onView={onView}
-          date={date}
-          onNavigate={onNavigate}
+          onView={handleView}
+          date={currentDate}
+          onNavigate={handleNavigate}
           step={60}
           showMultiDayTimes
           dayLayoutAlgorithm="no-overlap"

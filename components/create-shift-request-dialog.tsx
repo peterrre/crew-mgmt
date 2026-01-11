@@ -1,0 +1,284 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
+
+interface CreateShiftRequestDialogProps {
+  shift: {
+    id: string;
+    title: string;
+    start: Date;
+    end: Date;
+    helper?: {
+      id: string;
+      name: string | null;
+    } | null;
+  };
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+type RequestType = 'SWAP' | 'CANCEL' | 'MODIFY';
+
+export default function CreateShiftRequestDialog({
+  shift,
+  onClose,
+  onSuccess,
+}: CreateShiftRequestDialogProps) {
+  const [type, setType] = useState<RequestType>('CANCEL');
+  const [reason, setReason] = useState('');
+  const [newHelperId, setNewHelperId] = useState('');
+  const [newStart, setNewStart] = useState('');
+  const [newEnd, setNewEnd] = useState('');
+  const [availableHelpers, setAvailableHelpers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingHelpers, setLoadingHelpers] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (type === 'SWAP') {
+      fetchAvailableHelpers();
+    }
+  }, [type, shift.id]);
+
+  const fetchAvailableHelpers = async () => {
+    setLoadingHelpers(true);
+    try {
+      const response = await fetch('/api/shift-requests', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ shiftId: shift.id }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableHelpers(data.helpers || []);
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to load available helpers.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingHelpers(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!reason.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please provide a reason for your request.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (type === 'SWAP' && !newHelperId) {
+      toast({
+        title: 'Error',
+        description: 'Please select a helper to swap with.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (type === 'MODIFY' && (!newStart || !newEnd)) {
+      toast({
+        title: 'Error',
+        description: 'Please provide new start and end times.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const body: any = {
+        shiftId: shift.id,
+        type,
+        reason,
+      };
+
+      if (type === 'SWAP') {
+        body.newHelperId = newHelperId;
+      } else if (type === 'MODIFY') {
+        body.newStart = new Date(newStart);
+        body.newEnd = new Date(newEnd);
+      }
+
+      const response = await fetch('/api/shift-requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Request Submitted',
+          description: 'Your shift change request has been submitted for review.',
+        });
+        onSuccess();
+        onClose();
+      } else {
+        const error = await response.json();
+        toast({
+          title: 'Error',
+          description: error.error || 'Failed to submit request.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Request Shift Change</DialogTitle>
+          <DialogDescription>
+            Request a change for your shift: {shift.title}
+            <br />
+            {new Date(shift.start).toLocaleString()} - {new Date(shift.end).toLocaleString()}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="type" className="text-right">
+              Type
+            </Label>
+            <Select value={type} onValueChange={(value: RequestType) => setType(value)}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select request type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="CANCEL">Cancel Shift</SelectItem>
+                <SelectItem value="SWAP">Swap with Another Helper</SelectItem>
+                <SelectItem value="MODIFY">Modify Time</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {type === 'SWAP' && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="newHelper" className="text-right">
+                Swap With
+              </Label>
+              {loadingHelpers ? (
+                <div className="col-span-3 text-sm text-gray-500">Loading available helpers...</div>
+              ) : availableHelpers.length === 0 ? (
+                <div className="col-span-3 text-sm text-red-600">No helpers available for this time slot</div>
+              ) : (
+                <Select value={newHelperId} onValueChange={setNewHelperId}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select a helper to swap with" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableHelpers.map((helper) => (
+                      <SelectItem key={helper.id} value={helper.id}>
+                        {helper.name} ({helper.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          )}
+
+          {type === 'MODIFY' && (
+            <>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="newStart" className="text-right">
+                  New Start
+                </Label>
+                <Input
+                  id="newStart"
+                  type="datetime-local"
+                  value={newStart}
+                  onChange={(e) => setNewStart(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="newEnd" className="text-right">
+                  New End
+                </Label>
+                <Input
+                  id="newEnd"
+                  type="datetime-local"
+                  value={newEnd}
+                  onChange={(e) => setNewEnd(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+            </>
+          )}
+
+          <div className="grid grid-cols-4 items-start gap-4">
+            <Label htmlFor="reason" className="text-right pt-2">
+              Reason <span className="text-red-500">*</span>
+            </Label>
+            <Textarea
+              id="reason"
+              placeholder="Please explain why you need this change..."
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="col-span-3"
+              rows={3}
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} disabled={loading || !reason.trim()}>
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Submit Request
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

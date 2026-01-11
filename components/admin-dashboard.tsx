@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, CalendarClock, LogOut, TrendingUp } from 'lucide-react';
+import { Calendar, Users, CalendarClock, LogOut, TrendingUp, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Link href="/helpers" className="h-full">
             <div className="bg-gradient-to-br from-sky-400 to-sky-600 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer h-full">
               <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
@@ -154,6 +154,18 @@ export default function AdminDashboard() {
               <h3 className="text-2xl font-bold text-white mb-2">Schedule Editor</h3>
               <p className="text-amber-100">
                 Create and manage event shifts and schedules
+              </p>
+            </div>
+          </Link>
+
+          <Link href="/shift-requests" className="h-full">
+            <div className="bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer h-full">
+              <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+                <ClipboardList className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">Shift Requests</h3>
+              <p className="text-orange-100">
+                Review volunteer shift change requests
               </p>
             </div>
           </Link>
