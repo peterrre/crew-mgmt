@@ -50,6 +50,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
   const [helpers, setHelpers] = useState<Helper[]>([]);
   const [unassignedShifts, setUnassignedShifts] = useState<Shift[]>([]);
   const [selectedShiftId, setSelectedShiftId] = useState('');
+  const [availabilitySlots, setAvailabilitySlots] = useState<any[]>([]);
 
   const formatLocalDateTime = (date: Date) => {
     const d = new Date(date);
@@ -70,6 +71,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
 
   useEffect(() => {
     fetchHelpers();
+    fetchAvailabilitySlots();
     if (shift.isAvailability) {
       fetchUnassignedShifts();
     }
@@ -87,18 +89,30 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
     }
   };
 
+  const fetchAvailabilitySlots = async () => {
+    try {
+      const response = await fetch('/api/shifts');
+      if (response.ok) {
+        const data = await response.json();
+        setAvailabilitySlots(data?.availabilitySlots || []);
+      }
+    } catch (error) {
+      console.error('Error fetching availability slots:', error);
+    }
+  };
+
   const fetchUnassignedShifts = async () => {
     try {
       const response = await fetch('/api/shifts');
       if (response.ok) {
         const data = await response.json();
         let unassigned = (data?.shifts || []).filter((s: any) => !s.helperId);
-        // Filter to only shifts that are within the volunteer's availability slot
+        // Filter to only shifts that overlap with the volunteer's availability slot
         if (shift.isAvailability) {
           unassigned = unassigned.filter((s: any) => {
             const shiftStart = new Date(s.start);
             const shiftEnd = new Date(s.end);
-            return shiftStart >= shift.start && shiftEnd <= shift.end;
+            return shiftStart < shift.end && shiftEnd > shift.start;
           });
         }
         setUnassignedShifts(unassigned);
@@ -115,6 +129,23 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
 
     try {
       const helperIdToSend = formData.helperId === 'unassigned' || formData.helperId === '' ? null : formData.helperId;
+
+      // Validate availability for volunteers
+      if (helperIdToSend && selectedHelper?.role === 'VOLUNTEER') {
+        const helperSlots = availabilitySlots.filter(slot => slot.helper.id === helperIdToSend);
+        const shiftStart = new Date(formData.start);
+        const shiftEnd = new Date(formData.end);
+        const overlaps = helperSlots.some(slot => {
+          const slotStart = new Date(slot.start);
+          const slotEnd = new Date(slot.end);
+          return shiftStart < slotEnd && shiftEnd > slotStart;
+        });
+        if (!overlaps) {
+          setError('The shift does not overlap with the volunteer\'s availability.');
+          setLoading(false);
+          return;
+        }
+      }
 
       const response = await fetch(`/api/shifts/${shift.id}`, {
         method: 'PATCH',
@@ -155,21 +186,93 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
     setError('');
 
     try {
-      const response = await fetch(`/api/shifts/${selectedShiftId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ helperId: shift.userId }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          setError('Shift not found. The data may be stale. Please refresh the page.');
-        } else {
-          setError(data.error || 'Failed to assign shift');
-        }
+      const selectedShift = unassignedShifts.find(s => s.id === selectedShiftId);
+      if (!selectedShift) {
+        setError('Selected shift not found');
         return;
+      }
+
+      const availStart = new Date(shift.start);
+      const availEnd = new Date(shift.end);
+      const shiftStart = new Date(selectedShift.start);
+      const shiftEnd = new Date(selectedShift.end);
+
+      const overlapStart = new Date(Math.max(shiftStart.getTime(), availStart.getTime()));
+      const overlapEnd = new Date(Math.min(shiftEnd.getTime(), availEnd.getTime()));
+
+      if (overlapStart >= overlapEnd) {
+        setError('No overlap with availability');
+        return;
+      }
+
+      // If overlap is the whole shift, assign directly
+      if (overlapStart.getTime() === shiftStart.getTime() && overlapEnd.getTime() === shiftEnd.getTime()) {
+        const response = await fetch(`/api/shifts/${selectedShiftId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ helperId: shift.userId }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setError(data.error || 'Failed to assign shift');
+          return;
+        }
+      } else {
+        // Split the shift
+        // Update the existing shift to the overlap
+        const updateResponse = await fetch(`/api/shifts/${selectedShiftId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            start: overlapStart.toISOString(),
+            end: overlapEnd.toISOString(),
+            helperId: shift.userId,
+          }),
+        });
+
+        if (!updateResponse.ok) {
+          const data = await updateResponse.json();
+          setError(data.error || 'Failed to update shift');
+          return;
+        }
+
+        // Create new shift for before overlap
+        if (shiftStart < overlapStart) {
+          const beforeResponse = await fetch('/api/shifts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: selectedShift.title,
+              start: shiftStart.toISOString(),
+              end: overlapStart.toISOString(),
+            }),
+          });
+
+          if (!beforeResponse.ok) {
+            setError('Failed to create before shift');
+            return;
+          }
+        }
+
+        // Create new shift for after overlap
+        if (shiftEnd > overlapEnd) {
+          const afterResponse = await fetch('/api/shifts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: selectedShift.title,
+              start: overlapEnd.toISOString(),
+              end: shiftEnd.toISOString(),
+            }),
+          });
+
+          if (!afterResponse.ok) {
+            setError('Failed to create after shift');
+            return;
+          }
+        }
       }
 
       onSuccess();

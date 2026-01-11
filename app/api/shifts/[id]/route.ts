@@ -5,6 +5,58 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
+async function mergeAdjacentShifts(shiftId: string) {
+  const shift = await prisma.shift.findUnique({
+    where: { id: shiftId },
+  });
+
+  if (!shift || shift.helperId !== null) return;
+
+  // Find all unassigned shifts with same title, ordered by start
+  const adjacentShifts = await prisma.shift.findMany({
+    where: {
+      title: shift.title,
+      helperId: null,
+      eventId: shift.eventId,
+    },
+    orderBy: { start: 'asc' },
+  });
+
+  // Find the group that includes this shift
+  const group: typeof adjacentShifts = [];
+  let inGroup = false;
+  for (const s of adjacentShifts) {
+    if (s.id === shiftId) {
+      inGroup = true;
+      group.push(s);
+    } else if (inGroup) {
+      if (new Date(s.start).getTime() === new Date(group[group.length - 1].end).getTime()) {
+        group.push(s);
+      } else {
+        break;
+      }
+    } else if (new Date(s.end).getTime() === new Date(shift.start).getTime()) {
+      group.push(s);
+      inGroup = true;
+    }
+  }
+
+  if (group.length > 1) {
+    // Merge: update the first to cover all, delete others
+    const first = group[0];
+    const last = group[group.length - 1];
+    await prisma.shift.update({
+      where: { id: first.id },
+      data: { end: last.end },
+    });
+    for (let i = 1; i < group.length; i++) {
+      await prisma.shift.delete({
+        where: { id: group[i].id },
+      });
+    }
+  }
+}
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -55,6 +107,11 @@ export async function PATCH(
         },
       },
     });
+
+    // If unassigning, try to merge with adjacent unassigned shifts
+    if (helperId !== undefined && helperId === null) {
+      await mergeAdjacentShifts(shift.id);
+    }
 
     return NextResponse.json({ shift });
   } catch (error) {
