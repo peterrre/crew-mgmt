@@ -34,7 +34,7 @@ A comprehensive web application for managing event crews, volunteers, and shift 
 
 ## Tech Stack
 
-- **Framework**: [Next.js](https://nextjs.org/) 15 with App Router
+- **Framework**: [Next.js](https://nextjs.org/) 14 with App Router
 - **Language**: TypeScript
 - **Database**: PostgreSQL
 - **ORM**: [Prisma](https://www.prisma.io/)
