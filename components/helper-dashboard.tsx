@@ -4,16 +4,55 @@ import { useEffect, useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Calendar, LogOut, Edit, User } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, LogOut, Edit, User, ClipboardList } from 'lucide-react';
 import PersonalCalendar from '@/components/personal-calendar';
 import EditAvailability from '@/components/edit-availability';
 import { ThemeToggle } from '@/components/theme-toggle';
 
+interface ShiftRequest {
+  id: string;
+  type: 'SWAP' | 'CANCEL' | 'MODIFY';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  reason: string;
+  createdAt: string;
+  reviewedAt?: string;
+  shift: {
+    title: string;
+    start: string;
+    end: string;
+  };
+}
+
 export default function HelperDashboard() {
   const { data: session } = useSession() || {};
   const [showEditAvailability, setShowEditAvailability] = useState(false);
+  const [requests, setRequests] = useState<ShiftRequest[]>([]);
   const userRole = (session?.user as any)?.role;
   const isVolunteer = userRole === 'VOLUNTEER';
+
+  useEffect(() => {
+    if (isVolunteer) {
+      fetchRequests();
+      // Refresh requests every 30 seconds to show updates
+      const interval = setInterval(fetchRequests, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isVolunteer]);
+
+  const fetchRequests = async () => {
+    try {
+      const response = await fetch('/api/shift-requests');
+      if (response.ok) {
+        const data = await response.json();
+        setRequests(data.requests || []);
+      }
+    } catch (error) {
+      console.error('Error fetching requests:', error);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/login' });
@@ -81,6 +120,120 @@ export default function HelperDashboard() {
         </div>
 
         <PersonalCalendar />
+
+        {isVolunteer && (
+          <div className="mt-8">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+              <ClipboardList className="w-5 h-5 mr-2" />
+              My Shift Requests
+            </h3>
+            <Tabs defaultValue="pending" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="pending">Pending</TabsTrigger>
+                <TabsTrigger value="approved">Approved</TabsTrigger>
+              </TabsList>
+              <TabsContent value="pending">
+                {requests.filter(r => r.status === 'PENDING').length === 0 ? (
+                  <Card>
+                    <CardContent className="flex items-center justify-center py-8">
+                      <p className="text-gray-600 dark:text-slate-400">No pending shift requests</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {requests.filter(r => r.status === 'PENDING').map((request) => (
+                      <Card key={request.id}>
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <CardTitle className="text-lg">{request.shift.title}</CardTitle>
+                              <CardDescription>
+                                {new Date(request.shift.start).toLocaleString()} - {new Date(request.shift.end).toLocaleString()}
+                              </CardDescription>
+                            </div>
+                            <div className="flex gap-2">
+                              <Badge className={`${
+                                request.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                request.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {request.status}
+                              </Badge>
+                              <Badge className={`${
+                                request.type === 'CANCEL' ? 'bg-red-100 text-red-800' :
+                                request.type === 'SWAP' ? 'bg-blue-100 text-blue-800' :
+                                'bg-purple-100 text-purple-800'
+                              }`}>
+                                {request.type}
+                              </Badge>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-gray-600 dark:text-slate-400 mb-2">
+                            <strong>Reason:</strong> {request.reason}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-slate-500">
+                            Requested: {new Date(request.createdAt).toLocaleString()}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+              <TabsContent value="approved">
+                {requests.filter(r => r.status === 'APPROVED').length === 0 ? (
+                  <Card>
+                    <CardContent className="flex items-center justify-center py-8">
+                      <p className="text-gray-600 dark:text-slate-400">No approved shift requests</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {requests.filter(r => r.status === 'APPROVED').map((request) => (
+                      <Card key={request.id}>
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <CardTitle className="text-lg">{request.shift.title}</CardTitle>
+                              <CardDescription>
+                                {new Date(request.shift.start).toLocaleString()} - {new Date(request.shift.end).toLocaleString()}
+                              </CardDescription>
+                            </div>
+                            <div className="flex gap-2">
+                              <Badge className="bg-green-100 text-green-800">
+                                {request.status}
+                              </Badge>
+                              <Badge className={`${
+                                request.type === 'CANCEL' ? 'bg-red-100 text-red-800' :
+                                request.type === 'SWAP' ? 'bg-blue-100 text-blue-800' :
+                                'bg-purple-100 text-purple-800'
+                              }`}>
+                                {request.type}
+                              </Badge>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-gray-600 dark:text-slate-400 mb-2">
+                            <strong>Reason:</strong> {request.reason}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-slate-500">
+                            Requested: {new Date(request.createdAt).toLocaleString()}
+                            {request.reviewedAt && (
+                              <> • Approved: {new Date(request.reviewedAt).toLocaleString()}</>
+                            )}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
       </main>
 
       {showEditAvailability && (

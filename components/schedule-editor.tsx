@@ -68,6 +68,7 @@ function adjustAvailabilitySlots(availabilitySlots: Shift[], assignedShifts: Shi
       remaining.forEach(rem => {
         adjusted.push({
           ...slot,
+          id: `${slot.id}-${rem.start.getTime()}-${rem.end.getTime()}`, // Generate unique id for split slots
           start: rem.start,
           end: rem.end,
         });
@@ -135,7 +136,12 @@ export default function ScheduleEditor() {
         // Adjust availability slots based on assigned shifts
         const assignedShifts = shiftsData.filter((s: Shift) => s.helperId);
         const adjustedAvailability = adjustAvailabilitySlots(availabilityData, assignedShifts);
-        setShifts([...shiftsData, ...adjustedAvailability]);
+        // Remove duplicates by id
+        const allShifts = [...shiftsData, ...adjustedAvailability];
+        const uniqueShifts = allShifts.filter((shift, index, self) =>
+          index === self.findIndex(s => s.id === shift.id)
+        );
+        setShifts(uniqueShifts);
       }
     } catch (error) {
       console.error('Error fetching shifts:', error);

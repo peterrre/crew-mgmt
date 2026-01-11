@@ -50,7 +50,7 @@ export default function CreateShiftDialog({
     title: '',
     start: selectedSlot?.start ? formatLocalDateTime(selectedSlot.start) : '',
     end: selectedSlot?.end ? formatLocalDateTime(selectedSlot.end) : '',
-    helperId: '',
+    helperId: 'unassigned',
   });
 
   useEffect(() => {
