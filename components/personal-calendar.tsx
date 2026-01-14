@@ -54,14 +54,14 @@ export default function PersonalCalendar() {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-lg">
+    <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border dark:border-slate-700">
       {loading ? (
         <div className="flex items-center justify-center h-96">
           <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : shifts.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-600">No shifts assigned yet</p>
+          <p className="text-gray-600 dark:text-slate-400">No shifts assigned yet</p>
         </div>
       ) : (
         <BigCalendar

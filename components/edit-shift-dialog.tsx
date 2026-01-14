@@ -314,15 +314,15 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
     formData.start;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-900">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-card rounded-2xl max-w-md w-full shadow-2xl border border-border">
+        <div className="flex items-center justify-between p-6 border-b border-border">
+          <h2 className="text-xl font-bold text-card-foreground">
             {shift.isAvailability ? `Assign Shift to ${shift.helper?.name}` : 'Edit Shift'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -405,9 +405,9 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
               </div>
 
               {showAvailabilityWarning && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm text-blue-700 font-medium">Availability Note:</p>
-                  <p className="text-xs text-blue-600 mt-1">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                  <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">Availability Note:</p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                     {selectedHelper?.availability?.join(', ')}
                   </p>
                 </div>
@@ -416,7 +416,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
           )}
 
           {error && (
-            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</div>
+            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">{error}</div>
           )}
 
           {shift.isAvailability ? (
@@ -452,7 +452,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
                 variant="outline"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="text-red-600 border-red-600 hover:bg-red-50"
+                className="text-destructive border-destructive hover:bg-destructive/10"
               >
                 {deleting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
