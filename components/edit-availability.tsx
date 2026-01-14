@@ -122,12 +122,12 @@ export default function EditAvailability({ onClose }: EditAvailabilityProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-900">Edit Availability</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto border dark:border-slate-700">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Edit Availability</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -155,13 +155,13 @@ export default function EditAvailability({ onClose }: EditAvailabilityProps) {
                 </div>
 
                 {availability.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">No availability slots set. Add your first slot above.</p>
+                  <p className="text-gray-500 dark:text-slate-400 text-center py-8">No availability slots set. Add your first slot above.</p>
                 ) : (
                   <div className="space-y-3">
                     {availability.map((slot, index) => (
-                      <div key={index} className="border rounded-lg p-4 space-y-3">
+                      <div key={index} className="border border-gray-200 dark:border-slate-600 rounded-lg p-4 space-y-3">
                         <div className="flex items-center justify-between">
-                          <h4 className="font-medium">Slot {index + 1}</h4>
+                          <h4 className="font-medium text-gray-900 dark:text-white">Slot {index + 1}</h4>
                           <Button
                             type="button"
                             onClick={() => removeSlot(index)}
@@ -241,7 +241,7 @@ export default function EditAvailability({ onClose }: EditAvailabilityProps) {
               </div>
 
               {error && (
-                <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</div>
+                <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 p-3 rounded-lg">{error}</div>
               )}
 
               <div className="flex space-x-3 pt-4">
@@ -256,7 +256,7 @@ export default function EditAvailability({ onClose }: EditAvailabilityProps) {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                  className="flex-1 bg-amber-500 hover:bg-orange-600 dark:bg-amber-600 dark:hover:bg-orange-700"
                 >
                   {loading ? (
                     <>
