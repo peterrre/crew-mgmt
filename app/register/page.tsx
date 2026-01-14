@@ -133,7 +133,7 @@ export default function RegisterPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+              className="w-full h-11 bg-amber-500 hover:bg-orange-600 dark:bg-amber-600 dark:hover:bg-orange-700"
             >
               {loading ? (
                 <>
