@@ -1,6 +1,6 @@
 generator client {
-    provider = "prisma-client-js"
-    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+  provider = "prisma-client-js"
+  binaryTargets = ["native"]
 }
 
 datasource db {
@@ -24,6 +24,7 @@ model User {
   requests      ShiftRequest[] @relation("Requester")
   reviewedRequests ShiftRequest[] @relation("Reviewer")
   newHelperRequests ShiftRequest[] @relation("NewHelper")
+  contactEvents Event[]
 }
 
 enum Role {
@@ -38,6 +39,7 @@ model Shift {
   start     DateTime
   end       DateTime
   eventId   String?
+  event     Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
   helperId  String?
   helper    User?    @relation(fields: [helperId], references: [id], onDelete: SetNull)
   requests  ShiftRequest[]
@@ -46,12 +48,27 @@ model Shift {
 }
 
 model Event {
-  id        String   @id @default(cuid())
-  name      String
-  startDate DateTime
-  endDate   DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  startDate     DateTime
+  endDate       DateTime
+  location      String?
+  contactPersonId String?
+  contactPerson User?    @relation(fields: [contactPersonId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  shifts        Shift[]
+}
+
+
+model EventTemplate {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  defaultShifts Json     // Array of { title: string, startOffset: number (hours from event start), endOffset: number, recurrence?: string }
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Account {
