@@ -9,8 +9,18 @@
   border-color: #e5e7eb;
 }
 
+.dark .rbc-header {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
 .rbc-today {
   background-color: #eff6ff;
+}
+
+.dark .rbc-today {
+  background-color: #1e3a8a;
 }
 
 .rbc-event {
@@ -48,9 +58,20 @@
   pointer-events: auto;
 }
 
+.dark .rbc-toolbar button {
+  background-color: #1f2937;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
 .rbc-toolbar button:hover {
   background-color: #f9fafb;
   border-color: #d1d5db;
+}
+
+.dark .rbc-toolbar button:hover {
+  background-color: #374151;
+  border-color: #6b7280;
 }
 
 .rbc-toolbar button.rbc-active {
@@ -71,12 +92,25 @@
   overflow: hidden;
 }
 
+.dark .rbc-month-view,
+.dark .rbc-time-view {
+  border-color: #4b5563;
+}
+
 .rbc-time-slot {
   border-color: #f3f4f6;
 }
 
+.dark .rbc-time-slot {
+  border-color: #374151;
+}
+
 .rbc-day-slot .rbc-time-slot {
   border-top: 1px solid #f3f4f6;
+}
+
+.dark .rbc-day-slot .rbc-time-slot {
+  border-top-color: #374151;
 }
 
 .rbc-current-time-indicator {
@@ -89,6 +123,10 @@
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid #e5e7eb;
+}
+
+.dark .rbc-agenda-view {
+  border-color: #4b5563;
 }
 
 .rbc-agenda-view table.rbc-agenda-table {
@@ -106,10 +144,21 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
+.dark .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
+  background: #374151;
+  border-bottom-color: #4b5563;
+  color: #f9fafb;
+}
+
 .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
   padding: 10px 16px;
   border-bottom: 1px solid #f3f4f6;
   vertical-align: top;
+}
+
+.dark .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
+  border-bottom-color: #374151;
+  color: #f9fafb;
 }
 
 .rbc-agenda-view table.rbc-agenda-table tbody > tr > td.rbc-agenda-date-cell {
@@ -121,6 +170,10 @@
   white-space: nowrap;
 }
 
+.dark .rbc-agenda-view table.rbc-agenda-table tbody > tr > td.rbc-agenda-date-cell {
+  color: #f9fafb;
+}
+
 .rbc-agenda-view table.rbc-agenda-table tbody > tr > td.rbc-agenda-time-cell {
   width: 140px;
   min-width: 140px;
@@ -129,8 +182,16 @@
   white-space: nowrap;
 }
 
+.dark .rbc-agenda-view table.rbc-agenda-table tbody > tr > td.rbc-agenda-time-cell {
+  color: #cbd5e1;
+}
+
 .rbc-agenda-view table.rbc-agenda-table tbody > tr > td.rbc-agenda-event-cell {
   color: #1e293b;
+}
+
+.dark .rbc-agenda-view table.rbc-agenda-table tbody > tr > td.rbc-agenda-event-cell {
+  color: #f1f5f9;
 }
 
 /* Overlapping events */
