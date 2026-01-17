@@ -93,6 +93,25 @@ export async function PATCH(
       );
     }
 
+    // If assigning a helper, verify they are in the event crew
+    if (helperId && existingShift.eventId) {
+      const eventCrew = await prisma.eventCrew.findUnique({
+        where: {
+          eventId_userId: {
+            eventId: existingShift.eventId,
+            userId: helperId,
+          },
+        },
+      });
+
+      if (!eventCrew) {
+        return NextResponse.json(
+          { error: 'Helper must be assigned to event crew first' },
+          { status: 400 }
+        );
+      }
+    }
+
     const shift = await prisma.shift.update({
       where: { id },
       data: updateData,

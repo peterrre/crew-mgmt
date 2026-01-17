@@ -25,6 +25,7 @@ model User {
   reviewedRequests ShiftRequest[] @relation("Reviewer")
   newHelperRequests ShiftRequest[] @relation("NewHelper")
   contactEvents Event[]
+  eventAssignments EventCrew[]
 }
 
 enum Role {
@@ -38,8 +39,8 @@ model Shift {
   title     String
   start     DateTime
   end       DateTime
-  eventId   String?
-  event     Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   helperId  String?
   helper    User?    @relation(fields: [helperId], references: [id], onDelete: SetNull)
   requests  ShiftRequest[]
@@ -59,6 +60,20 @@ model Event {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   shifts        Shift[]
+  crew          EventCrew[]
+  shiftRequests ShiftRequest[]
+}
+
+model EventCrew {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
 }
 
 
@@ -126,6 +141,7 @@ enum RequestStatus {
 model ShiftRequest {
   id          String       @id @default(cuid())
   shiftId     String
+  eventId     String
   requesterId String
   type        RequestType
   status      RequestStatus @default(PENDING)
@@ -138,6 +154,7 @@ model ShiftRequest {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   shift       Shift        @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
   requester   User         @relation("Requester", fields: [requesterId], references: [id])
   newHelper   User?        @relation("NewHelper", fields: [newHelperId], references: [id])
   reviewer    User?        @relation("Reviewer", fields: [reviewedBy], references: [id])

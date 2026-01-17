@@ -102,11 +102,39 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { title, start, end, helperId, eventId } = body;
 
-    if (!title || !start || !end) {
+    if (!title || !start || !end || !eventId) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields (title, start, end, eventId are required)' },
         { status: 400 }
       );
+    }
+
+    // Verify event exists
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+    }
+
+    // If assigning a helper, verify they are in the event crew
+    if (helperId) {
+      const eventCrew = await prisma.eventCrew.findUnique({
+        where: {
+          eventId_userId: {
+            eventId,
+            userId: helperId,
+          },
+        },
+      });
+
+      if (!eventCrew) {
+        return NextResponse.json(
+          { error: 'Helper must be assigned to event crew first' },
+          { status: 400 }
+        );
+      }
     }
 
     const shift = await prisma.shift.create({
@@ -115,7 +143,7 @@ export async function POST(request: Request) {
         start: new Date(start),
         end: new Date(end),
         helperId: helperId || null,
-        eventId: eventId || null,
+        eventId,
       },
       include: {
         helper: {

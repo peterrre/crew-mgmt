@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
     const shift = await prisma.shift.findUnique({
       where: { id: shiftId },
-      select: { helperId: true },
+      select: { helperId: true, eventId: true },
     });
 
     if (!shift) {
@@ -124,6 +124,7 @@ export async function POST(request: Request) {
       const shiftRequest = await prisma.shiftRequest.create({
         data: {
           shiftId,
+          eventId: shift.eventId,
           requesterId: userId,
           type,
           status: 'APPROVED', // Immediately approved for cancel
@@ -154,6 +155,7 @@ export async function POST(request: Request) {
       const shiftRequest = await prisma.shiftRequest.create({
         data: {
           shiftId,
+          eventId: shift.eventId,
           requesterId: userId,
           type,
           reason,
