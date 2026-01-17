@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Users } from 'lucide-react';
 import AddEventCrewDialog from '@/components/add-event-crew-dialog';
+import { useEventData } from '@/contexts/event-data-context';
 
 interface CrewMember {
   id: string;
@@ -25,29 +26,10 @@ interface EventCrewManagementProps {
 }
 
 export default function EventCrewManagement({ eventId }: EventCrewManagementProps) {
-  const [crew, setCrew] = useState<CrewMember[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { crew, crewLoading, refreshCrew } = useEventData();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
-
-  useEffect(() => {
-    fetchCrew();
-  }, [eventId]);
-
-  const fetchCrew = async () => {
-    try {
-      const response = await fetch(`/api/events/${eventId}/crew`);
-      if (response.ok) {
-        const data = await response.json();
-        setCrew(data?.crew || []);
-      }
-    } catch (error) {
-      console.error('Error fetching crew:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleRemove = async (userId: string) => {
     if (!confirm('Are you sure you want to remove this crew member from the event?')) return;
@@ -58,7 +40,7 @@ export default function EventCrewManagement({ eventId }: EventCrewManagementProp
       });
 
       if (response.ok) {
-        fetchCrew();
+        await refreshCrew();
       } else {
         const data = await response.json();
         alert(data.error || 'Failed to remove crew member');
@@ -127,7 +109,7 @@ export default function EventCrewManagement({ eventId }: EventCrewManagementProp
         </Select>
       </div>
 
-      {loading ? (
+      {crewLoading ? (
         <div className="text-center py-12">
           <div className="inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
@@ -176,9 +158,9 @@ export default function EventCrewManagement({ eventId }: EventCrewManagementProp
           eventId={eventId}
           existingCrewIds={crew.map(c => c.userId)}
           onClose={() => setShowAddDialog(false)}
-          onSuccess={() => {
+          onSuccess={async () => {
             setShowAddDialog(false);
-            fetchCrew();
+            await refreshCrew();
           }}
         />
       )}

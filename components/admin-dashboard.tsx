@@ -167,7 +167,7 @@ export default function AdminDashboard() {
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">Shift Requests</h3>
               <p className="text-orange-100">
-                Review volunteer shift change requests
+                Monitor and manage requests across all events
               </p>
             </div>
           </Link>

@@ -100,11 +100,51 @@ export async function PATCH(
       }
     }
 
-    return NextResponse.json({ request: updatedRequest });
+    // Prepare success message based on action
+    const actionMessages = {
+      APPROVED: {
+        CANCEL: `Request approved: Shift "${updatedRequest.shift.title}" has been unassigned`,
+        SWAP: `Request approved: Shift "${updatedRequest.shift.title}" has been reassigned`,
+        MODIFY: `Request approved: Shift "${updatedRequest.shift.title}" times have been updated`,
+      },
+      REJECTED: {
+        CANCEL: `Request rejected: Shift "${updatedRequest.shift.title}" remains assigned`,
+        SWAP: `Request rejected: Shift "${updatedRequest.shift.title}" assignment unchanged`,
+        MODIFY: `Request rejected: Shift "${updatedRequest.shift.title}" times unchanged`,
+      },
+    };
+
+    const message =
+      actionMessages[status as 'APPROVED' | 'REJECTED']?.[
+        shiftRequest.type as 'CANCEL' | 'SWAP' | 'MODIFY'
+      ] || `Request ${status.toLowerCase()}`;
+
+    return NextResponse.json({
+      request: updatedRequest,
+      success: true,
+      message,
+    });
   } catch (error) {
     console.error('Error updating shift request:', error);
+
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes('Shift not found')) {
+        return NextResponse.json(
+          { error: 'The shift associated with this request no longer exists', success: false },
+          { status: 404 }
+        );
+      }
+      if (error.message.includes('User not found')) {
+        return NextResponse.json(
+          { error: 'The user associated with this request no longer exists', success: false },
+          { status: 404 }
+        );
+      }
+    }
+
     return NextResponse.json(
-      { error: 'Failed to update shift request' },
+      { error: 'Failed to update shift request. Please try again.', success: false },
       { status: 500 }
     );
   }

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import { format } from 'date-fns'
 import EventDetailTabs from '@/components/event-detail-tabs'
+import { EventDataProvider } from '@/contexts/event-data-context'
 
 interface EventDetailPageProps {
   params: { id: string }
@@ -39,14 +40,6 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
     notFound()
   }
 
-  // Count pending shift requests for this event
-  const pendingRequestsCount = await prisma.shiftRequest.count({
-    where: {
-      eventId: params.id,
-      status: 'PENDING',
-    },
-  })
-
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-start mb-8">
@@ -66,20 +59,19 @@ export default async function EventDetailPage({ params }: EventDetailPageProps) 
         </div>
       </div>
 
-      <EventDetailTabs
-        event={{
-          id: event.id,
-          name: event.name,
-          description: event.description,
-          startDate: event.startDate,
-          endDate: event.endDate,
-          location: event.location,
-          contactPerson: event.contactPerson,
-        }}
-        crewCount={event._count.crew}
-        shiftsCount={event._count.shifts}
-        pendingRequestsCount={pendingRequestsCount}
-      />
+      <EventDataProvider eventId={event.id}>
+        <EventDetailTabs
+          event={{
+            id: event.id,
+            name: event.name,
+            description: event.description,
+            startDate: event.startDate,
+            endDate: event.endDate,
+            location: event.location,
+            contactPerson: event.contactPerson,
+          }}
+        />
+      </EventDataProvider>
     </div>
   )
 }
