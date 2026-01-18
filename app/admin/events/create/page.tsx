@@ -1,19 +1,19 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { EventForm } from '@/components/event-form'
-import { createEvent } from '@/lib/actions/events'
+import { createEvent, getUsers } from '@/lib/actions/events'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 export default function CreateEventPage() {
   const router = useRouter()
+  const [users, setUsers] = useState<{ id: string; name: string | null }[]>([])
 
-  // Mock data - in real app, fetch from API
-  const users = [
-    { id: '1', name: 'John Doe' },
-    { id: '2', name: 'Jane Smith' },
-  ]
+  useEffect(() => {
+    getUsers().then(setUsers)
+  }, [])
 
   const handleCancel = () => {
     router.push('/admin/events')
@@ -35,7 +35,7 @@ export default function CreateEventPage() {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-bold mb-8">Create Event</h1>
         <EventForm
-          users={users}
+          users={users.map(u => ({ id: u.id, name: u.name || 'Unknown' }))}
           onSubmit={createEvent}
           onCancel={handleCancel}
           submitLabel="Create Event"

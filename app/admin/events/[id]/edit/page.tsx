@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { EventForm } from '@/components/event-form'
-import { updateEvent } from '@/lib/actions/events'
+import { updateEvent, getUsers } from '@/lib/actions/events'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
@@ -22,10 +22,12 @@ interface Event {
 
 export default function EditEventPage({ params }: EditEventPageProps) {
   const [event, setEvent] = useState<Event | null>(null)
+  const [users, setUsers] = useState<{ id: string; name: string | null }[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchEvent()
+    getUsers().then(setUsers)
   }, [])
 
   const fetchEvent = async () => {
@@ -41,12 +43,6 @@ export default function EditEventPage({ params }: EditEventPageProps) {
       setLoading(false)
     }
   }
-
-  // Mock users - in real app, fetch from database
-  const users = [
-    { id: '1', name: 'John Doe' },
-    { id: '2', name: 'Jane Smith' },
-  ]
 
   if (loading) {
     return <div className="container mx-auto py-8">Loading...</div>
@@ -71,7 +67,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
       <div className="space-y-6">
         <EventForm
           initialData={initialData}
-          users={users}
+          users={users.map(u => ({ id: u.id, name: u.name || 'Unknown' }))}
           onSubmit={updateEvent.bind(null, params.id)}
           submitLabel="Update Event"
         />

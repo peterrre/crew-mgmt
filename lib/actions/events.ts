@@ -37,6 +37,21 @@ async function requireAdmin() {
   }
 }
 
+// Users (only ADMIN and CREW can be contact persons)
+export async function getUsers() {
+  const users = await prisma.user.findMany({
+    where: {
+      role: { in: ['ADMIN', 'CREW'] },
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: { name: 'asc' },
+  })
+  return users
+}
+
 // Events
 export async function createEvent(formData: FormData) {
   await requireAdmin()
