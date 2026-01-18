@@ -21,11 +21,14 @@ model User {
   accounts      Account[]
   sessions      Session[]
   availabilitySlots  AvailabilitySlot[]
+  shiftAssignments   ShiftAssignment[]
   requests      ShiftRequest[] @relation("Requester")
   reviewedRequests ShiftRequest[] @relation("Reviewer")
   newHelperRequests ShiftRequest[] @relation("NewHelper")
   contactEvents Event[]
   eventAssignments EventCrew[]
+  volunteerApplications VolunteerApplication[] @relation("Applicant")
+  reviewedApplications  VolunteerApplication[] @relation("ApplicationReviewer")
 }
 
 enum Role {
@@ -34,18 +37,26 @@ enum Role {
   VOLUNTEER
 }
 
+enum ShiftAssignmentRole {
+  RESPONSIBLE
+  HELPER
+}
+
 model Shift {
-  id        String   @id @default(cuid())
-  title     String
-  start     DateTime
-  end       DateTime
-  eventId   String
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  helperId  String?
-  helper    User?    @relation(fields: [helperId], references: [id], onDelete: SetNull)
-  requests  ShiftRequest[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  title        String
+  start        DateTime
+  end          DateTime
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  helperId     String?  // DEPRECATED: Use assignments instead. Kept for backward compatibility.
+  helper       User?    @relation(fields: [helperId], references: [id], onDelete: SetNull)
+  minHelpers   Int      @default(1)
+  maxHelpers   Int      @default(1)
+  assignments  ShiftAssignment[]
+  requests     ShiftRequest[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Event {
@@ -59,11 +70,13 @@ model Event {
   contactPerson User?    @relation(fields: [contactPersonId], references: [id])
   isArchived    Boolean  @default(false)
   archivedAt    DateTime?
+  acceptingVolunteers Boolean @default(false)  // Whether volunteers can apply to this event
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   shifts        Shift[]
   crew          EventCrew[]
   shiftRequests ShiftRequest[]
+  volunteerApplications VolunteerApplication[]
 }
 
 model EventCrew {
@@ -78,6 +91,19 @@ model EventCrew {
   @@unique([eventId, userId])
 }
 
+model ShiftAssignment {
+  id        String              @id @default(cuid())
+  shiftId   String
+  userId    String
+  role      ShiftAssignmentRole @default(HELPER)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  shift     Shift               @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([shiftId, userId])
+}
 
 model EventTemplate {
   id            String   @id @default(cuid())
@@ -140,6 +166,13 @@ enum RequestStatus {
   REJECTED
 }
 
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
 model ShiftRequest {
   id          String       @id @default(cuid())
   shiftId     String
@@ -168,4 +201,23 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model VolunteerApplication {
+  id          String            @id @default(cuid())
+  eventId     String
+  userId      String
+  status      ApplicationStatus @default(PENDING)
+  message     String?           // Optional message from volunteer
+  reviewedBy  String?           // Admin who reviewed
+  reviewedAt  DateTime?
+  reviewNote  String?           // Admin note on decision
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  event       Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user        User              @relation("Applicant", fields: [userId], references: [id], onDelete: Cascade)
+  reviewer    User?             @relation("ApplicationReviewer", fields: [reviewedBy], references: [id])
+
+  @@unique([eventId, userId])  // One application per user per event
 }

@@ -2,19 +2,40 @@
 
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 
+interface ShiftAssignment {
+  id: string;
+  role: 'RESPONSIBLE' | 'HELPER';
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    role: string;
+  };
+}
+
 interface Shift {
   id: string;
   title: string;
   start: Date;
   end: Date;
-  helperId: string | null;
+  helperId: string | null; // Deprecated: use assignments instead
   eventId: string;
+  minHelpers: number;
+  maxHelpers: number;
   helper?: {
     id: string;
     name: string | null;
     email: string;
     role: string;
   } | null;
+  event?: {
+    id: string;
+    name: string;
+    startDate: Date;
+    endDate: Date;
+    location: string | null;
+  };
+  assignments: ShiftAssignment[];
 }
 
 interface CrewMember {
@@ -72,6 +93,19 @@ interface AvailabilitySlot {
   };
 }
 
+interface VolunteerApplication {
+  id: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'WITHDRAWN';
+  message: string | null;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    role: string;
+  };
+}
+
 interface EventDataContextType {
   eventId: string;
 
@@ -80,22 +114,28 @@ interface EventDataContextType {
   crew: CrewMember[];
   requests: ShiftRequest[];
   availability: AvailabilitySlot[];
+  applications: VolunteerApplication[];
+  acceptingVolunteers: boolean;
 
   // Loading states
   shiftsLoading: boolean;
   crewLoading: boolean;
   requestsLoading: boolean;
   availabilityLoading: boolean;
+  applicationsLoading: boolean;
 
   // Refresh functions
   refreshShifts: () => Promise<void>;
   refreshCrew: () => Promise<void>;
   refreshRequests: () => Promise<void>;
   refreshAvailability: () => Promise<void>;
+  refreshApplications: () => Promise<void>;
   refreshAll: () => Promise<void>;
+  refreshData: () => Promise<void>; // Alias for refreshAll
 
   // Computed values
   pendingRequestsCount: number;
+  pendingApplicationsCount: number;
   shiftsCount: number;
   crewCount: number;
 }
@@ -112,11 +152,14 @@ export function EventDataProvider({ eventId, children }: EventDataProviderProps)
   const [crew, setCrew] = useState<CrewMember[]>([]);
   const [requests, setRequests] = useState<ShiftRequest[]>([]);
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
+  const [applications, setApplications] = useState<VolunteerApplication[]>([]);
+  const [acceptingVolunteers, setAcceptingVolunteers] = useState(false);
 
   const [shiftsLoading, setShiftsLoading] = useState(false);
   const [crewLoading, setCrewLoading] = useState(false);
   const [requestsLoading, setRequestsLoading] = useState(false);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
 
   const refreshShifts = useCallback(async () => {
     setShiftsLoading(true);
@@ -130,6 +173,16 @@ export function EventDataProvider({ eventId, children }: EventDataProviderProps)
             ...shift,
             start: new Date(shift.start),
             end: new Date(shift.end),
+            minHelpers: shift.minHelpers ?? 1,
+            maxHelpers: shift.maxHelpers ?? 1,
+            assignments: shift.assignments || [],
+            event: shift.event
+              ? {
+                  ...shift.event,
+                  startDate: new Date(shift.event.startDate),
+                  endDate: new Date(shift.event.endDate),
+                }
+              : undefined,
           }));
         setShifts(eventShifts);
       }
@@ -190,14 +243,35 @@ export function EventDataProvider({ eventId, children }: EventDataProviderProps)
     }
   }, [eventId]);
 
+  const refreshApplications = useCallback(async () => {
+    setApplicationsLoading(true);
+    try {
+      const response = await fetch(`/api/events/${eventId}/applications`);
+      if (response.ok) {
+        const data = await response.json();
+        setApplications(data?.applications || []);
+        if (data?.event) {
+          setAcceptingVolunteers(data.event.acceptingVolunteers);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+    } finally {
+      setApplicationsLoading(false);
+    }
+  }, [eventId]);
+
   const refreshAll = useCallback(async () => {
     await Promise.all([
       refreshShifts(),
       refreshCrew(),
       refreshRequests(),
       refreshAvailability(),
+      refreshApplications(),
     ]);
-  }, [refreshShifts, refreshCrew, refreshRequests, refreshAvailability]);
+  }, [refreshShifts, refreshCrew, refreshRequests, refreshAvailability, refreshApplications]);
+
+  const refreshData = refreshAll;
 
   // Initial data fetch
   useEffect(() => {
@@ -206,6 +280,7 @@ export function EventDataProvider({ eventId, children }: EventDataProviderProps)
 
   // Computed values
   const pendingRequestsCount = requests.filter((r) => r.status === 'PENDING').length;
+  const pendingApplicationsCount = applications.filter((a) => a.status === 'PENDING').length;
   const shiftsCount = shifts.length;
   const crewCount = crew.length;
 
@@ -215,16 +290,22 @@ export function EventDataProvider({ eventId, children }: EventDataProviderProps)
     crew,
     requests,
     availability,
+    applications,
+    acceptingVolunteers,
     shiftsLoading,
     crewLoading,
     requestsLoading,
     availabilityLoading,
+    applicationsLoading,
     refreshShifts,
     refreshCrew,
     refreshRequests,
     refreshAvailability,
+    refreshApplications,
     refreshAll,
+    refreshData,
     pendingRequestsCount,
+    pendingApplicationsCount,
     shiftsCount,
     crewCount,
   };

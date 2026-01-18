@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, Star, UserPlus, Users } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface CrewMember {
   id: string;
@@ -44,6 +45,8 @@ export default function ShiftCreateDialog({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [availabilityWarning, setAvailabilityWarning] = useState('');
+  const [selectedHelpers, setSelectedHelpers] = useState<string[]>([]);
+  const [helperToAdd, setHelperToAdd] = useState<string>('');
 
   const formatLocalDateTime = (date: Date) => {
     const d = new Date(date);
@@ -59,18 +62,20 @@ export default function ShiftCreateDialog({
     title: '',
     start: selectedSlot?.start ? formatLocalDateTime(selectedSlot.start) : '',
     end: selectedSlot?.end ? formatLocalDateTime(selectedSlot.end) : '',
-    helperId: 'unassigned',
+    responsibleId: 'unassigned',
+    minHelpers: 1,
+    maxHelpers: 1,
   });
 
-  // Check availability when helper or time changes
+  // Check availability when responsible person or time changes
   useEffect(() => {
-    if (formData.helperId && formData.helperId !== 'unassigned' && formData.start && formData.end) {
+    if (formData.responsibleId && formData.responsibleId !== 'unassigned' && formData.start && formData.end) {
       const startDate = new Date(formData.start);
       const endDate = new Date(formData.end);
-      const hasAvailability = checkHelperAvailability(formData.helperId, startDate, endDate);
+      const hasAvailability = checkHelperAvailability(formData.responsibleId, startDate, endDate);
 
       if (!hasAvailability) {
-        const selectedCrew = crew.find((c) => c.userId === formData.helperId);
+        const selectedCrew = crew.find((c) => c.userId === formData.responsibleId);
         const name = selectedCrew?.user.name || selectedCrew?.user.email || 'This crew member';
         setAvailabilityWarning(`${name} does not have availability during this time slot.`);
       } else {
@@ -79,7 +84,23 @@ export default function ShiftCreateDialog({
     } else {
       setAvailabilityWarning('');
     }
-  }, [formData.helperId, formData.start, formData.end, checkHelperAvailability, crew]);
+  }, [formData.responsibleId, formData.start, formData.end, checkHelperAvailability, crew]);
+
+  // Get available crew for helper selection (not responsible, not already added)
+  const availableForHelper = crew.filter(
+    (c) => c.userId !== formData.responsibleId && !selectedHelpers.includes(c.userId)
+  );
+
+  const handleAddHelper = () => {
+    if (helperToAdd && !selectedHelpers.includes(helperToAdd)) {
+      setSelectedHelpers([...selectedHelpers, helperToAdd]);
+      setHelperToAdd('');
+    }
+  };
+
+  const handleRemoveHelper = (userId: string) => {
+    setSelectedHelpers(selectedHelpers.filter((id) => id !== userId));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,10 +108,10 @@ export default function ShiftCreateDialog({
     setError('');
 
     try {
-      const helperIdToSend =
-        formData.helperId === 'unassigned' || formData.helperId === ''
+      const responsibleUserId =
+        formData.responsibleId === 'unassigned' || formData.responsibleId === ''
           ? null
-          : formData.helperId;
+          : formData.responsibleId;
 
       const response = await fetch('/api/shifts', {
         method: 'POST',
@@ -99,8 +120,11 @@ export default function ShiftCreateDialog({
           title: formData.title,
           start: new Date(formData.start).toISOString(),
           end: new Date(formData.end).toISOString(),
-          helperId: helperIdToSend,
           eventId,
+          minHelpers: formData.minHelpers,
+          maxHelpers: formData.maxHelpers,
+          responsibleUserId,
+          helperIds: selectedHelpers,
         }),
       });
 
@@ -121,8 +145,8 @@ export default function ShiftCreateDialog({
 
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-2xl max-w-md w-full shadow-2xl border border-border">
-        <div className="flex items-center justify-between p-6 border-b border-border">
+      <div className="bg-card rounded-2xl max-w-lg w-full shadow-2xl border border-border max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-card z-10">
           <h2 className="text-xl font-bold text-card-foreground">Create Shift</h2>
           <button
             onClick={onClose}
@@ -144,36 +168,79 @@ export default function ShiftCreateDialog({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="start">Start Time</Label>
-            <Input
-              id="start"
-              type="datetime-local"
-              value={formData.start}
-              onChange={(e) => setFormData({ ...formData, start: e.target.value })}
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="start">Start Time</Label>
+              <Input
+                id="start"
+                type="datetime-local"
+                value={formData.start}
+                onChange={(e) => setFormData({ ...formData, start: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="end">End Time</Label>
+              <Input
+                id="end"
+                type="datetime-local"
+                value={formData.end}
+                onChange={(e) => setFormData({ ...formData, end: e.target.value })}
+                required
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="end">End Time</Label>
-            <Input
-              id="end"
-              type="datetime-local"
-              value={formData.end}
-              onChange={(e) => setFormData({ ...formData, end: e.target.value })}
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="minHelpers">Min Helpers</Label>
+              <Input
+                id="minHelpers"
+                type="number"
+                min="1"
+                value={formData.minHelpers}
+                onChange={(e) =>
+                  setFormData({ ...formData, minHelpers: parseInt(e.target.value) || 1 })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="maxHelpers">Max Helpers</Label>
+              <Input
+                id="maxHelpers"
+                type="number"
+                min={formData.minHelpers}
+                value={formData.maxHelpers}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    maxHelpers: Math.max(parseInt(e.target.value) || 1, formData.minHelpers),
+                  })
+                }
+              />
+            </div>
           </div>
 
+          {/* Responsible Person */}
           <div className="space-y-2">
-            <Label htmlFor="helper">Assign Crew Member (optional)</Label>
+            <Label htmlFor="responsible" className="flex items-center gap-2">
+              <Star className="w-4 h-4 text-amber-500" />
+              Responsible Person (optional)
+            </Label>
             <Select
-              value={formData.helperId}
-              onValueChange={(value) => setFormData({ ...formData, helperId: value })}
+              value={formData.responsibleId}
+              onValueChange={(value) => {
+                setFormData({ ...formData, responsibleId: value });
+                // Remove from helpers if was selected there
+                if (selectedHelpers.includes(value)) {
+                  setSelectedHelpers(selectedHelpers.filter((id) => id !== value));
+                }
+              }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a crew member" />
+                <SelectValue placeholder="Select responsible person" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="unassigned">Unassigned</SelectItem>
@@ -184,15 +251,76 @@ export default function ShiftCreateDialog({
                 ))}
               </SelectContent>
             </Select>
+            {availabilityWarning && (
+              <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-800">
+                Warning: {availabilityWarning}
+              </div>
+            )}
+          </div>
+
+          {/* Additional Helpers */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Additional Helpers (optional)
+            </Label>
+
+            {/* Selected helpers */}
+            {selectedHelpers.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {selectedHelpers.map((userId) => {
+                  const member = crew.find((c) => c.userId === userId);
+                  return (
+                    <Badge
+                      key={userId}
+                      variant="secondary"
+                      className="flex items-center gap-1 pr-1"
+                    >
+                      {member?.user.name || member?.user.email || userId}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveHelper(userId)}
+                        className="ml-1 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full p-0.5"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Add helper selector */}
+            {availableForHelper.length > 0 && (
+              <div className="flex gap-2">
+                <Select value={helperToAdd} onValueChange={setHelperToAdd}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Add helper..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableForHelper.map((member) => (
+                      <SelectItem key={member.userId} value={member.userId}>
+                        {member.user.name || member.user.email} ({member.user.role})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddHelper}
+                  disabled={!helperToAdd}
+                >
+                  <UserPlus className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+
             {crew.length === 0 && (
               <p className="text-xs text-amber-600 dark:text-amber-400">
                 No crew assigned to this event yet. Add crew members first.
               </p>
-            )}
-            {availabilityWarning && (
-              <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-800">
-                ⚠️ {availabilityWarning}
-              </div>
             )}
           </div>
 

@@ -7,8 +7,11 @@ async function main() {
   console.log('🌱 Seeding database...');
 
   // Clear existing data
+  await prisma.shiftAssignment.deleteMany();
+  await prisma.volunteerApplication.deleteMany();
   await prisma.availabilitySlot.deleteMany();
   await prisma.shift.deleteMany();
+  await prisma.eventCrew.deleteMany();
   await prisma.event.deleteMany();
   await prisma.user.deleteMany();
 

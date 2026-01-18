@@ -8,6 +8,8 @@ import EventDetailTabs from '@/components/event-detail-tabs'
 import { EventDataProvider } from '@/contexts/event-data-context'
 import { EventActions } from '@/components/event-actions'
 
+export const dynamic = 'force-dynamic'
+
 interface EventDetailPageProps {
   params: { id: string }
 }

@@ -19,6 +19,7 @@ interface Event {
   endDate: Date
   location: string | null
   contactPersonId: string | null
+  acceptingVolunteers: boolean
 }
 
 export default function EditEventPage({ params }: EditEventPageProps) {
@@ -73,6 +74,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
     endDate: new Date(event.endDate).toISOString().slice(0, 16),
     location: event.location || '',
     contactPersonId: event.contactPersonId || '',
+    acceptingVolunteers: event.acceptingVolunteers,
   }
 
   return (

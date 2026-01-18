@@ -1,17 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { X, Loader2 } from 'lucide-react';
+import ShiftAssignmentManager from '@/components/shift-assignment-manager';
+
+interface ShiftAssignment {
+  id: string;
+  role: 'RESPONSIBLE' | 'HELPER';
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    role: string;
+  };
+}
 
 interface Shift {
   id: string;
@@ -20,12 +26,15 @@ interface Shift {
   end: Date;
   helperId: string | null;
   eventId: string;
+  minHelpers: number;
+  maxHelpers: number;
   helper?: {
     id: string;
     name: string | null;
     email: string;
     role: string;
   } | null;
+  assignments: ShiftAssignment[];
 }
 
 interface CrewMember {
@@ -54,9 +63,22 @@ export default function ShiftEditDialog({
   onClose,
   onSuccess,
 }: ShiftEditDialogProps) {
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [availabilityWarning, setAvailabilityWarning] = useState('');
+  const [currentShift, setCurrentShift] = useState(shift);
+
+  const currentUserId = (session?.user as any)?.id;
+  const currentUserRole = (session?.user as any)?.role;
+  const isAdmin = currentUserRole === 'ADMIN';
+
+  // Check if current user is the responsible person
+  const isResponsible = currentShift.assignments?.some(
+    (a) => a.user.id === currentUserId && a.role === 'RESPONSIBLE'
+  );
+
+  const canManage = isAdmin || isResponsible;
+  const canSetResponsible = isAdmin;
 
   const formatLocalDateTime = (date: Date) => {
     const d = new Date(date);
@@ -72,27 +94,9 @@ export default function ShiftEditDialog({
     title: shift.title,
     start: formatLocalDateTime(shift.start),
     end: formatLocalDateTime(shift.end),
-    helperId: shift.helperId || 'unassigned',
+    minHelpers: shift.minHelpers || 1,
+    maxHelpers: shift.maxHelpers || 1,
   });
-
-  // Check availability when helper or time changes
-  useEffect(() => {
-    if (formData.helperId && formData.helperId !== 'unassigned' && formData.start && formData.end) {
-      const startDate = new Date(formData.start);
-      const endDate = new Date(formData.end);
-      const hasAvailability = checkHelperAvailability(formData.helperId, startDate, endDate);
-
-      if (!hasAvailability) {
-        const selectedCrew = crew.find((c) => c.userId === formData.helperId);
-        const name = selectedCrew?.user.name || selectedCrew?.user.email || 'This crew member';
-        setAvailabilityWarning(`${name} does not have availability during this time slot.`);
-      } else {
-        setAvailabilityWarning('');
-      }
-    } else {
-      setAvailabilityWarning('');
-    }
-  }, [formData.helperId, formData.start, formData.end, checkHelperAvailability, crew]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,11 +104,6 @@ export default function ShiftEditDialog({
     setError('');
 
     try {
-      const helperIdToSend =
-        formData.helperId === 'unassigned' || formData.helperId === ''
-          ? null
-          : formData.helperId;
-
       const response = await fetch(`/api/shifts/${shift.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -112,7 +111,8 @@ export default function ShiftEditDialog({
           title: formData.title,
           start: new Date(formData.start).toISOString(),
           end: new Date(formData.end).toISOString(),
-          helperId: helperIdToSend,
+          minHelpers: formData.minHelpers,
+          maxHelpers: formData.maxHelpers,
         }),
       });
 
@@ -153,10 +153,28 @@ export default function ShiftEditDialog({
     }
   };
 
+  const handleAssignmentChange = async () => {
+    // Refresh shift data after assignment change
+    try {
+      const response = await fetch(`/api/shifts/${shift.id}/assignments`);
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentShift((prev) => ({
+          ...prev,
+          assignments: data.assignments || [],
+          minHelpers: data.minHelpers,
+          maxHelpers: data.maxHelpers,
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to refresh assignments:', err);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-2xl max-w-md w-full shadow-2xl border border-border">
-        <div className="flex items-center justify-between p-6 border-b border-border">
+      <div className="bg-card rounded-2xl max-w-lg w-full shadow-2xl border border-border max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-card z-10">
           <h2 className="text-xl font-bold text-card-foreground">Edit Shift</h2>
           <button
             onClick={onClose}
@@ -174,54 +192,84 @@ export default function ShiftEditDialog({
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
+              disabled={!isAdmin}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="edit-start">Start Time</Label>
-            <Input
-              id="edit-start"
-              type="datetime-local"
-              value={formData.start}
-              onChange={(e) => setFormData({ ...formData, start: e.target.value })}
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-start">Start Time</Label>
+              <Input
+                id="edit-start"
+                type="datetime-local"
+                value={formData.start}
+                onChange={(e) => setFormData({ ...formData, start: e.target.value })}
+                required
+                disabled={!isAdmin}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-end">End Time</Label>
+              <Input
+                id="edit-end"
+                type="datetime-local"
+                value={formData.end}
+                onChange={(e) => setFormData({ ...formData, end: e.target.value })}
+                required
+                disabled={!isAdmin}
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="edit-end">End Time</Label>
-            <Input
-              id="edit-end"
-              type="datetime-local"
-              value={formData.end}
-              onChange={(e) => setFormData({ ...formData, end: e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="edit-helper">Assign Crew Member</Label>
-            <Select
-              value={formData.helperId}
-              onValueChange={(value) => setFormData({ ...formData, helperId: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a crew member" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
-                {crew.map((member) => (
-                  <SelectItem key={member.userId} value={member.userId}>
-                    {member.user.name || member.user.email} ({member.user.role})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {availabilityWarning && (
-              <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-800">
-                ⚠️ {availabilityWarning}
+          {isAdmin && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-min-helpers">Min Helpers</Label>
+                <Input
+                  id="edit-min-helpers"
+                  type="number"
+                  min="1"
+                  value={formData.minHelpers}
+                  onChange={(e) =>
+                    setFormData({ ...formData, minHelpers: parseInt(e.target.value) || 1 })
+                  }
+                />
               </div>
-            )}
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-max-helpers">Max Helpers</Label>
+                <Input
+                  id="edit-max-helpers"
+                  type="number"
+                  min={formData.minHelpers}
+                  value={formData.maxHelpers}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      maxHelpers: Math.max(
+                        parseInt(e.target.value) || 1,
+                        formData.minHelpers
+                      ),
+                    })
+                  }
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Assignment Manager */}
+          <div className="pt-4 border-t border-border">
+            <ShiftAssignmentManager
+              shiftId={shift.id}
+              assignments={currentShift.assignments || []}
+              crew={crew}
+              minHelpers={currentShift.minHelpers || 1}
+              maxHelpers={currentShift.maxHelpers || 1}
+              canManage={canManage}
+              canSetResponsible={canSetResponsible}
+              onAssignmentChange={handleAssignmentChange}
+            />
           </div>
 
           {error && (
@@ -231,32 +279,36 @@ export default function ShiftEditDialog({
           )}
 
           <div className="flex space-x-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleDelete}
-              disabled={loading}
-              className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/30"
-            >
-              Delete
-            </Button>
+            {isAdmin && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleDelete}
+                disabled={loading}
+                className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/30"
+              >
+                Delete
+              </Button>
+            )}
             <Button type="button" variant="outline" onClick={onClose} className="flex-1">
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-amber-500 hover:bg-orange-600"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Save'
-              )}
-            </Button>
+            {isAdmin && (
+              <Button
+                type="submit"
+                disabled={loading}
+                className="flex-1 bg-amber-500 hover:bg-orange-600"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save'
+                )}
+              </Button>
+            )}
           </div>
         </form>
       </div>
