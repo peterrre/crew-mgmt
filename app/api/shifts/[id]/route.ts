@@ -5,6 +5,60 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Check if a user has overlapping shift assignments for the given time range
+ */
+async function checkForOverlappingShifts(
+  userId: string,
+  eventId: string,
+  start: Date,
+  end: Date,
+  excludeShiftId?: string
+) {
+  const overlappingShifts = await prisma.shift.findMany({
+    where: {
+      eventId,
+      ...(excludeShiftId && { id: { not: excludeShiftId } }),
+      assignments: {
+        some: {
+          userId: userId,
+        },
+      },
+      OR: [
+        {
+          // New shift starts during existing shift
+          AND: [
+            { start: { lte: start } },
+            { end: { gt: start } },
+          ],
+        },
+        {
+          // New shift ends during existing shift
+          AND: [
+            { start: { lt: end } },
+            { end: { gte: end } },
+          ],
+        },
+        {
+          // New shift completely contains existing shift
+          AND: [
+            { start: { gte: start } },
+            { end: { lte: end } },
+          ],
+        },
+      ],
+    },
+    select: {
+      id: true,
+      title: true,
+      start: true,
+      end: true,
+    },
+  });
+
+  return overlappingShifts;
+}
+
 async function mergeAdjacentShifts(shiftId: string) {
   const shift = await prisma.shift.findUnique({
     where: { id: shiftId },
@@ -111,6 +165,50 @@ export async function PATCH(
           { error: 'Helper must be assigned to event crew first' },
           { status: 400 }
         );
+      }
+    }
+
+    // If updating time, check for overlapping shifts for all assigned users
+    if ((start !== undefined || end !== undefined) && existingShift.eventId) {
+      const newStart = start ? new Date(start) : existingShift.start;
+      const newEnd = end ? new Date(end) : existingShift.end;
+
+      // Get all users assigned to this shift
+      const assignments = await prisma.shiftAssignment.findMany({
+        where: { shiftId: id },
+        select: { userId: true, user: { select: { name: true, email: true } } },
+      });
+
+      const formatTime = (date: Date) => {
+        return date.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        });
+      };
+
+      // Check each assigned user for overlaps
+      for (const assignment of assignments) {
+        const overlaps = await checkForOverlappingShifts(
+          assignment.userId,
+          existingShift.eventId,
+          newStart,
+          newEnd,
+          id // Exclude current shift
+        );
+
+        if (overlaps.length > 0) {
+          const userName = assignment.user.name || assignment.user.email;
+          const conflictingShift = overlaps[0];
+
+          return NextResponse.json(
+            {
+              error: `${userName} is already assigned to "${conflictingShift.title}" (${formatTime(conflictingShift.start)} - ${formatTime(conflictingShift.end)}) which would overlap with this updated time`,
+            },
+            { status: 400 }
+          );
+        }
       }
     }
 

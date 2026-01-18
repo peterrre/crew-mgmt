@@ -6,6 +6,60 @@ import { prisma } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 
 /**
+ * Check if a user has overlapping shift assignments for the given time range
+ */
+async function checkForOverlappingShifts(
+  userId: string,
+  eventId: string,
+  start: Date,
+  end: Date,
+  excludeShiftId?: string
+) {
+  const overlappingShifts = await prisma.shift.findMany({
+    where: {
+      eventId,
+      ...(excludeShiftId && { id: { not: excludeShiftId } }),
+      assignments: {
+        some: {
+          userId: userId,
+        },
+      },
+      OR: [
+        {
+          // New shift starts during existing shift
+          AND: [
+            { start: { lte: start } },
+            { end: { gt: start } },
+          ],
+        },
+        {
+          // New shift ends during existing shift
+          AND: [
+            { start: { lt: end } },
+            { end: { gte: end } },
+          ],
+        },
+        {
+          // New shift completely contains existing shift
+          AND: [
+            { start: { gte: start } },
+            { end: { lte: end } },
+          ],
+        },
+      ],
+    },
+    select: {
+      id: true,
+      title: true,
+      start: true,
+      end: true,
+    },
+  });
+
+  return overlappingShifts;
+}
+
+/**
  * GET /api/shifts/:id/assignments
  * List all assignments for a shift
  */
@@ -157,6 +211,34 @@ export async function POST(
     if (!eventCrew) {
       return NextResponse.json(
         { error: 'User must be assigned to event crew first' },
+        { status: 400 }
+      );
+    }
+
+    // Check for overlapping shift assignments for the same user
+    const overlappingShifts = await checkForOverlappingShifts(
+      userId,
+      shift.eventId,
+      shift.start,
+      shift.end,
+      shift.id // Exclude the current shift
+    );
+
+    if (overlappingShifts.length > 0) {
+      const conflictingShift = overlappingShifts[0];
+      const formatTime = (date: Date) => {
+        return new Date(date).toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        });
+      };
+
+      return NextResponse.json(
+        {
+          error: `User is already assigned to "${conflictingShift.title}" (${formatTime(conflictingShift.start)} - ${formatTime(conflictingShift.end)}) which overlaps with this shift`,
+        },
         { status: 400 }
       );
     }
