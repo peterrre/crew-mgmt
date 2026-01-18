@@ -24,10 +24,11 @@ interface EventFormProps {
   initialData?: Partial<EventFormData>
   users: { id: string; name: string }[]
   onSubmit: (data: FormData) => void
+  onCancel?: () => void
   submitLabel: string
 }
 
-export function EventForm({ initialData, users, onSubmit, submitLabel }: EventFormProps) {
+export function EventForm({ initialData, users, onSubmit, onCancel, submitLabel }: EventFormProps) {
   const {
     register,
     handleSubmit,
@@ -95,7 +96,14 @@ export function EventForm({ initialData, users, onSubmit, submitLabel }: EventFo
         </Select>
       </div>
 
-      <Button type="submit">{submitLabel}</Button>
+      <div className="flex gap-4">
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+        )}
+        <Button type="submit">{submitLabel}</Button>
+      </div>
     </form>
   )
 }
