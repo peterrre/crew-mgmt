@@ -17,6 +17,8 @@ export async function GET(
         location: true,
         contactPersonId: true,
         contactPerson: true,
+        acceptingVolunteers: true,
+        isArchived: true,
         shifts: {
           include: {
             helper: true,

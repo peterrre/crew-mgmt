@@ -15,6 +15,10 @@ const eventSchema = z.object({
   endDate: z.string().transform((str: string) => new Date(str)),
   location: z.string().optional(),
   contactPersonId: z.string().optional(),
+  acceptingVolunteers: z.preprocess(
+    (val) => val === 'true' || val === true,
+    z.boolean()
+  ).optional(),
 })
 
 
@@ -65,6 +69,7 @@ export async function createEvent(formData: FormData) {
     endDate: data.endDate,
     location: data.location,
     contactPersonId: data.contactPersonId,
+    acceptingVolunteers: data.acceptingVolunteers,
   }
   const validated = eventSchema.parse(filteredData)
 
@@ -76,6 +81,7 @@ export async function createEvent(formData: FormData) {
       ...(validated.location && { location: validated.location }),
       ...(validated.contactPersonId && { contactPersonId: validated.contactPersonId }),
       ...(validated.description && { description: validated.description }),
+      ...(validated.acceptingVolunteers !== undefined && { acceptingVolunteers: validated.acceptingVolunteers }),
     },
   })
 
@@ -95,6 +101,7 @@ export async function updateEvent(id: string, formData: FormData) {
     endDate: data.endDate,
     location: data.location,
     contactPersonId: data.contactPersonId,
+    acceptingVolunteers: data.acceptingVolunteers,
   }
   const validated = eventSchema.parse(filteredData)
 
@@ -107,6 +114,7 @@ export async function updateEvent(id: string, formData: FormData) {
       ...(validated.location && { location: validated.location }),
       ...(validated.contactPersonId && { contactPersonId: validated.contactPersonId }),
       ...(validated.description && { description: validated.description }),
+      acceptingVolunteers: validated.acceptingVolunteers ?? false,
     },
   })
 
@@ -148,6 +156,20 @@ export async function restoreEvent(id: string) {
     data: {
       isArchived: false,
       archivedAt: null,
+    },
+  })
+
+  revalidatePath('/admin/events')
+  revalidatePath(`/admin/events/${id}`)
+}
+
+export async function toggleAcceptingVolunteers(id: string, accepting: boolean) {
+  await requireAdmin()
+
+  await prisma.event.update({
+    where: { id },
+    data: {
+      acceptingVolunteers: accepting,
     },
   })
 

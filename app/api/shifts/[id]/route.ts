@@ -69,7 +69,7 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { title, start, end, helperId } = body;
+    const { title, start, end, helperId, minHelpers, maxHelpers } = body;
     const { id } = await params;
 
     console.log('Received id:', id);
@@ -80,6 +80,8 @@ export async function PATCH(
     if (start !== undefined) updateData.start = new Date(start);
     if (end !== undefined) updateData.end = new Date(end);
     if (helperId !== undefined) updateData.helperId = helperId || null;
+    if (minHelpers !== undefined) updateData.minHelpers = minHelpers;
+    if (maxHelpers !== undefined) updateData.maxHelpers = maxHelpers;
 
     // Check if shift exists first
     const existingShift = await prisma.shift.findUnique({
@@ -122,6 +124,30 @@ export async function PATCH(
             name: true,
             email: true,
             role: true,
+          },
+        },
+        event: {
+          select: {
+            id: true,
+            name: true,
+            startDate: true,
+            endDate: true,
+            location: true,
+          },
+        },
+        assignments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+              },
+            },
+          },
+          orderBy: {
+            role: 'asc',
           },
         },
       },

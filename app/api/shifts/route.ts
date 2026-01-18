@@ -31,6 +31,30 @@ export async function GET() {
               role: true,
             },
           },
+          event: {
+            select: {
+              id: true,
+              name: true,
+              startDate: true,
+              endDate: true,
+              location: true,
+            },
+          },
+          assignments: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  role: true,
+                },
+              },
+            },
+            orderBy: {
+              role: 'asc', // RESPONSIBLE comes before HELPER alphabetically
+            },
+          },
         },
         orderBy: {
           start: 'asc',
@@ -59,10 +83,13 @@ export async function GET() {
         }))
       );
     } else {
-      // Crew and Volunteers see only their own shifts
+      // Crew and Volunteers see only their own shifts (via assignments or legacy helperId)
       shifts = await prisma.shift.findMany({
         where: {
-          helperId: userId,
+          OR: [
+            { helperId: userId },
+            { assignments: { some: { userId: userId } } },
+          ],
         },
         include: {
           helper: {
@@ -71,6 +98,30 @@ export async function GET() {
               name: true,
               email: true,
               role: true,
+            },
+          },
+          event: {
+            select: {
+              id: true,
+              name: true,
+              startDate: true,
+              endDate: true,
+              location: true,
+            },
+          },
+          assignments: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  role: true,
+                },
+              },
+            },
+            orderBy: {
+              role: 'asc',
             },
           },
         },
@@ -100,7 +151,17 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, start, end, helperId, eventId } = body;
+    const {
+      title,
+      start,
+      end,
+      helperId,
+      eventId,
+      minHelpers = 1,
+      maxHelpers = 1,
+      responsibleUserId,
+      helperIds = [],
+    } = body;
 
     if (!title || !start || !end || !eventId) {
       return NextResponse.json(
@@ -118,43 +179,112 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
-    // If assigning a helper, verify they are in the event crew
-    if (helperId) {
-      const eventCrew = await prisma.eventCrew.findUnique({
+    // Determine the responsible user (prefer responsibleUserId, fall back to helperId for backward compatibility)
+    const actualResponsibleId = responsibleUserId || helperId;
+
+    // Collect all user IDs to validate (responsible + helpers)
+    const allUserIds = [
+      ...(actualResponsibleId ? [actualResponsibleId] : []),
+      ...helperIds,
+    ].filter(Boolean);
+
+    // Validate all users are in event crew
+    if (allUserIds.length > 0) {
+      const eventCrewMembers = await prisma.eventCrew.findMany({
         where: {
-          eventId_userId: {
-            eventId,
-            userId: helperId,
-          },
+          eventId,
+          userId: { in: allUserIds },
         },
       });
 
-      if (!eventCrew) {
+      const crewUserIds = new Set(eventCrewMembers.map((ec) => ec.userId));
+      const invalidUsers = allUserIds.filter((id) => !crewUserIds.has(id));
+
+      if (invalidUsers.length > 0) {
         return NextResponse.json(
-          { error: 'Helper must be assigned to event crew first' },
+          { error: 'All assigned users must be in event crew first' },
           { status: 400 }
         );
       }
     }
 
-    const shift = await prisma.shift.create({
-      data: {
-        title,
-        start: new Date(start),
-        end: new Date(end),
-        helperId: helperId || null,
-        eventId,
-      },
-      include: {
-        helper: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
+    // Create shift with assignments in a transaction
+    const shift = await prisma.$transaction(async (tx) => {
+      // Create the shift
+      const newShift = await tx.shift.create({
+        data: {
+          title,
+          start: new Date(start),
+          end: new Date(end),
+          helperId: actualResponsibleId || null, // Keep for backward compatibility
+          eventId,
+          minHelpers,
+          maxHelpers,
+        },
+      });
+
+      // Create ShiftAssignment for responsible person
+      if (actualResponsibleId) {
+        await tx.shiftAssignment.create({
+          data: {
+            shiftId: newShift.id,
+            userId: actualResponsibleId,
+            role: 'RESPONSIBLE',
+          },
+        });
+      }
+
+      // Create ShiftAssignments for helpers
+      for (const helperId of helperIds) {
+        if (helperId !== actualResponsibleId) {
+          await tx.shiftAssignment.create({
+            data: {
+              shiftId: newShift.id,
+              userId: helperId,
+              role: 'HELPER',
+            },
+          });
+        }
+      }
+
+      // Fetch the complete shift with all relations
+      return tx.shift.findUnique({
+        where: { id: newShift.id },
+        include: {
+          helper: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+            },
+          },
+          event: {
+            select: {
+              id: true,
+              name: true,
+              startDate: true,
+              endDate: true,
+              location: true,
+            },
+          },
+          assignments: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  role: true,
+                },
+              },
+            },
+            orderBy: {
+              role: 'asc',
+            },
           },
         },
-      },
+      });
     });
 
     return NextResponse.json({ shift }, { status: 201 });
@@ -179,30 +309,45 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const { eventId } = body;
 
-    // Find unassigned shifts
-    const unassignedShifts = await prisma.shift.findMany({
+    // Find shifts that need more assignments
+    const shiftsNeedingHelp = await prisma.shift.findMany({
       where: {
-        helperId: null,
         eventId: eventId || undefined,
+      },
+      include: {
+        assignments: true,
       },
       orderBy: { start: 'asc' },
     });
 
+    // Filter to shifts that need more helpers
+    const unassignedShifts = shiftsNeedingHelp.filter(
+      (shift) => shift.assignments.length < shift.minHelpers
+    );
+
     if (unassignedShifts.length === 0) {
-      return NextResponse.json({ message: 'No unassigned shifts found' });
+      return NextResponse.json({ message: 'No shifts need assignments' });
     }
 
     // Get all volunteers with their availability
-    const volunteers = await prisma.user.findMany({
+    const volunteers = (await prisma.user.findMany({
       where: { role: 'VOLUNTEER' },
       include: { availabilitySlots: true },
-    }) as any;
+    })) as any;
 
-    let assignments = 0;
+    let totalAssignments = 0;
 
     for (const shift of unassignedShifts) {
+      const neededCount = shift.minHelpers - shift.assignments.length;
+
       // Find volunteers available for this shift
       const availableVolunteers = volunteers.filter((volunteer: any) => {
+        // Check if volunteer is already assigned to this shift
+        const alreadyAssigned = shift.assignments.some(
+          (a) => a.userId === volunteer.id
+        );
+        if (alreadyAssigned) return false;
+
         return volunteer.availabilitySlots.some((slot: any) => {
           const slotStart = new Date(slot.start);
           const slotEnd = new Date(slot.end);
@@ -210,17 +355,38 @@ export async function PATCH(request: Request) {
         });
       });
 
-      if (availableVolunteers.length > 0) {
-        // Assign to first available volunteer (could be improved with scoring)
-        await prisma.shift.update({
-          where: { id: shift.id },
-          data: { helperId: availableVolunteers[0].id },
-        });
-        assignments++;
+      // Assign up to neededCount volunteers
+      const volunteersToAssign = availableVolunteers.slice(0, neededCount);
+
+      for (let i = 0; i < volunteersToAssign.length; i++) {
+        const volunteer = volunteersToAssign[i];
+        // First assignment is RESPONSIBLE, rest are HELPERS
+        const role = shift.assignments.length === 0 && i === 0 ? 'RESPONSIBLE' : 'HELPER';
+
+        await prisma.$transaction([
+          prisma.shiftAssignment.create({
+            data: {
+              shiftId: shift.id,
+              userId: volunteer.id,
+              role: role as 'RESPONSIBLE' | 'HELPER',
+            },
+          }),
+          // Update legacy helperId for backward compatibility (only for RESPONSIBLE)
+          ...(role === 'RESPONSIBLE'
+            ? [
+                prisma.shift.update({
+                  where: { id: shift.id },
+                  data: { helperId: volunteer.id },
+                }),
+              ]
+            : []),
+        ]);
+
+        totalAssignments++;
       }
     }
 
-    return NextResponse.json({ message: `Assigned ${assignments} shifts` });
+    return NextResponse.json({ message: `Created ${totalAssignments} assignments` });
   } catch (error) {
     console.error('Error auto-assigning shifts:', error);
     return NextResponse.json(

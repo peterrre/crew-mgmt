@@ -1,6 +1,6 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 
 const eventSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -16,6 +17,7 @@ const eventSchema = z.object({
   endDate: z.string().min(1, 'End date is required'),
   location: z.string().optional(),
   contactPersonId: z.string().optional(),
+  acceptingVolunteers: z.boolean().optional(),
 })
 
 type EventFormData = z.infer<typeof eventSchema>
@@ -33,6 +35,7 @@ export function EventForm({ initialData, users, onSubmit, onCancel, submitLabel 
     register,
     handleSubmit,
     setValue,
+    control,
     formState: { errors },
   } = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
@@ -43,7 +46,7 @@ export function EventForm({ initialData, users, onSubmit, onCancel, submitLabel 
     const formData = new FormData()
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        formData.append(key, value.toString())
+        formData.append(key, String(value))
       }
     })
     onSubmit(formData)
@@ -82,7 +85,7 @@ export function EventForm({ initialData, users, onSubmit, onCancel, submitLabel 
 
       <div>
         <Label htmlFor="contactPersonId">Contact Person</Label>
-        <Select onValueChange={(value: string) => setValue('contactPersonId', value)}>
+        <Select onValueChange={(value: string) => setValue('contactPersonId', value)} defaultValue={initialData?.contactPersonId}>
           <SelectTrigger>
             <SelectValue placeholder="Select contact person" />
           </SelectTrigger>
@@ -94,6 +97,24 @@ export function EventForm({ initialData, users, onSubmit, onCancel, submitLabel 
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="flex items-center space-x-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+        <Controller
+          name="acceptingVolunteers"
+          control={control}
+          render={({ field }) => (
+            <Switch
+              id="acceptingVolunteers"
+              checked={field.value ?? false}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
+        <div>
+          <Label htmlFor="acceptingVolunteers" className="font-medium">Accept Volunteer Applications</Label>
+          <p className="text-sm text-muted-foreground">Allow volunteers to apply to participate in this event</p>
+        </div>
       </div>
 
       <div className="flex gap-4">

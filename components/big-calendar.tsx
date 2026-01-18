@@ -38,6 +38,34 @@ interface BigCalendarProps {
   onView?: (view: View) => void;
 }
 
+// Helper to get display text for shift assignment
+const getAssignmentDisplay = (event: any): string => {
+  if (event.isAvailability) {
+    return event?.helper?.name || 'Available';
+  }
+
+  // Use new assignments array if available
+  if (event.assignments && event.assignments.length > 0) {
+    const responsible = event.assignments.find((a: any) => a.role === 'RESPONSIBLE');
+    const helperCount = event.assignments.filter((a: any) => a.role === 'HELPER').length;
+    const responsibleName = responsible?.user?.name || 'Unknown';
+
+    if (helperCount > 0) {
+      return `${responsibleName} +${helperCount}`;
+    }
+    return responsibleName;
+  }
+
+  // Fall back to legacy helper field
+  return event?.helper?.name || 'Unassigned';
+};
+
+// Helper to get event badge display
+const getEventBadge = (event: any): string | null => {
+  if (event.isAvailability) return null;
+  return event?.event?.name || null;
+};
+
 const CustomAgenda = ({ events, onSelectEvent }: { events: any[]; onSelectEvent?: (event: any) => void }) => {
   const sortedEvents = [...events].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 
@@ -52,6 +80,13 @@ const CustomAgenda = ({ events, onSelectEvent }: { events: any[]; onSelectEvent?
 
   const getRoleColor = (event: any) => {
     if (event.isAvailability) return 'bg-green-500 opacity-60 border-2 border-dashed border-green-800';
+    // Check assignments first
+    if (event.assignments && event.assignments.length > 0) {
+      const responsible = event.assignments.find((a: any) => a.role === 'RESPONSIBLE');
+      if (responsible?.user?.role === 'CREW') return 'bg-sky-500';
+      if (responsible?.user?.role === 'VOLUNTEER') return 'bg-amber-500';
+    }
+    // Fall back to legacy helper
     if (event?.helper?.role === 'CREW') return 'bg-sky-500';
     if (event?.helper?.role === 'VOLUNTEER') return 'bg-amber-500';
     return 'bg-red-500';
@@ -75,24 +110,32 @@ const CustomAgenda = ({ events, onSelectEvent }: { events: any[]; onSelectEvent?
             </h3>
           </div>
           <div className="divide-y divide-gray-100 dark:divide-slate-600">
-            {dayEvents.map((event, idx) => (
-              <div
-                key={event.id || idx}
-                onClick={() => onSelectEvent?.(event)}
-                className="flex items-center gap-4 px-4 py-3 hover:bg-amber-50 dark:hover:bg-slate-600 cursor-pointer transition-colors"
-              >
-                <div className={`w-3 h-3 rounded-full ${getRoleColor(event)}`} />
-                <div className="w-32 text-sm text-gray-600 dark:text-slate-300 font-medium">
-                  {format(new Date(event.start), 'HH:mm')} - {format(new Date(event.end), 'HH:mm')}
+            {dayEvents.map((event, idx) => {
+              const eventBadge = getEventBadge(event);
+              return (
+                <div
+                  key={event.id || idx}
+                  onClick={() => onSelectEvent?.(event)}
+                  className="flex items-center gap-4 px-4 py-3 hover:bg-amber-50 dark:hover:bg-slate-600 cursor-pointer transition-colors"
+                >
+                  <div className={`w-3 h-3 rounded-full ${getRoleColor(event)}`} />
+                  <div className="w-32 text-sm text-gray-600 dark:text-slate-300 font-medium">
+                    {format(new Date(event.start), 'HH:mm')} - {format(new Date(event.end), 'HH:mm')}
+                  </div>
+                  <div className="flex-1 flex items-center gap-2">
+                    {eventBadge && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                        {eventBadge}
+                      </span>
+                    )}
+                    <span className="font-medium text-gray-900 dark:text-white">{event.title}</span>
+                    <span className="text-gray-500 dark:text-slate-400">
+                      — {getAssignmentDisplay(event)}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <span className="font-medium text-gray-900 dark:text-white">{event.title}</span>
-                  <span className="text-gray-500 dark:text-slate-400 ml-2">
-                    — {event?.helper?.name || 'Unassigned'}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ))}
@@ -141,7 +184,17 @@ export default function BigCalendar({
       backgroundColor = '#10b981'; // green for availability
       opacity = 0.6;
     } else {
-      const role = event?.helper?.role;
+      // Check assignments first for role
+      let role = null;
+      if (event.assignments && event.assignments.length > 0) {
+        const responsible = event.assignments.find((a: any) => a.role === 'RESPONSIBLE');
+        role = responsible?.user?.role;
+      }
+      // Fall back to legacy helper
+      if (!role) {
+        role = event?.helper?.role;
+      }
+
       if (role === 'CREW') {
         backgroundColor = '#0ea5e9';
       } else if (role === 'VOLUNTEER') {
@@ -239,8 +292,8 @@ export default function BigCalendar({
           endAccessor="end"
           formats={formats}
           titleAccessor={(event: any) => {
-            const helperName = event?.helper?.name || 'Unassigned';
-            return `${event?.title || 'Untitled'} - ${helperName}`;
+            const assignmentDisplay = getAssignmentDisplay(event);
+            return `${event?.title || 'Untitled'} - ${assignmentDisplay}`;
           }}
           onSelectSlot={selectable ? onSelectSlot : undefined}
           onSelectEvent={onSelectEvent}

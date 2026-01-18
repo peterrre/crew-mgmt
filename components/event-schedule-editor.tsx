@@ -19,6 +19,17 @@ const BigCalendar = dynamic(() => import('@/components/big-calendar'), {
   ),
 });
 
+interface ShiftAssignment {
+  id: string;
+  role: 'RESPONSIBLE' | 'HELPER';
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    role: string;
+  };
+}
+
 interface Shift {
   id: string;
   title: string;
@@ -26,12 +37,22 @@ interface Shift {
   end: Date;
   helperId: string | null;
   eventId: string;
+  minHelpers: number;
+  maxHelpers: number;
   helper?: {
     id: string;
     name: string | null;
     email: string;
     role: string;
   } | null;
+  event?: {
+    id: string;
+    name: string;
+    startDate: Date;
+    endDate: Date;
+    location: string | null;
+  };
+  assignments: ShiftAssignment[];
 }
 
 interface CrewMember {

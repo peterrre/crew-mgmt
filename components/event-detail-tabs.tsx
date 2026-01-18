@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalendarDays, Users, Info, FileText } from 'lucide-react';
+import { CalendarDays, Users, Info, FileText, UserPlus } from 'lucide-react';
 import EventCrewManagement from '@/components/event-crew-management';
 import EventScheduleEditor from '@/components/event-schedule-editor';
 import EventRequestsManager from '@/components/event-requests-manager';
+import EventApplicationsManager from '@/components/event-applications-manager';
 import { useEventData } from '@/contexts/event-data-context';
 
 interface EventDetailTabsProps {
@@ -26,21 +27,21 @@ interface EventDetailTabsProps {
 }
 
 export default function EventDetailTabs({ event }: EventDetailTabsProps) {
-  const { crewCount, shiftsCount, pendingRequestsCount } = useEventData();
+  const { crewCount, shiftsCount, pendingRequestsCount, pendingApplicationsCount, acceptingVolunteers } = useEventData();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Set initial tab from URL parameter
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['overview', 'crew', 'schedule', 'requests'].includes(tabParam)) {
+    if (tabParam && ['overview', 'crew', 'schedule', 'requests', 'applications'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-4 mb-6">
+      <TabsList className="grid w-full grid-cols-5 mb-6">
         <TabsTrigger value="overview" className="flex items-center gap-2">
           <Info className="w-4 h-4" />
           Overview
@@ -52,6 +53,15 @@ export default function EventDetailTabs({ event }: EventDetailTabsProps) {
         <TabsTrigger value="schedule" className="flex items-center gap-2">
           <CalendarDays className="w-4 h-4" />
           Schedule ({shiftsCount})
+        </TabsTrigger>
+        <TabsTrigger value="applications" className="flex items-center gap-2">
+          <UserPlus className="w-4 h-4" />
+          Applications
+          {pendingApplicationsCount > 0 && (
+            <span className="ml-1 px-2 py-0.5 bg-green-500 text-white text-xs font-medium rounded-full">
+              {pendingApplicationsCount}
+            </span>
+          )}
         </TabsTrigger>
         <TabsTrigger value="requests" className="flex items-center gap-2">
           <FileText className="w-4 h-4" />
@@ -118,6 +128,17 @@ export default function EventDetailTabs({ event }: EventDetailTabsProps) {
               eventStartDate={new Date(event.startDate)}
               eventEndDate={new Date(event.endDate)}
             />
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="applications">
+        <Card>
+          <CardHeader>
+            <CardTitle>Volunteer Applications</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <EventApplicationsManager eventId={event.id} acceptingVolunteers={acceptingVolunteers} />
           </CardContent>
         </Card>
       </TabsContent>

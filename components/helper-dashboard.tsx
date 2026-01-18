@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, LogOut, Edit, User, ClipboardList } from 'lucide-react';
+import { Calendar, LogOut, Edit, User, ClipboardList, CalendarDays, MapPin, Search, FileText } from 'lucide-react';
 import PersonalCalendar from '@/components/personal-calendar';
 import EditAvailability from '@/components/edit-availability';
 import { ThemeToggle } from '@/components/theme-toggle';
+import AvailableEvents from '@/components/available-events';
+import MyApplications from '@/components/my-applications';
 
 interface ShiftRequest {
   id: string;
@@ -26,14 +28,28 @@ interface ShiftRequest {
   };
 }
 
+interface MyEvent {
+  id: string;
+  name: string;
+  description: string | null;
+  startDate: string;
+  endDate: string;
+  location: string | null;
+  totalShiftsCount: number;
+  myShiftsCount: number;
+}
+
 export default function HelperDashboard() {
   const { data: session } = useSession() || {};
   const [showEditAvailability, setShowEditAvailability] = useState(false);
   const [requests, setRequests] = useState<ShiftRequest[]>([]);
+  const [myEvents, setMyEvents] = useState<MyEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
   const userRole = (session?.user as any)?.role;
   const isVolunteer = userRole === 'VOLUNTEER';
 
   useEffect(() => {
+    fetchMyEvents();
     if (isVolunteer) {
       fetchRequests();
       // Refresh requests every 30 seconds to show updates
@@ -41,6 +57,21 @@ export default function HelperDashboard() {
       return () => clearInterval(interval);
     }
   }, [isVolunteer]);
+
+  const fetchMyEvents = async () => {
+    try {
+      setEventsLoading(true);
+      const response = await fetch('/api/my-events');
+      if (response.ok) {
+        const data = await response.json();
+        setMyEvents(data.events || []);
+      }
+    } catch (error) {
+      console.error('Error fetching my events:', error);
+    } finally {
+      setEventsLoading(false);
+    }
+  };
 
   const fetchRequests = async () => {
     try {
@@ -120,6 +151,84 @@ export default function HelperDashboard() {
         </div>
 
         <PersonalCalendar />
+
+        {/* Available Events Section - For volunteers to apply */}
+        {isVolunteer && (
+          <div className="mt-8">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+              <Search className="w-5 h-5 mr-2" />
+              Available Events
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">
+              Browse events accepting volunteers and submit your application
+            </p>
+            <AvailableEvents />
+          </div>
+        )}
+
+        {/* My Events Section */}
+        <div className="mt-8">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+            <CalendarDays className="w-5 h-5 mr-2" />
+            My Events
+          </h3>
+          {eventsLoading ? (
+            <Card>
+              <CardContent className="flex items-center justify-center py-8">
+                <p className="text-gray-600 dark:text-slate-400">Loading events...</p>
+              </CardContent>
+            </Card>
+          ) : myEvents.length === 0 ? (
+            <Card>
+              <CardContent className="flex items-center justify-center py-8">
+                <p className="text-gray-600 dark:text-slate-400">You are not assigned to any events yet</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {myEvents.map((event) => (
+                <Card key={event.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">{event.name}</CardTitle>
+                    <CardDescription className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {event.location && (
+                      <p className="text-sm text-gray-600 dark:text-slate-400 mb-2 flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {event.location}
+                      </p>
+                    )}
+                    {event.description && (
+                      <p className="text-sm text-gray-500 dark:text-slate-500 mb-3 line-clamp-2">
+                        {event.description}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className="text-sky-600 border-sky-600">
+                        {event.myShiftsCount} of {event.totalShiftsCount} shifts
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* My Applications Section - For volunteers to track their event applications */}
+        {isVolunteer && (
+          <div className="mt-8">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+              <FileText className="w-5 h-5 mr-2" />
+              My Applications
+            </h3>
+            <MyApplications />
+          </div>
+        )}
 
         {isVolunteer && (
           <div className="mt-8">
