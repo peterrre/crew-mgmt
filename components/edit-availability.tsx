@@ -97,11 +97,22 @@ export default function EditAvailability({ onClose }: EditAvailabilityProps) {
     setError('');
 
     try {
+      // Convert datetime-local values to ISO strings with timezone
+      const availabilityToSend = availability
+        .filter(slot => slot.start && slot.end)
+        .map(slot => ({
+          start: new Date(slot.start).toISOString(),
+          end: new Date(slot.end).toISOString(),
+          isRecurring: slot.isRecurring,
+          recurrencePattern: slot.recurrencePattern,
+          recurrenceEnd: slot.recurrenceEnd ? new Date(slot.recurrenceEnd).toISOString() : undefined,
+        }));
+
       const response = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          availability: availability.filter(slot => slot.start && slot.end),
+          availability: availabilityToSend,
         }),
       });
 

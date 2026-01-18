@@ -5,73 +5,84 @@ import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, LogOut, ArrowLeft, Check, X } from 'lucide-react';
+import { Calendar, LogOut, ArrowLeft, Clock, CheckCircle, XCircle, ChevronRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
-interface ShiftRequest {
+interface EventWithRequests {
   id: string;
-  type: 'SWAP' | 'CANCEL' | 'MODIFY';
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  reason: string;
-  newHelperId?: string;
-  newStart?: string;
-  newEnd?: string;
-  createdAt: string;
-  shift: {
-    id: string;
-    title: string;
-    start: string;
-    end: string;
-    helper: {
-      id: string;
-      name: string;
-      email: string;
-    };
-  };
-  requester: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  newHelper?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  reviewer?: {
-    id: string;
-    name: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  location: string | null;
+  _count: {
+    shiftRequests: number;
   };
 }
 
-export default function ShiftRequestsPage() {
+interface RecentActivity {
+  id: string;
+  type: 'CANCEL' | 'SWAP' | 'MODIFY';
+  status: 'APPROVED' | 'REJECTED';
+  reviewedAt: string;
+  shift: {
+    title: string;
+    event: {
+      id: string;
+      name: string;
+    };
+  };
+  requester: {
+    name: string | null;
+    email: string;
+  };
+  reviewer: {
+    name: string | null;
+  } | null;
+}
+
+interface DashboardData {
+  stats: {
+    pending: number;
+    today: number;
+    week: number;
+  };
+  eventsWithRequests: EventWithRequests[];
+  recentActivity: RecentActivity[];
+}
+
+export default function ShiftRequestsDashboard() {
   const router = useRouter();
-  const [requests, setRequests] = useState<ShiftRequest[]>([]);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchRequests();
+    fetchDashboardData();
   }, []);
 
-  const fetchRequests = async () => {
+  const fetchDashboardData = async () => {
     try {
-      const response = await fetch('/api/shift-requests');
+      const response = await fetch('/api/shift-requests/dashboard');
       if (response.ok) {
-        const data = await response.json();
-        setRequests(data.requests || []);
+        const dashboardData = await response.json();
+        setData(dashboardData);
       } else if (response.status === 401) {
         router.push('/login');
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to load dashboard data.',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
-      console.error('Error fetching requests:', error);
+      console.error('Error fetching dashboard:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load shift requests.',
+        description: 'Failed to load dashboard data.',
         variant: 'destructive',
       });
     } finally {
@@ -79,73 +90,62 @@ export default function ShiftRequestsPage() {
     }
   };
 
-  const handleReviewRequest = async (requestId: string, status: 'APPROVED' | 'REJECTED') => {
-    try {
-      const response = await fetch('/api/shift-requests', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ requestId, status }),
-      });
-
-      if (response.ok) {
-        toast({
-          title: 'Request Updated',
-          description: `Request has been ${status.toLowerCase()}.`,
-        });
-        fetchRequests(); // Refresh the list
-      } else {
-        const error = await response.json();
-        toast({
-          title: 'Error',
-          description: error.error || 'Failed to update request.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred.',
-        variant: 'destructive',
-      });
-    }
-  };
-
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/login' });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'APPROVED':
-        return 'bg-green-100 text-green-800';
-      case 'REJECTED':
-        return 'bg-red-100 text-red-800';
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
+
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'CANCEL':
+        return '🚫';
+      case 'SWAP':
+        return '🔄';
+      case 'MODIFY':
+        return '✏️';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return '📝';
     }
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'CANCEL':
-        return 'bg-red-100 text-red-800';
-      case 'SWAP':
-        return 'bg-blue-100 text-blue-800';
-      case 'MODIFY':
-        return 'bg-purple-100 text-purple-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const getStatusColor = (status: string) => {
+    return status === 'APPROVED'
+      ? 'text-green-600 dark:text-green-400'
+      : 'text-red-600 dark:text-red-400';
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin" />
+        <Loader2 className="w-8 h-8 animate-spin text-sky-500" />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <p className="text-gray-600 dark:text-slate-400">Failed to load dashboard data</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -166,7 +166,7 @@ export default function ShiftRequestsPage() {
               <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-amber-500 rounded-xl flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-sky-900 dark:text-white">Shift Requests</h1>
+              <h1 className="text-xl font-bold text-sky-900 dark:text-white">Shift Requests Dashboard</h1>
             </div>
             <div className="flex items-center space-x-2">
               <ThemeToggle />
@@ -186,91 +186,173 @@ export default function ShiftRequestsPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-sky-900 dark:text-white mb-2">Manage Shift Requests</h2>
-          <p className="text-sky-700 dark:text-slate-400">Review and approve volunteer shift change requests</p>
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-sky-900 dark:text-white mb-2">Request Overview</h2>
+          <p className="text-sky-700 dark:text-slate-400">
+            Monitor and manage shift requests across all events
+          </p>
         </div>
 
-        <div className="space-y-4">
-          {requests.length === 0 ? (
-            <Card>
-              <CardContent className="flex items-center justify-center py-12">
-                <p className="text-gray-600 dark:text-slate-400">No shift requests found</p>
-              </CardContent>
-            </Card>
-          ) : (
-            requests.map((request) => (
-              <Card key={request.id} className="w-full">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{request.shift.title}</CardTitle>
-                      <CardDescription>
-                        {new Date(request.shift.start).toLocaleString()} - {new Date(request.shift.end).toLocaleString()}
-                      </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Badge className={getTypeColor(request.type)}>{request.type}</Badge>
-                      <Badge className={getStatusColor(request.status)}>{request.status}</Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <h4 className="font-semibold text-sm text-gray-700 dark:text-slate-300 mb-2">Requester</h4>
-                      <p className="text-sm">{request.requester.name} ({request.requester.email})</p>
-                      <p className="text-sm text-gray-600 dark:text-slate-400">Current Helper: {request.shift.helper?.name || 'Unassigned'}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-sm text-gray-700 dark:text-slate-300 mb-2">Request Details</h4>
-                      <p className="text-sm"><strong>Reason:</strong> {request.reason}</p>
-                      {request.type === 'SWAP' && request.newHelper && (
-                        <p className="text-sm"><strong>Swap with:</strong> {request.newHelper.name}</p>
-                      )}
-                      {request.type === 'MODIFY' && (
-                        <div className="text-sm">
-                          <p><strong>New Start:</strong> {request.newStart ? new Date(request.newStart).toLocaleString() : 'N/A'}</p>
-                          <p><strong>New End:</strong> {request.newEnd ? new Date(request.newEnd).toLocaleString() : 'N/A'}</p>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-slate-400">Pending</p>
+                  <p className="text-3xl font-bold text-amber-600 dark:text-amber-400 mt-2">
+                    {data.stats.pending}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-slate-400">Today</p>
+                  <p className="text-3xl font-bold text-sky-600 dark:text-sky-400 mt-2">
+                    {data.stats.today}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-sky-100 dark:bg-sky-900/30 rounded-full flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-sky-600 dark:text-sky-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-slate-400">This Week</p>
+                  <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">
+                    {data.stats.week}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Events with Pending Requests */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Events with Pending Requests</CardTitle>
+            <CardDescription>
+              Click on an event to view and manage its shift requests
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {data.eventsWithRequests.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <CheckCircle className="w-12 h-12 text-green-500 mb-4" />
+                <p className="text-gray-600 dark:text-slate-400 text-center">
+                  All caught up! No pending requests at the moment.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {data.eventsWithRequests.map((event) => (
+                  <Link
+                    key={event.id}
+                    href={`/admin/events/${event.id}?tab=requests`}
+                    className="block"
+                  >
+                    <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-slate-800 rounded-lg border border-amber-100 dark:border-slate-700 hover:border-amber-300 dark:hover:border-slate-600 transition-colors group">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Calendar className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                          <h3 className="font-semibold text-sky-900 dark:text-white group-hover:text-sky-700 dark:group-hover:text-sky-300">
+                            {event.name}
+                          </h3>
                         </div>
-                      )}
-                      <p className="text-sm text-gray-500 dark:text-slate-500 mt-2">
-                        Requested: {new Date(request.createdAt).toLocaleString()}
+                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-slate-400">
+                          <span>
+                            {formatDate(event.startDate)} - {formatDate(event.endDate)}
+                          </span>
+                          {event.location && <span>• {event.location}</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="px-3 py-1 bg-amber-500 text-white text-sm font-medium rounded-full">
+                            {event._count.shiftRequests} pending
+                          </span>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" />
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>
+              Last 10 processed requests across all events
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {data.recentActivity.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
+                <p className="text-gray-600 dark:text-slate-400">No recent activity</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {data.recentActivity.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-lg"
+                  >
+                    <div className="text-2xl mt-1">{getTypeIcon(activity.type)}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`font-medium ${getStatusColor(activity.status)}`}>
+                          {activity.status}
+                        </span>
+                        <span className="text-sm text-gray-500 dark:text-slate-500">•</span>
+                        <span className="text-sm text-gray-600 dark:text-slate-400">
+                          {activity.type}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-900 dark:text-white mb-1">
+                        <span className="font-medium">{activity.shift.title}</span> -{' '}
+                        <Link
+                          href={`/admin/events/${activity.shift.event.id}`}
+                          className="text-sky-600 dark:text-sky-400 hover:underline"
+                        >
+                          {activity.shift.event.name}
+                        </Link>
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-slate-500">
+                        Requested by {activity.requester.name || activity.requester.email} •{' '}
+                        {activity.status.toLowerCase()} by{' '}
+                        {activity.reviewer?.name || 'Admin'} •{' '}
+                        {formatDateTime(activity.reviewedAt)}
                       </p>
                     </div>
                   </div>
-
-                  {request.status === 'PENDING' && (
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleReviewRequest(request.id, 'APPROVED')}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        <Check className="w-4 h-4 mr-2" />
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleReviewRequest(request.id, 'REJECTED')}
-                      >
-                        <X className="w-4 h-4 mr-2" />
-                        Reject
-                      </Button>
-                    </div>
-                  )}
-
-                  {request.reviewer && (
-                    <p className="text-sm text-gray-500 dark:text-slate-500 mt-2">
-                      Reviewed by {request.reviewer.name}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </main>
     </div>
   );

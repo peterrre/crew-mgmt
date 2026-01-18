@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
     const shift = await prisma.shift.findUnique({
       where: { id: shiftId },
-      select: { helperId: true },
+      select: { helperId: true, eventId: true },
     });
 
     if (!shift) {
@@ -124,6 +124,7 @@ export async function POST(request: Request) {
       const shiftRequest = await prisma.shiftRequest.create({
         data: {
           shiftId,
+          eventId: shift.eventId,
           requesterId: userId,
           type,
           status: 'APPROVED', // Immediately approved for cancel
@@ -154,6 +155,7 @@ export async function POST(request: Request) {
       const shiftRequest = await prisma.shiftRequest.create({
         data: {
           shiftId,
+          eventId: shift.eventId,
           requesterId: userId,
           type,
           reason,
@@ -247,91 +249,19 @@ export async function PUT(request: Request) {
   }
 }
 
-// Review shift request (admin only)
+// DEPRECATED: Use event-scoped API endpoint instead: /api/events/[id]/shift-requests/[requestId]
+// This endpoint now returns 405 Method Not Allowed to enforce event-centric architecture
 export async function PATCH(request: Request) {
-  try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user || (session.user as any).role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const { requestId, status, reason } = body;
-
-    if (!requestId || !status) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    const shiftRequest = await prisma.shiftRequest.findUnique({
-      where: { id: requestId },
-      include: { shift: true },
-    });
-
-    if (!shiftRequest) {
-      return NextResponse.json({ error: 'Request not found' }, { status: 404 });
-    }
-
-    // Update request status
-    const updatedRequest = await prisma.shiftRequest.update({
-      where: { id: requestId },
-      data: {
-        status,
-        reviewedBy: (session.user as any).id,
-        reviewedAt: new Date(),
-      },
-      include: {
-        shift: {
-          include: {
-            helper: {
-              select: { id: true, name: true, email: true },
-            },
-          },
-        },
-        requester: {
-          select: { id: true, name: true, email: true },
-        },
-        newHelper: {
-          select: { id: true, name: true, email: true },
-        },
-        reviewer: {
-          select: { id: true, name: true, email: true },
-        },
-      },
-    });
-
-    // If approved, apply the changes
-    if (status === 'APPROVED') {
-      if (shiftRequest.type === 'CANCEL') {
-        await prisma.shift.update({
-          where: { id: shiftRequest.shiftId },
-          data: { helperId: null },
-        });
-      } else if (shiftRequest.type === 'SWAP' && shiftRequest.newHelperId) {
-        await prisma.shift.update({
-          where: { id: shiftRequest.shiftId },
-          data: { helperId: shiftRequest.newHelperId },
-        });
-      } else if (shiftRequest.type === 'MODIFY' && shiftRequest.newStart && shiftRequest.newEnd) {
-        await prisma.shift.update({
-          where: { id: shiftRequest.shiftId },
-          data: {
-            start: shiftRequest.newStart,
-            end: shiftRequest.newEnd,
-          },
-        });
+  return NextResponse.json(
+    {
+      error: 'Method not allowed. Use event-scoped endpoint: /api/events/[eventId]/shift-requests/[requestId]',
+      deprecationNotice: 'This endpoint has been deprecated in favor of event-centric request management.'
+    },
+    {
+      status: 405,
+      headers: {
+        'Allow': 'GET, POST, PUT'
       }
     }
-
-    return NextResponse.json({ request: updatedRequest });
-  } catch (error) {
-    console.error('Error reviewing shift request:', error);
-    return NextResponse.json(
-      { error: 'Failed to review shift request' },
-      { status: 500 }
-    );
-  }
+  );
 }

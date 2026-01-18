@@ -1,10 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, CalendarClock, LogOut, TrendingUp, ClipboardList } from 'lucide-react';
+import { Calendar, Users, LogOut, TrendingUp, ClipboardList, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 
@@ -14,8 +13,11 @@ interface Stats {
   totalHelpers: number;
 }
 
+interface Helper {
+  role: 'ADMIN' | 'CREW' | 'VOLUNTEER';
+}
+
 export default function AdminDashboard() {
-  const router = useRouter();
   const { data: session } = useSession();
   const [stats, setStats] = useState<Stats>({
     crewCount: 0,
@@ -34,8 +36,8 @@ export default function AdminDashboard() {
       if (response.ok) {
         const data = await response.json();
         const helpers = data?.helpers || [];
-        const crewCount = helpers.filter((h: any) => h?.role === 'CREW')?.length || 0;
-        const volunteerCount = helpers.filter((h: any) => h?.role === 'VOLUNTEER')?.length || 0;
+        const crewCount = helpers.filter((h: Helper) => h?.role === 'CREW')?.length || 0;
+        const volunteerCount = helpers.filter((h: Helper) => h?.role === 'VOLUNTEER')?.length || 0;
         setStats({
           crewCount,
           volunteerCount,
@@ -133,7 +135,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Link href="/helpers" className="h-full">
             <div className="bg-gradient-to-br from-sky-400 to-sky-600 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer h-full">
               <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
@@ -146,14 +148,14 @@ export default function AdminDashboard() {
             </div>
           </Link>
 
-          <Link href="/schedules" className="h-full">
+          <Link href="/admin/events" className="h-full">
             <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer h-full">
               <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
-                <CalendarClock className="w-7 h-7 text-white" />
+                <CalendarDays className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Schedule Editor</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">Events</h3>
               <p className="text-amber-100">
-                Create and manage event shifts and schedules
+                Manage events, crew, schedules and requests
               </p>
             </div>
           </Link>
@@ -165,7 +167,7 @@ export default function AdminDashboard() {
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">Shift Requests</h3>
               <p className="text-orange-100">
-                Review volunteer shift change requests
+                Monitor and manage requests across all events
               </p>
             </div>
           </Link>
