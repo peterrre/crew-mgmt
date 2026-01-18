@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, CalendarClock, LogOut, TrendingUp, ClipboardList, CalendarDays } from 'lucide-react';
+import { Calendar, Users, LogOut, TrendingUp, ClipboardList, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 
@@ -148,14 +148,14 @@ export default function AdminDashboard() {
             </div>
           </Link>
 
-          <Link href="/schedules" className="h-full">
+          <Link href="/admin/events" className="h-full">
             <div className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer h-full">
               <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
-                <CalendarClock className="w-7 h-7 text-white" />
+                <CalendarDays className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Schedule Editor</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">Events</h3>
               <p className="text-amber-100">
-                Create and manage event shifts and schedules
+                Manage events, crew, schedules and requests
               </p>
             </div>
           </Link>
@@ -180,18 +180,6 @@ export default function AdminDashboard() {
               <h3 className="text-2xl font-bold text-white mb-2">Hours Report</h3>
               <p className="text-purple-100">
                 View working hours per helper
-              </p>
-            </div>
-          </Link>
-
-          <Link href="/admin/events" className="h-full">
-            <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all hover:scale-105 cursor-pointer h-full">
-              <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
-                <CalendarDays className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Events</h3>
-              <p className="text-green-100">
-                Manage events and their shifts
               </p>
             </div>
           </Link>
