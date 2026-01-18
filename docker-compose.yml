@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: crewmgmt-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: crewuser
+      POSTGRES_PASSWORD: crewpass
+      POSTGRES_DB: crewmgmt
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crewuser -d crewmgmt"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - crewmgmt-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crewmgmt-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://crewuser:crewpass@db:5432/crewmgmt"
+      NEXTAUTH_SECRET: "${NEXTAUTH_SECRET}"
+      NEXTAUTH_URL: "${NEXTAUTH_URL:-http://localhost:3000}"
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - crewmgmt-network
+
+volumes:
+  postgres_data:
+
+networks:
+  crewmgmt-network:
+    driver: bridge
