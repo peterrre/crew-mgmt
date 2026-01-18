@@ -124,6 +124,37 @@ export async function deleteEvent(id: string) {
   redirect('/admin/events')
 }
 
+export async function archiveEvent(id: string) {
+  await requireAdmin()
+
+  await prisma.event.update({
+    where: { id },
+    data: {
+      isArchived: true,
+      archivedAt: new Date(),
+    },
+  })
+
+  revalidatePath('/admin/events')
+  revalidatePath(`/admin/events/${id}`)
+  redirect('/admin/events')
+}
+
+export async function restoreEvent(id: string) {
+  await requireAdmin()
+
+  await prisma.event.update({
+    where: { id },
+    data: {
+      isArchived: false,
+      archivedAt: null,
+    },
+  })
+
+  revalidatePath('/admin/events')
+  revalidatePath(`/admin/events/${id}`)
+}
+
 export async function createEventFromTemplate(templateId: string, eventData: Partial<z.infer<typeof eventSchema>>) {
   await requireAdmin()
 

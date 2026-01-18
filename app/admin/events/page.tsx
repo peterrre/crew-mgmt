@@ -4,8 +4,15 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/theme-toggle'
 
-export default async function EventsPage() {
+interface EventsPageProps {
+  searchParams: { showArchived?: string }
+}
+
+export default async function EventsPage({ searchParams }: EventsPageProps) {
+  const showArchived = searchParams.showArchived === 'true'
+
   const events = await prisma.event.findMany({
+    where: showArchived ? {} : { isArchived: { not: true } },
     orderBy: { startDate: 'desc' },
     select: {
       id: true,
@@ -14,6 +21,7 @@ export default async function EventsPage() {
       endDate: true,
       description: true,
       location: true,
+      isArchived: true,
     },
   })
 
@@ -32,7 +40,7 @@ export default async function EventsPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <EventsList events={events} />
+        <EventsList events={events} showArchived={showArchived} />
       </main>
     </div>
   )

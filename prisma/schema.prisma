@@ -57,6 +57,8 @@ model Event {
   location      String?
   contactPersonId String?
   contactPerson User?    @relation(fields: [contactPersonId], references: [id])
+  isArchived    Boolean  @default(false)
+  archivedAt    DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   shifts        Shift[]
