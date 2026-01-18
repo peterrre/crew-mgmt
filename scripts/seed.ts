@@ -270,6 +270,42 @@ async function main() {
       helperId: volunteer3.id,
       eventId: event.id,
     },
+    // Unassigned shifts - available for volunteers
+    {
+      title: 'Parking Assistance',
+      start: new Date('2026-07-10T09:00:00Z'),
+      end: new Date('2026-07-10T13:00:00Z'),
+      helperId: null,
+      eventId: event.id,
+    },
+    {
+      title: 'VIP Area Support',
+      start: new Date('2026-07-11T14:00:00Z'),
+      end: new Date('2026-07-11T20:00:00Z'),
+      helperId: null,
+      eventId: event.id,
+    },
+    {
+      title: 'Lost & Found Desk',
+      start: new Date('2026-07-11T10:00:00Z'),
+      end: new Date('2026-07-11T16:00:00Z'),
+      helperId: null,
+      eventId: event.id,
+    },
+    {
+      title: 'Artist Hospitality',
+      start: new Date('2026-07-12T11:00:00Z'),
+      end: new Date('2026-07-12T18:00:00Z'),
+      helperId: null,
+      eventId: event.id,
+    },
+    {
+      title: 'Evening Cleanup Crew',
+      start: new Date('2026-07-10T21:00:00Z'),
+      end: new Date('2026-07-10T23:30:00Z'),
+      helperId: null,
+      eventId: event.id,
+    },
   ];
 
   for (const shift of shifts) {
