@@ -11,6 +11,8 @@ A comprehensive web application for managing event crews, volunteers, and shift 
 - **Restore Events**: Restore archived events back to active status
 - **Delete Events**: Permanently delete events with confirmation dialog
 - **Contact Person**: Only Admin and Crew members can be assigned as event contact persons
+- **Volunteer Applications**: Toggle events to accept volunteer applications, allowing volunteers to apply directly
+- **Event Context**: All shifts display their associated event, making it easy to see which event each task belongs to
 
 ### Core Features
 - **User Authentication**: Secure login and registration with role-based access control
