@@ -7,12 +7,23 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, LogOut, Edit, User, ClipboardList, CalendarDays, MapPin, Search, FileText } from 'lucide-react';
+import { Calendar, LogOut, Edit, User, ClipboardList, CalendarDays, MapPin, Search, FileText, Menu, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 import PersonalCalendar from '@/components/personal-calendar';
 import EditAvailability from '@/components/edit-availability';
 import { ThemeToggle } from '@/components/theme-toggle';
 import AvailableEvents from '@/components/available-events';
 import MyApplications from '@/components/my-applications';
+import { themeConfig } from '@/lib/theme-config';
+import { AreaChart } from '@/components/charts/area-chart';
+import { StatsSkeleton } from '@/components/ui/skeleton-loaders';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 interface ShiftRequest {
   id: string;
@@ -39,17 +50,35 @@ interface MyEvent {
   myShiftsCount: number;
 }
 
+interface HelperDashboardStats {
+  totalShifts: number;
+  upcomingShifts: number;
+  shiftsThisMonth: number;
+  hoursThisMonth: number;
+  applicationStats: {
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+  } | null;
+  shiftsActivity: Array<{ month: string; shifts: number }>;
+}
+
 export default function HelperDashboard() {
   const { data: session } = useSession() || {};
   const [showEditAvailability, setShowEditAvailability] = useState(false);
   const [requests, setRequests] = useState<ShiftRequest[]>([]);
   const [myEvents, setMyEvents] = useState<MyEvent[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dashboardStats, setDashboardStats] = useState<HelperDashboardStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const userRole = (session?.user as any)?.role;
   const isVolunteer = userRole === 'VOLUNTEER';
 
   useEffect(() => {
     fetchMyEvents();
+    fetchDashboardStats();
     if (isVolunteer) {
       fetchRequests();
       // Refresh requests every 30 seconds to show updates
@@ -73,6 +102,20 @@ export default function HelperDashboard() {
     }
   };
 
+  const fetchDashboardStats = async () => {
+    try {
+      const response = await fetch('/api/helper/dashboard-stats');
+      if (response.ok) {
+        const data = await response.json();
+        setDashboardStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   const fetchRequests = async () => {
     try {
       const response = await fetch('/api/shift-requests');
@@ -90,29 +133,28 @@ export default function HelperDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className={`min-h-screen ${themeConfig.backgrounds.pageGradient}`}>
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-green-600 rounded-xl flex items-center justify-center">
+              <div className={`w-10 h-10 ${themeConfig.backgrounds.logo} rounded-xl flex items-center justify-center`}>
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h1 className="text-lg font-bold text-foreground">
                   {session?.user?.name || 'User'}
                 </h1>
-                <p className="text-xs text-gray-600 dark:text-slate-400">{userRole}</p>
+                <p className="text-xs text-muted-foreground">{userRole}</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
               <ThemeToggle />
-              <Link href="/profile">
+              <Link href="/profile" className="hidden md:block">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-sky-600 border-sky-600 hover:bg-sky-50 dark:text-sky-400 dark:border-sky-400 dark:hover:bg-slate-800"
                 >
                   <User className="w-4 h-4 mr-2" />
                   Edit Profile
@@ -123,7 +165,7 @@ export default function HelperDashboard() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowEditAvailability(true)}
-                  className="text-blue-600 border-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-slate-800"
+                  className="hidden md:flex"
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Availability
@@ -133,11 +175,61 @@ export default function HelperDashboard() {
                 variant="ghost"
                 size="sm"
                 onClick={handleSignOut}
-                className="text-gray-600 hover:text-gray-900 dark:text-slate-300 dark:hover:text-white"
+                className="hidden md:flex"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign out
               </Button>
+
+              {/* Mobile Menu */}
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm" className="md:hidden">
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[280px]">
+                  <SheetHeader>
+                    <SheetTitle>Menu</SheetTitle>
+                    <SheetDescription>
+                      Access your profile and settings
+                    </SheetDescription>
+                  </SheetHeader>
+                  <nav className="mt-6 space-y-2">
+                    <Link
+                      href="/profile"
+                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <User className="w-5 h-5 text-muted-foreground" />
+                      <span className="font-medium">Edit Profile</span>
+                    </Link>
+                    {isVolunteer && (
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setShowEditAvailability(true);
+                        }}
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors w-full text-left"
+                      >
+                        <Edit className="w-5 h-5 text-muted-foreground" />
+                        <span className="font-medium">Edit Availability</span>
+                      </button>
+                    )}
+                    <div className="border-t border-border my-4" />
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleSignOut();
+                      }}
+                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors w-full text-left"
+                    >
+                      <LogOut className="w-5 h-5 text-muted-foreground" />
+                      <span className="font-medium">Sign out</span>
+                    </button>
+                  </nav>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>
@@ -145,21 +237,160 @@ export default function HelperDashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Personal Stats Section */}
+        {statsLoading ? (
+          <div className="mb-8">
+            <StatsSkeleton cards={4} />
+          </div>
+        ) : dashboardStats && (
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-foreground mb-4">My Stats</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Upcoming Shifts
+                    </CardTitle>
+                    <Calendar className="w-4 h-4 text-sky-500" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{dashboardStats.upcomingShifts}</div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {dashboardStats.totalShifts} total
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      This Month
+                    </CardTitle>
+                    <CalendarDays className="w-4 h-4 text-amber-500" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{dashboardStats.shiftsThisMonth}</div>
+                  <p className="text-xs text-muted-foreground mt-1">shifts scheduled</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Hours This Month
+                    </CardTitle>
+                    <Clock className="w-4 h-4 text-purple-500" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{dashboardStats.hoursThisMonth}</div>
+                  <p className="text-xs text-muted-foreground mt-1">hours worked</p>
+                </CardContent>
+              </Card>
+
+              {isVolunteer && dashboardStats.applicationStats && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Applications
+                      </CardTitle>
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{dashboardStats.applicationStats.approved}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {dashboardStats.applicationStats.pending} pending
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Activity Chart */}
+            {dashboardStats.shiftsActivity.length > 0 && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle>Activity Trend</CardTitle>
+                  <CardDescription>Your shifts over the last 6 months</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AreaChart
+                    data={dashboardStats.shiftsActivity}
+                    dataKey="shifts"
+                    xAxisKey="month"
+                    color="#10b981"
+                    gradientId="colorHelperActivity"
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <Link href="/profile">
+                <Button variant="outline" className="w-full justify-start">
+                  <User className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </Button>
+              </Link>
+              {isVolunteer && (
+                <>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => setShowEditAvailability(true)}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Availability
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    asChild
+                  >
+                    <a href="#available-events">
+                      <Search className="w-4 h-4 mr-2" />
+                      Browse Events
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    asChild
+                  >
+                    <a href="#my-applications">
+                      <FileText className="w-4 h-4 mr-2" />
+                      My Applications
+                    </a>
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">My Schedule</h2>
-          <p className="text-gray-600 dark:text-slate-400">View your assigned shifts</p>
+          <h2 className="text-2xl font-bold text-foreground mb-2">My Schedule</h2>
+          <p className="text-muted-foreground">View your assigned shifts</p>
         </div>
 
         <PersonalCalendar />
 
         {/* Available Events Section - For volunteers to apply */}
         {isVolunteer && (
-          <div className="mt-8">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+          <div className="mt-8" id="available-events">
+            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center">
               <Search className="w-5 h-5 mr-2" />
               Available Events
             </h3>
-            <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               Browse events accepting volunteers and submit your application
             </p>
             <AvailableEvents />
@@ -168,20 +399,20 @@ export default function HelperDashboard() {
 
         {/* My Events Section */}
         <div className="mt-8">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+          <h3 className="text-xl font-bold text-foreground mb-4 flex items-center">
             <CalendarDays className="w-5 h-5 mr-2" />
             My Events
           </h3>
           {eventsLoading ? (
             <Card>
               <CardContent className="flex items-center justify-center py-8">
-                <p className="text-gray-600 dark:text-slate-400">Loading events...</p>
+                <p className="text-muted-foreground">Loading events...</p>
               </CardContent>
             </Card>
           ) : myEvents.length === 0 ? (
             <Card>
               <CardContent className="flex items-center justify-center py-8">
-                <p className="text-gray-600 dark:text-slate-400">You are not assigned to any events yet</p>
+                <p className="text-muted-foreground">You are not assigned to any events yet</p>
               </CardContent>
             </Card>
           ) : (
@@ -221,8 +452,8 @@ export default function HelperDashboard() {
 
         {/* My Applications Section - For volunteers to track their event applications */}
         {isVolunteer && (
-          <div className="mt-8">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+          <div className="mt-8" id="my-applications">
+            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center">
               <FileText className="w-5 h-5 mr-2" />
               My Applications
             </h3>
@@ -232,7 +463,7 @@ export default function HelperDashboard() {
 
         {isVolunteer && (
           <div className="mt-8">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+            <h3 className="text-xl font-bold text-foreground mb-4 flex items-center">
               <ClipboardList className="w-5 h-5 mr-2" />
               My Shift Requests
             </h3>
@@ -245,7 +476,7 @@ export default function HelperDashboard() {
                 {requests.filter(r => r.status === 'PENDING').length === 0 ? (
                   <Card>
                     <CardContent className="flex items-center justify-center py-8">
-                      <p className="text-gray-600 dark:text-slate-400">No pending shift requests</p>
+                      <p className="text-muted-foreground">No pending shift requests</p>
                     </CardContent>
                   </Card>
                 ) : (
@@ -295,7 +526,7 @@ export default function HelperDashboard() {
                 {requests.filter(r => r.status === 'APPROVED').length === 0 ? (
                   <Card>
                     <CardContent className="flex items-center justify-center py-8">
-                      <p className="text-gray-600 dark:text-slate-400">No approved shift requests</p>
+                      <p className="text-muted-foreground">No approved shift requests</p>
                     </CardContent>
                   </Card>
                 ) : (

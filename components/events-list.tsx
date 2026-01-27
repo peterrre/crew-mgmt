@@ -9,6 +9,8 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { format } from 'date-fns'
 import { restoreEvent } from '@/lib/actions/events'
+import { EmptyState } from '@/components/ui/empty-state'
+import { CalendarDays } from 'lucide-react'
 
 interface Event {
   id: string
@@ -105,12 +107,23 @@ export function EventsList({ events, showArchived }: EventsListProps) {
       </div>
 
       {events.length === 0 && (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">No events found.</p>
-          <Button asChild className="mt-4">
-            <Link href="/admin/events/create">Create your first event</Link>
-          </Button>
-        </div>
+        <EmptyState
+          icon={CalendarDays}
+          title={showArchived ? 'No archived events' : 'No events yet'}
+          description={
+            showArchived
+              ? 'You haven\'t archived any events. Archived events will appear here.'
+              : 'Get started by creating your first event. Events help you organize crew schedules and shifts.'
+          }
+          action={
+            !showArchived
+              ? {
+                  label: 'Create Event',
+                  onClick: () => router.push('/admin/events/create'),
+                }
+              : undefined
+          }
+        />
       )}
     </div>
   )

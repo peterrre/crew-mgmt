@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Heart } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { themeConfig } from '@/lib/theme-config';
 
 export default function SignupVolunteerPage() {
   const router = useRouter();
@@ -60,14 +61,14 @@ export default function SignupVolunteerPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4">
+    <div className={`min-h-screen flex items-center justify-center ${themeConfig.backgrounds.pageGradient} px-4`}>
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className={`w-16 h-16 ${themeConfig.backgrounds.logo} rounded-2xl flex items-center justify-center shadow-lg`}>
               <Heart className="w-8 h-8 text-white" />
             </div>
           </div>

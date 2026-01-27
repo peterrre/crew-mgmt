@@ -44,6 +44,13 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { toggleAcceptingVolunteers } from '@/lib/actions/events';
 import { useEventData } from '@/contexts/event-data-context';
+import {
+  toastApplicationApproved,
+  toastApplicationRejected,
+  toastApplicationsToggled,
+  toastLoadError,
+  toastGenericError,
+} from '@/lib/toast-helpers';
 
 interface Application {
   id: string;
@@ -121,11 +128,7 @@ export default function EventApplicationsManager({
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load applications',
-        variant: 'destructive',
-      });
+      toastLoadError('applications');
     } finally {
       setLoading(false);
     }
@@ -136,23 +139,20 @@ export default function EventApplicationsManager({
   }, [fetchApplications]);
 
   const handleToggleAccepting = async (accepting: boolean) => {
+    const previousState = acceptingVolunteers;
+
+    // Optimistic update
+    setAcceptingVolunteers(accepting);
+
     try {
       setTogglingAccepting(true);
       await toggleAcceptingVolunteers(eventId, accepting);
-      setAcceptingVolunteers(accepting);
-      toast({
-        title: accepting ? 'Applications Open' : 'Applications Closed',
-        description: accepting
-          ? 'Volunteers can now apply to this event'
-          : 'No new applications will be accepted',
-      });
+      toastApplicationsToggled(accepting);
     } catch (error) {
+      // Rollback on error
+      setAcceptingVolunteers(previousState);
       console.error('Error toggling accepting volunteers:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update application settings',
-        variant: 'destructive',
-      });
+      toastGenericError('Failed to update application settings');
     } finally {
       setTogglingAccepting(false);
     }
@@ -160,6 +160,27 @@ export default function EventApplicationsManager({
 
   const handleReview = async () => {
     if (!reviewingApplication || !reviewAction) return;
+
+    // Store original applications for rollback
+    const originalApplications = [...applications];
+
+    // Optimistic update: immediately update UI
+    const updatedApplications = applications.map((app) =>
+      app.id === reviewingApplication.id
+        ? {
+            ...app,
+            status: reviewAction,
+            reviewNote: reviewNote.trim() || null,
+            reviewedAt: new Date().toISOString(),
+          }
+        : app
+    );
+    setApplications(updatedApplications as Application[]);
+
+    // Close dialog and reset immediately
+    setReviewingApplication(null);
+    setReviewAction(null);
+    setReviewNote('');
 
     try {
       setSubmitting(true);
@@ -173,34 +194,29 @@ export default function EventApplicationsManager({
       });
 
       if (response.ok) {
-        toast({
-          title: reviewAction === 'APPROVED' ? 'Application Approved' : 'Application Rejected',
-          description:
-            reviewAction === 'APPROVED'
-              ? `${reviewingApplication.user.name || reviewingApplication.user.email} has been added to the event crew`
-              : `The application has been rejected`,
-        });
-        setReviewingApplication(null);
-        setReviewAction(null);
-        setReviewNote('');
+        if (reviewAction === 'APPROVED') {
+          toastApplicationApproved(
+            reviewingApplication.user.name || reviewingApplication.user.email,
+            'the event'
+          );
+        } else {
+          toastApplicationRejected(reviewingApplication.user.name || reviewingApplication.user.email);
+        }
+        // Fetch fresh data to ensure sync
         fetchApplications();
         // Refresh event data to update crew count
         refreshData();
       } else {
+        // Rollback on error
+        setApplications(originalApplications);
         const data = await response.json();
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to review application',
-          variant: 'destructive',
-        });
+        toastGenericError(data.error || 'Failed to review application');
       }
     } catch (error) {
+      // Rollback on error
+      setApplications(originalApplications);
       console.error('Error reviewing application:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to review application',
-        variant: 'destructive',
-      });
+      toastGenericError('Failed to review application');
     } finally {
       setSubmitting(false);
     }
@@ -276,76 +292,80 @@ export default function EventApplicationsManager({
               No pending applications
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Applicant</TableHead>
-                  <TableHead>Message</TableHead>
-                  <TableHead>Applied</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pendingApplications.map((app) => (
-                  <TableRow key={app.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center">
-                          <User className="w-4 h-4 text-gray-500" />
-                        </div>
-                        <div>
-                          <div className="font-medium">{app.user.name || 'Unknown'}</div>
-                          <div className="text-sm text-muted-foreground flex items-center gap-1">
-                            <Mail className="w-3 h-3" />
-                            {app.user.email}
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <div className="inline-block min-w-full align-middle">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[200px]">Applicant</TableHead>
+                      <TableHead className="min-w-[150px]">Message</TableHead>
+                      <TableHead className="min-w-[100px]">Applied</TableHead>
+                      <TableHead className="text-right min-w-[200px]">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingApplications.map((app) => (
+                      <TableRow key={app.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
+                              <User className="w-4 h-4 text-gray-500" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-medium">{app.user.name || 'Unknown'}</div>
+                              <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                <Mail className="w-3 h-3 flex-shrink-0" />
+                                <span className="truncate">{app.user.email}</span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {app.message ? (
-                        <span className="text-sm line-clamp-2">{app.message}</span>
-                      ) : (
-                        <span className="text-sm text-muted-foreground italic">No message</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">
-                        {new Date(app.createdAt).toLocaleDateString()}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-green-600 border-green-600 hover:bg-green-50"
-                          onClick={() => {
-                            setReviewingApplication(app);
-                            setReviewAction('APPROVED');
-                          }}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-red-600 border-red-600 hover:bg-red-50"
-                          onClick={() => {
-                            setReviewingApplication(app);
-                            setReviewAction('REJECTED');
-                          }}
-                        >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          Reject
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                        </TableCell>
+                        <TableCell>
+                          {app.message ? (
+                            <span className="text-sm line-clamp-2">{app.message}</span>
+                          ) : (
+                            <span className="text-sm text-muted-foreground italic">No message</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm whitespace-nowrap">
+                            {new Date(app.createdAt).toLocaleDateString()}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-green-600 border-green-600 hover:bg-green-50 whitespace-nowrap"
+                              onClick={() => {
+                                setReviewingApplication(app);
+                                setReviewAction('APPROVED');
+                              }}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 border-red-600 hover:bg-red-50 whitespace-nowrap"
+                              onClick={() => {
+                                setReviewingApplication(app);
+                                setReviewAction('REJECTED');
+                              }}
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Reject
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
           )}
         </TabsContent>
 
@@ -355,63 +375,67 @@ export default function EventApplicationsManager({
               No processed applications
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Applicant</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Reviewer Note</TableHead>
-                  <TableHead>Reviewed</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {processedApplications.map((app) => {
-                  const status = statusConfig[app.status];
-                  const StatusIcon = status.icon;
-
-                  return (
-                    <TableRow key={app.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center">
-                            <User className="w-4 h-4 text-gray-500" />
-                          </div>
-                          <div>
-                            <div className="font-medium">{app.user.name || 'Unknown'}</div>
-                            <div className="text-sm text-muted-foreground">{app.user.email}</div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={status.className}>
-                          <StatusIcon className="w-3 h-3 mr-1" />
-                          {status.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {app.reviewNote ? (
-                          <span className="text-sm">{app.reviewNote}</span>
-                        ) : (
-                          <span className="text-sm text-muted-foreground italic">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {app.reviewedAt ? (
-                          <div className="text-sm">
-                            <div>{new Date(app.reviewedAt).toLocaleDateString()}</div>
-                            {app.reviewer && (
-                              <div className="text-muted-foreground">by {app.reviewer.name}</div>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <div className="inline-block min-w-full align-middle">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[200px]">Applicant</TableHead>
+                      <TableHead className="min-w-[120px]">Status</TableHead>
+                      <TableHead className="min-w-[150px]">Reviewer Note</TableHead>
+                      <TableHead className="min-w-[150px]">Reviewed</TableHead>
                     </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {processedApplications.map((app) => {
+                      const status = statusConfig[app.status];
+                      const StatusIcon = status.icon;
+
+                      return (
+                        <TableRow key={app.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
+                                <User className="w-4 h-4 text-gray-500" />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-medium">{app.user.name || 'Unknown'}</div>
+                                <div className="text-sm text-muted-foreground truncate">{app.user.email}</div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={status.className}>
+                              <StatusIcon className="w-3 h-3 mr-1" />
+                              {status.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {app.reviewNote ? (
+                              <span className="text-sm">{app.reviewNote}</span>
+                            ) : (
+                              <span className="text-sm text-muted-foreground italic">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {app.reviewedAt ? (
+                              <div className="text-sm whitespace-nowrap">
+                                <div>{new Date(app.reviewedAt).toLocaleDateString()}</div>
+                                {app.reviewer && (
+                                  <div className="text-muted-foreground">by {app.reviewer.name}</div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
           )}
         </TabsContent>
       </Tabs>

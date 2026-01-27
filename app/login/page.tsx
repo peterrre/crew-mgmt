@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar, Loader2 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { themeConfig } from '@/lib/theme-config';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4">
+    <div className={`min-h-screen flex items-center justify-center ${themeConfig.backgrounds.pageGradient} px-4`}>
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>

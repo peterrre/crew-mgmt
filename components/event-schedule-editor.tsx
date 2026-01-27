@@ -161,55 +161,71 @@ export default function EventScheduleEditor({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div className="flex items-center space-x-2">
           <CalendarDays className="w-5 h-5 text-sky-600 dark:text-sky-400" />
           <h3 className="text-lg font-semibold text-sky-900 dark:text-white">
             Schedule ({shifts.length} shifts)
           </h3>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant={filter === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilter('all')}
-          >
-            All
-          </Button>
-          <Button
-            variant={filter === 'assigned' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilter('assigned')}
-          >
-            Assigned ({counts.crew})
-          </Button>
-          <Button
-            variant={filter === 'unassigned' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilter('unassigned')}
-          >
-            Unassigned ({counts.unassigned})
-          </Button>
-          <div className="border-l border-gray-300 dark:border-slate-600 mx-1"></div>
-          <Button
-            variant={showAvailability ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setShowAvailability(!showAvailability)}
-          >
-            Show Availability
-          </Button>
-          <Button
-            variant={showMatchingOnly ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setShowMatchingOnly(!showMatchingOnly)}
-          >
-            Matching
-          </Button>
+
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant={filter === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilter('all')}
+              className="text-xs sm:text-sm"
+            >
+              All
+            </Button>
+            <Button
+              variant={filter === 'assigned' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilter('assigned')}
+              className="text-xs sm:text-sm"
+            >
+              <span className="hidden sm:inline">Assigned ({counts.crew})</span>
+              <span className="sm:hidden">Assign ({counts.crew})</span>
+            </Button>
+            <Button
+              variant={filter === 'unassigned' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilter('unassigned')}
+              className="text-xs sm:text-sm"
+            >
+              <span className="hidden sm:inline">Unassigned ({counts.unassigned})</span>
+              <span className="sm:hidden">Unass ({counts.unassigned})</span>
+            </Button>
+          </div>
+
+          <div className="hidden sm:block border-l border-gray-300 dark:border-slate-600 mx-1"></div>
+
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant={showAvailability ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setShowAvailability(!showAvailability)}
+              className="text-xs sm:text-sm"
+            >
+              <span className="hidden sm:inline">Show Availability</span>
+              <span className="sm:hidden">Avail</span>
+            </Button>
+            <Button
+              variant={showMatchingOnly ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setShowMatchingOnly(!showMatchingOnly)}
+              className="text-xs sm:text-sm"
+            >
+              Matching
+            </Button>
+          </div>
         </div>
       </div>
 
       <p className="text-sm text-sky-700 dark:text-slate-400 mb-4">
-        Click and drag on the calendar to create shifts
+        <span className="hidden sm:inline">Click and drag on the calendar to create shifts</span>
+        <span className="sm:hidden">Tap calendar to create shifts</span>
       </p>
 
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-amber-100 dark:border-slate-700 p-4">

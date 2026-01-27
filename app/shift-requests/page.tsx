@@ -10,6 +10,8 @@ import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { themeConfig } from '@/lib/theme-config';
+import { toastLoadError } from '@/lib/toast-helpers';
 
 interface EventWithRequests {
   id: string;
@@ -72,19 +74,11 @@ export default function ShiftRequestsDashboard() {
       } else if (response.status === 401) {
         router.push('/login');
       } else {
-        toast({
-          title: 'Error',
-          description: 'Failed to load dashboard data.',
-          variant: 'destructive',
-        });
+        toastLoadError('dashboard data');
       }
     } catch (error) {
       console.error('Error fetching dashboard:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load dashboard data.',
-        variant: 'destructive',
-      });
+      toastLoadError('dashboard data');
     } finally {
       setLoading(false);
     }
@@ -132,7 +126,7 @@ export default function ShiftRequestsDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+      <div className={`min-h-screen ${themeConfig.backgrounds.pageGradient} flex items-center justify-center`}>
         <Loader2 className="w-8 h-8 animate-spin text-sky-500" />
       </div>
     );
@@ -140,7 +134,7 @@ export default function ShiftRequestsDashboard() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+      <div className={`min-h-screen ${themeConfig.backgrounds.pageGradient} flex items-center justify-center`}>
         <Card>
           <CardContent className="flex items-center justify-center py-12">
             <p className="text-gray-600 dark:text-slate-400">Failed to load dashboard data</p>
@@ -151,7 +145,7 @@ export default function ShiftRequestsDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className={`min-h-screen ${themeConfig.backgrounds.pageGradient}`}>
       {/* Header */}
       <header className="sticky top-0 z-50 bg-amber-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-amber-200 dark:border-slate-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -163,7 +157,7 @@ export default function ShiftRequestsDashboard() {
                   Back
                 </Button>
               </Link>
-              <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-amber-500 rounded-xl flex items-center justify-center">
+              <div className={`w-10 h-10 ${themeConfig.backgrounds.logo} rounded-xl flex items-center justify-center`}>
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-xl font-bold text-sky-900 dark:text-white">Shift Requests Dashboard</h1>

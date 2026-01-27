@@ -6,6 +6,16 @@ import { updateEvent, getUsers } from '@/lib/actions/events'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { themeConfig } from '@/lib/theme-config'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 
 interface EditEventPageProps {
   params: { id: string }
@@ -53,15 +63,31 @@ export default function EditEventPage({ params }: EditEventPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <div className="container mx-auto py-8">Loading...</div>
+      <div className={`min-h-screen ${themeConfig.backgrounds.pageGradient}`}>
+        <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center h-16">
+              <Skeleton className="h-5 w-32" />
+            </div>
+          </div>
+        </header>
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <Skeleton className="h-8 w-48 mb-8" />
+          <div className="space-y-6">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        </main>
       </div>
     )
   }
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <div className={`min-h-screen ${themeConfig.backgrounds.pageGradient}`}>
         <div className="container mx-auto py-8">Event not found</div>
       </div>
     )
@@ -78,11 +104,11 @@ export default function EditEventPage({ params }: EditEventPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <header className="sticky top-0 z-50 bg-amber-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-amber-200 dark:border-slate-700 shadow-sm">
+    <div className={`min-h-screen ${themeConfig.backgrounds.pageGradient}`}>
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
-            <Link href={`/admin/events/${params.id}`} className="flex items-center space-x-2 text-sky-700 hover:text-sky-900 dark:text-sky-400 dark:hover:text-sky-300">
+            <Link href={`/admin/events/${params.id}`} className="flex items-center space-x-2 text-muted-foreground hover:text-foreground">
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Event</span>
             </Link>
@@ -91,6 +117,32 @@ export default function EditEventPage({ params }: EditEventPageProps) {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Dashboard</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/admin/events">Events</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href={`/admin/events/${params.id}`}>{event.name}</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Edit</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <h1 className="text-3xl font-bold mb-8">Edit Event</h1>
         <EventForm
           initialData={initialData}

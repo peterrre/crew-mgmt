@@ -89,7 +89,7 @@ export default function EventCrewManagement({ eventId }: EventCrewManagementProp
         </Button>
       </div>
 
-      <div className="flex space-x-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <Input
           placeholder="Search by name or email..."
           value={searchTerm}
@@ -97,7 +97,7 @@ export default function EventCrewManagement({ eventId }: EventCrewManagementProp
           className="flex-1"
         />
         <Select value={selectedRole} onValueChange={setSelectedRole}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filter by role" />
           </SelectTrigger>
           <SelectContent>

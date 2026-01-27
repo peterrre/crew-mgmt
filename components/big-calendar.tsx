@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { format, parse, startOfWeek, getDay, addDays, addWeeks } from 'date-fns';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './big-calendar.css';
 
@@ -154,10 +154,31 @@ export default function BigCalendar({
   view: propView,
   onView: propOnView,
 }: BigCalendarProps) {
+  const [isMobile, setIsMobile] = useState(false);
   const [localDate, setLocalDate] = useState(propDate || new Date(2026, 6, 10));
   const [localView, setLocalView] = useState<View>(propView || 'week');
   const currentDate = propDate !== undefined ? propDate : localDate;
   const currentView = propView !== undefined ? propView : localView;
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+  const calendarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile && propView === undefined && localView !== 'agenda' && localView !== 'day') {
+      setLocalView('agenda');
+    }
+  }, [isMobile, propView, localView]);
 
   const handleNavigate = useCallback((newDate: Date) => {
     if (propOnNavigate) {
@@ -174,6 +195,55 @@ export default function BigCalendar({
       setLocalView(newView);
     }
   }, [propOnView]);
+
+  const handleSwipe = useCallback(() => {
+    const minSwipeDistance = 50;
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe || isRightSwipe) {
+      let newDate: Date;
+
+      if (currentView === 'day') {
+        newDate = addDays(currentDate, isLeftSwipe ? 1 : -1);
+      } else if (currentView === 'week' || currentView === 'agenda') {
+        newDate = addWeeks(currentDate, isLeftSwipe ? 1 : -1);
+      } else {
+        return;
+      }
+
+      handleNavigate(newDate);
+    }
+  }, [currentView, currentDate, handleNavigate]);
+
+  useEffect(() => {
+    if (!isMobile || !calendarRef.current) return;
+
+    const element = calendarRef.current;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      touchEndX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchEnd = () => {
+      handleSwipe();
+    };
+
+    element.addEventListener('touchstart', handleTouchStart);
+    element.addEventListener('touchmove', handleTouchMove);
+    element.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      element.removeEventListener('touchstart', handleTouchStart);
+      element.removeEventListener('touchmove', handleTouchMove);
+      element.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isMobile, handleSwipe]);
 
   const eventStyleGetter = (event: any) => {
     let backgroundColor = '#3b82f6';
@@ -222,40 +292,40 @@ export default function BigCalendar({
 
   if (currentView === 'agenda') {
     return (
-      <div>
-        <div className="flex items-center gap-6 mb-4 p-3 bg-amber-50 dark:bg-slate-700 rounded-lg border border-amber-100 dark:border-slate-600">
+      <div ref={calendarRef}>
+        <div className="flex flex-wrap items-center gap-3 md:gap-6 mb-4 p-3 bg-amber-50 dark:bg-slate-700 rounded-lg border border-amber-100 dark:border-slate-600">
           <span className="text-sm font-medium text-sky-900 dark:text-white">Legend:</span>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-sky-500"></div>
-            <span className="text-sm text-sky-800 dark:text-slate-200">Crew ({counts?.crew || 0})</span>
+            <span className="text-xs md:text-sm text-sky-800 dark:text-slate-200">Crew ({counts?.crew || 0})</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-amber-500"></div>
-            <span className="text-sm text-sky-800 dark:text-slate-200">Volunteer ({counts?.volunteer || 0})</span>
+            <span className="text-xs md:text-sm text-sky-800 dark:text-slate-200">Volunteer ({counts?.volunteer || 0})</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-red-500"></div>
-            <span className="text-sm text-sky-800 dark:text-slate-200">Unassigned ({counts?.unassigned || 0})</span>
+            <span className="text-xs md:text-sm text-sky-800 dark:text-slate-200">Unassigned ({counts?.unassigned || 0})</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-green-500 opacity-60 border-2 border-dashed border-green-800"></div>
-            <span className="text-sm text-sky-800 dark:text-slate-200">Available ({counts?.availability || 0})</span>
+            <span className="text-xs md:text-sm text-sky-800 dark:text-slate-200">Available ({counts?.availability || 0})</span>
           </div>
         </div>
-        <div className="rbc-toolbar" style={{ padding: '16px 0', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+        <div className="rbc-toolbar" style={{ padding: '16px 0', marginBottom: '16px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
           <div className="rbc-btn-group">
-            <button type="button" onClick={() => handleNavigate(new Date())}>Today</button>
-            <button type="button" onClick={() => handleNavigate(new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000))}>Back</button>
-            <button type="button" onClick={() => handleNavigate(new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000))}>Next</button>
+            <button type="button" onClick={() => handleNavigate(new Date())} className="min-h-[44px] md:min-h-auto">Today</button>
+            <button type="button" onClick={() => handleNavigate(new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000))} className="min-h-[44px] md:min-h-auto">Back</button>
+            <button type="button" onClick={() => handleNavigate(new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000))} className="min-h-[44px] md:min-h-auto">Next</button>
           </div>
-          <span className="rbc-toolbar-label font-semibold">
-            {format(currentDate, 'MMMM yyyy')}
+          <span className="rbc-toolbar-label font-semibold text-sm md:text-base">
+            {format(currentDate, isMobile ? 'MMM yyyy' : 'MMMM yyyy')}
           </span>
           <div className="rbc-btn-group">
-            <button type="button" onClick={() => handleView('month')}>Month</button>
-            <button type="button" onClick={() => handleView('week')}>Week</button>
-            <button type="button" onClick={() => handleView('day')}>Day</button>
-            <button type="button" className="rbc-active" onClick={() => handleView('agenda')}>Agenda</button>
+            {!isMobile && <button type="button" onClick={() => handleView('month')}>Month</button>}
+            {!isMobile && <button type="button" onClick={() => handleView('week')}>Week</button>}
+            <button type="button" onClick={() => handleView('day')} className="min-h-[44px] md:min-h-auto">Day</button>
+            <button type="button" className="rbc-active min-h-[44px] md:min-h-auto" onClick={() => handleView('agenda')}>Agenda</button>
           </div>
         </div>
         <CustomAgenda events={events} onSelectEvent={onSelectEvent} />
@@ -264,27 +334,27 @@ export default function BigCalendar({
   }
 
   return (
-    <div>
-      <div className="flex items-center gap-6 mb-4 p-3 bg-amber-50 dark:bg-slate-700 rounded-lg border border-amber-100 dark:border-slate-600">
+    <div ref={calendarRef}>
+      <div className="flex flex-wrap items-center gap-3 md:gap-6 mb-4 p-3 bg-amber-50 dark:bg-slate-700 rounded-lg border border-amber-100 dark:border-slate-600">
         <span className="text-sm font-medium text-sky-900 dark:text-white">Legend:</span>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-sky-500"></div>
-          <span className="text-sm text-sky-800 dark:text-slate-200">Crew ({counts?.crew || 0})</span>
+          <span className="text-xs md:text-sm text-sky-800 dark:text-slate-200">Crew ({counts?.crew || 0})</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-amber-500"></div>
-          <span className="text-sm text-sky-800 dark:text-slate-200">Volunteer ({counts?.volunteer || 0})</span>
+          <span className="text-xs md:text-sm text-sky-800 dark:text-slate-200">Volunteer ({counts?.volunteer || 0})</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-red-500"></div>
-          <span className="text-sm text-sky-800 dark:text-slate-200">Unassigned ({counts?.unassigned || 0})</span>
+          <span className="text-xs md:text-sm text-sky-800 dark:text-slate-200">Unassigned ({counts?.unassigned || 0})</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-green-500 opacity-60 border-2 border-dashed border-green-800"></div>
-          <span className="text-sm text-sky-800 dark:text-slate-200">Available ({counts?.availability || 0})</span>
+          <span className="text-xs md:text-sm text-sky-800 dark:text-slate-200">Available ({counts?.availability || 0})</span>
         </div>
       </div>
-      <div style={{ height: '700px' }}>
+      <div style={{ height: isMobile ? '500px' : '700px' }}>
         <CalendarComponent
           localizer={localizer}
           events={events}

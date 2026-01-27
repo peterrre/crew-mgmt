@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, Loader2, XCircle, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Calendar, MapPin, Loader2, XCircle, CheckCircle, Clock, AlertCircle, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ListSkeleton } from '@/components/ui/skeleton-loaders';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { toastApplicationWithdrawn, toastLoadError, toastGenericError } from '@/lib/toast-helpers';
 
 interface Application {
   id: string;
@@ -79,17 +82,51 @@ export default function MyApplications() {
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load your applications',
-        variant: 'destructive',
-      });
+      toastLoadError('your applications');
     } finally {
       setLoading(false);
     }
   };
 
   const handleWithdraw = async (applicationId: string) => {
+    // Store original state for rollback
+    const originalApplications = [...applications];
+
+    // Optimistic update: immediately mark as withdrawn
+    setApplications((prev) =>
+      prev.map((app) =>
+        app.id === applicationId ? { ...app, status: 'WITHDRAWN' as const } : app
+      )
+    );
+
+    // Undo function to resubmit the application
+    const handleUndo = async () => {
+      try {
+        const response = await fetch(`/api/volunteer-applications/${applicationId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'PENDING' }),
+        });
+
+        if (response.ok) {
+          setApplications((prev) =>
+            prev.map((app) =>
+              app.id === applicationId ? { ...app, status: 'PENDING' as const } : app
+            )
+          );
+          toast({
+            title: 'Application Restored',
+            description: 'Your application has been restored to pending status.',
+          });
+        } else {
+          toastGenericError('Failed to restore application');
+        }
+      } catch (error) {
+        console.error('Error restoring application:', error);
+        toastGenericError('Failed to restore application');
+      }
+    };
+
     try {
       const response = await fetch(`/api/volunteer-applications/${applicationId}`, {
         method: 'PATCH',
@@ -98,54 +135,34 @@ export default function MyApplications() {
       });
 
       if (response.ok) {
-        toast({
-          title: 'Application Withdrawn',
-          description: 'Your application has been withdrawn.',
-        });
-        // Update local state
-        setApplications((prev) =>
-          prev.map((app) =>
-            app.id === applicationId ? { ...app, status: 'WITHDRAWN' as const } : app
-          )
-        );
+        toastApplicationWithdrawn(handleUndo);
       } else {
+        // Rollback on error
+        setApplications(originalApplications);
         const data = await response.json();
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to withdraw application',
-          variant: 'destructive',
-        });
+        toastGenericError(data.error || 'Failed to withdraw application');
       }
     } catch (error) {
+      // Rollback on error
+      setApplications(originalApplications);
       console.error('Error withdrawing application:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to withdraw application',
-        variant: 'destructive',
-      });
+      toastGenericError('Failed to withdraw application');
     } finally {
       setWithdrawing(null);
     }
   };
 
   if (loading) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin mr-2" />
-          <p className="text-gray-600 dark:text-slate-400">Loading your applications...</p>
-        </CardContent>
-      </Card>
-    );
+    return <ListSkeleton items={3} />;
   }
 
   if (applications.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <p className="text-gray-600 dark:text-slate-400">You haven't applied to any events yet.</p>
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={FileText}
+        title="No applications yet"
+        description="You haven't applied to any events yet. Browse available events above to find opportunities to volunteer!"
+      />
     );
   }
 

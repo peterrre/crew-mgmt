@@ -14,6 +14,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useEventData } from '@/contexts/event-data-context';
+import { toastRequestApproved, toastRequestRejected, toastGenericError } from '@/lib/toast-helpers';
 import {
   Clock,
   CheckCircle,
@@ -67,10 +68,22 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
   const [statusFilter, setStatusFilter] = useState<'all' | 'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING');
   const [typeFilter, setTypeFilter] = useState<'all' | 'CANCEL' | 'SWAP' | 'MODIFY'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [optimisticRequests, setOptimisticRequests] = useState<ShiftRequest[]>([]);
   const { toast } = useToast();
 
+  // Use optimistic requests if available, otherwise use context requests
+  const displayRequests = optimisticRequests.length > 0 ? optimisticRequests : requests;
+
   const handleApprove = async (requestId: string) => {
+    // Optimistic update: immediately mark as approved
+    const updatedRequests = requests.map((req) =>
+      req.id === requestId
+        ? { ...req, status: 'APPROVED' as const, reviewedAt: new Date().toISOString() }
+        : req
+    );
+    setOptimisticRequests(updatedRequests);
     setProcessingId(requestId);
+
     try {
       const response = await fetch(
         `/api/events/${eventId}/shift-requests/${requestId}`,
@@ -84,32 +97,34 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
       const data = await response.json();
 
       if (response.ok) {
-        toast({
-          title: 'Request Approved',
-          description: data.message || 'The request has been approved successfully',
-        });
+        toastRequestApproved(data.message);
         await refreshAll();
+        setOptimisticRequests([]); // Clear optimistic state after real data loads
       } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to approve request',
-          variant: 'destructive',
-        });
+        // Rollback on error
+        setOptimisticRequests([]);
+        toastGenericError(data.error || 'Failed to approve request');
       }
     } catch (error) {
+      // Rollback on error
+      setOptimisticRequests([]);
       console.error('Error approving request:', error);
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+      toastGenericError('An unexpected error occurred');
     } finally {
       setProcessingId(null);
     }
   };
 
   const handleReject = async (requestId: string) => {
+    // Optimistic update: immediately mark as rejected
+    const updatedRequests = requests.map((req) =>
+      req.id === requestId
+        ? { ...req, status: 'REJECTED' as const, reviewedAt: new Date().toISOString() }
+        : req
+    );
+    setOptimisticRequests(updatedRequests);
     setProcessingId(requestId);
+
     try {
       const response = await fetch(
         `/api/events/${eventId}/shift-requests/${requestId}`,
@@ -123,25 +138,19 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
       const data = await response.json();
 
       if (response.ok) {
-        toast({
-          title: 'Request Rejected',
-          description: data.message || 'The request has been rejected',
-        });
+        toastRequestRejected(data.message);
         await refreshAll();
+        setOptimisticRequests([]); // Clear optimistic state after real data loads
       } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to reject request',
-          variant: 'destructive',
-        });
+        // Rollback on error
+        setOptimisticRequests([]);
+        toastGenericError(data.error || 'Failed to reject request');
       }
     } catch (error) {
+      // Rollback on error
+      setOptimisticRequests([]);
       console.error('Error rejecting request:', error);
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+      toastGenericError('An unexpected error occurred');
     } finally {
       setProcessingId(null);
     }
@@ -149,7 +158,7 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
 
   // Filter and search requests
   const filteredRequests = useMemo(() => {
-    let filtered = requests;
+    let filtered = displayRequests;
 
     // Status filter
     if (statusFilter !== 'all') {
@@ -177,16 +186,16 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
     return filtered.sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
-  }, [requests, statusFilter, typeFilter, searchQuery]);
+  }, [displayRequests, statusFilter, typeFilter, searchQuery]);
 
   // Count requests by status
   const counts = useMemo(() => {
     return {
-      pending: requests.filter((r) => r.status === 'PENDING').length,
-      approved: requests.filter((r) => r.status === 'APPROVED').length,
-      rejected: requests.filter((r) => r.status === 'REJECTED').length,
+      pending: displayRequests.filter((r) => r.status === 'PENDING').length,
+      approved: displayRequests.filter((r) => r.status === 'APPROVED').length,
+      rejected: displayRequests.filter((r) => r.status === 'REJECTED').length,
     };
-  }, [requests]);
+  }, [displayRequests]);
 
   const getTypeBadgeColor = (type: string) => {
     switch (type) {
@@ -282,7 +291,7 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
           size="sm"
           onClick={() => setStatusFilter('all')}
         >
-          All ({requests.length})
+          All ({displayRequests.length})
         </Button>
       </div>
 
@@ -410,11 +419,12 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
 
                   {/* Right section: Actions */}
                   {request.status === 'PENDING' && (
-                    <div className="flex lg:flex-col gap-2 lg:min-w-[120px]">
+                    <div className="flex flex-col sm:flex-row lg:flex-col gap-2 lg:min-w-[120px]">
                       <Button
                         onClick={() => handleApprove(request.id)}
                         disabled={processingId === request.id}
-                        className="flex-1 lg:flex-none bg-green-600 hover:bg-green-700 text-white"
+                        size="sm"
+                        className="w-full sm:w-auto lg:w-full bg-green-600 hover:bg-green-700 text-white"
                       >
                         {processingId === request.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -429,7 +439,8 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
                         variant="outline"
                         onClick={() => handleReject(request.id)}
                         disabled={processingId === request.id}
-                        className="flex-1 lg:flex-none border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
+                        size="sm"
+                        className="w-full sm:w-auto lg:w-full border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
                       >
                         {processingId === request.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />

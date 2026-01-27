@@ -22,6 +22,13 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import {
+  toastRequestSubmitted,
+  toastValidationError,
+  toastLoadError,
+  toastGenericError
+} from '@/lib/toast-helpers';
+import { useRouter } from 'next/navigation';
 
 interface CreateShiftRequestDialogProps {
   shift: {
@@ -54,6 +61,7 @@ export default function CreateShiftRequestDialog({
   const [loading, setLoading] = useState(false);
   const [loadingHelpers, setLoadingHelpers] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     if (type === 'SWAP') {
@@ -76,18 +84,10 @@ export default function CreateShiftRequestDialog({
         const data = await response.json();
         setAvailableHelpers(data.helpers || []);
       } else {
-        toast({
-          title: 'Error',
-          description: 'Failed to load available helpers.',
-          variant: 'destructive',
-        });
+        toastLoadError('available helpers');
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred.',
-        variant: 'destructive',
-      });
+      toastGenericError('An unexpected error occurred');
     } finally {
       setLoadingHelpers(false);
     }
@@ -95,29 +95,17 @@ export default function CreateShiftRequestDialog({
 
   const handleSubmit = async () => {
     if (!reason.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Please provide a reason for your request.',
-        variant: 'destructive',
-      });
+      toastValidationError('Please provide a reason for your request.');
       return;
     }
 
     if (type === 'SWAP' && !newHelperId) {
-      toast({
-        title: 'Error',
-        description: 'Please select a helper to swap with.',
-        variant: 'destructive',
-      });
+      toastValidationError('Please select a helper to swap with.');
       return;
     }
 
     if (type === 'MODIFY' && (!newStart || !newEnd)) {
-      toast({
-        title: 'Error',
-        description: 'Please provide new start and end times.',
-        variant: 'destructive',
-      });
+      toastValidationError('Please provide new start and end times.');
       return;
     }
 
@@ -145,26 +133,17 @@ export default function CreateShiftRequestDialog({
       });
 
       if (response.ok) {
-        toast({
-          title: 'Request Submitted',
-          description: 'Your shift change request has been submitted for review.',
+        toastRequestSubmitted(() => {
+          router.push('/shift-requests');
         });
         onSuccess();
         onClose();
       } else {
         const error = await response.json();
-        toast({
-          title: 'Error',
-          description: error.error || 'Failed to submit request.',
-          variant: 'destructive',
-        });
+        toastGenericError(error.error || 'Failed to submit request');
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred.',
-        variant: 'destructive',
-      });
+      toastGenericError('An unexpected error occurred');
     } finally {
       setLoading(false);
     }

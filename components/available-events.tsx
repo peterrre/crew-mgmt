@@ -9,6 +9,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Calendar, MapPin, Users, ClipboardCheck, Send, Loader2, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { CardGridSkeleton } from '@/components/ui/skeleton-loaders';
+import { EmptyState } from '@/components/ui/empty-state';
+import { toastApplicationSubmitted, toastLoadError, toastGenericError } from '@/lib/toast-helpers';
+import { useRouter } from 'next/navigation';
 
 interface AvailableEvent {
   id: string;
@@ -31,6 +35,7 @@ export default function AvailableEvents() {
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     fetchAvailableEvents();
@@ -46,11 +51,7 @@ export default function AvailableEvents() {
       }
     } catch (error) {
       console.error('Error fetching available events:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load available events',
-        variant: 'destructive',
-      });
+      toastLoadError('available events');
     } finally {
       setLoading(false);
     }
@@ -71,9 +72,8 @@ export default function AvailableEvents() {
       });
 
       if (response.ok) {
-        toast({
-          title: 'Application Submitted',
-          description: `Your application to ${applyingTo.name} has been submitted. You'll be notified once it's reviewed.`,
+        toastApplicationSubmitted(applyingTo.name, () => {
+          router.push('/my-applications');
         });
         setApplyingTo(null);
         setMessage('');
@@ -85,48 +85,27 @@ export default function AvailableEvents() {
         );
       } else {
         const data = await response.json();
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to submit application',
-          variant: 'destructive',
-        });
+        toastGenericError(data.error || 'Failed to submit application');
       }
     } catch (error) {
       console.error('Error submitting application:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to submit application',
-        variant: 'destructive',
-      });
+      toastGenericError('Failed to submit application');
     } finally {
       setSubmitting(false);
     }
   };
 
   if (loading) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin mr-2" />
-          <p className="text-gray-600 dark:text-slate-400">Loading available events...</p>
-        </CardContent>
-      </Card>
-    );
+    return <CardGridSkeleton cards={6} />;
   }
 
   if (events.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-8">
-          <ClipboardCheck className="w-12 h-12 text-gray-400 mb-3" />
-          <p className="text-gray-600 dark:text-slate-400 text-center">
-            No events are currently accepting volunteer applications.
-          </p>
-          <p className="text-sm text-gray-500 dark:text-slate-500 text-center mt-1">
-            Check back later for new opportunities!
-          </p>
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={ClipboardCheck}
+        title="No events available"
+        description="There are no events currently accepting volunteer applications. Check back later for new opportunities!"
+      />
     );
   }
 

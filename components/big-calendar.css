@@ -47,6 +47,8 @@
 
 .rbc-toolbar button {
   padding: 8px 16px;
+  min-height: 44px;
+  min-width: 44px;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
   background-color: white;
@@ -56,6 +58,13 @@
   position: relative;
   z-index: 10;
   pointer-events: auto;
+}
+
+@media (min-width: 768px) {
+  .rbc-toolbar button {
+    min-height: auto;
+    min-width: auto;
+  }
 }
 
 .dark .rbc-toolbar button {

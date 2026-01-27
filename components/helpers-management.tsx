@@ -11,6 +11,13 @@ import Link from 'next/link';
 import AddHelperDialog from '@/components/add-helper-dialog';
 import EditHelperDialog from '@/components/edit-helper-dialog';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { TableSkeleton } from '@/components/ui/skeleton-loaders';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Users } from 'lucide-react';
+import { themeConfig } from '@/lib/theme-config';
+import { useConfirmDialog } from '@/hooks/useConfirmDialog';
+import { useToast } from '@/hooks/use-toast';
+import { toastHelperDeleted, toastGenericError } from '@/lib/toast-helpers';
 
 interface Helper {
   id: string;
@@ -29,6 +36,8 @@ export default function HelpersManagement() {
   const [editingHelper, setEditingHelper] = useState<Helper | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
+  const { confirm, ConfirmDialog } = useConfirmDialog();
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchHelpers();
@@ -49,7 +58,21 @@ export default function HelpersManagement() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this helper?')) return;
+    const helper = helpers.find(h => h.id === id);
+    const confirmed = await confirm({
+      title: 'Delete Helper',
+      description: `Are you sure you want to delete ${helper?.name || helper?.email}? This action cannot be undone.`,
+      confirmText: 'Delete',
+      variant: 'destructive',
+    });
+
+    if (!confirmed) return;
+
+    // Store original state for rollback
+    const originalHelpers = [...helpers];
+
+    // Optimistic update: immediately remove from list
+    setHelpers((prev) => prev.filter((h) => h.id !== id));
 
     try {
       const response = await fetch(`/api/helpers/${id}`, {
@@ -57,10 +80,20 @@ export default function HelpersManagement() {
       });
 
       if (response.ok) {
+        toastHelperDeleted(helper?.name || helper?.email || 'User');
+        // Fetch fresh data to ensure sync
         fetchHelpers();
+      } else {
+        // Rollback on error
+        setHelpers(originalHelpers);
+        const data = await response.json();
+        toastGenericError(data.error || 'Failed to delete helper');
       }
     } catch (error) {
+      // Rollback on error
+      setHelpers(originalHelpers);
       console.error('Error deleting helper:', error);
+      toastGenericError('An unexpected error occurred');
     }
   };
 
@@ -90,9 +123,9 @@ export default function HelpersManagement() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className={`min-h-screen ${themeConfig.backgrounds.pageGradient}`}>
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-amber-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-amber-200 dark:border-slate-700 shadow-sm">
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
@@ -102,10 +135,10 @@ export default function HelpersManagement() {
                   Back
                 </Button>
               </Link>
-              <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-amber-500 rounded-xl flex items-center justify-center">
+              <div className={`w-10 h-10 ${themeConfig.backgrounds.logo} rounded-xl flex items-center justify-center`}>
                 <Calendar className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-sky-900 dark:text-white">Helpers Management</h1>
+              <h1 className="text-xl font-bold text-foreground">Helpers Management</h1>
             </div>
             <div className="flex items-center space-x-2">
               <ThemeToggle />
@@ -113,7 +146,6 @@ export default function HelpersManagement() {
                 variant="ghost"
                 size="sm"
                 onClick={handleSignOut}
-                className="text-sky-700 hover:text-sky-900 dark:text-slate-300 dark:hover:text-white"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign out
@@ -127,12 +159,11 @@ export default function HelpersManagement() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-sky-900 dark:text-white mb-2">Crew & Volunteers</h2>
-            <p className="text-sky-700 dark:text-slate-400">Manage your event helpers</p>
+            <h2 className="text-3xl font-bold text-foreground mb-2">Crew & Volunteers</h2>
+            <p className="text-muted-foreground">Manage your event helpers</p>
           </div>
           <Button
             onClick={() => setShowAddDialog(true)}
-            className="bg-amber-500 hover:bg-orange-600"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Helper
@@ -160,43 +191,64 @@ export default function HelpersManagement() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
-          </div>
+          <TableSkeleton rows={5} />
         ) : filteredHelpers.length === 0 ? (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-12 text-center shadow-lg border border-amber-100 dark:border-slate-700">
-            <p className="text-sky-700 dark:text-slate-400">
-              {helpers.length === 0 ? 'No helpers yet. Add your first helper!' : 'No helpers match your search criteria.'}
-            </p>
-          </div>
+          <EmptyState
+            icon={Users}
+            title={helpers.length === 0 ? 'No helpers yet' : 'No matching helpers'}
+            description={
+              helpers.length === 0
+                ? 'Get started by adding your first crew member or volunteer. They\'ll appear here once added.'
+                : 'No helpers match your search criteria. Try adjusting your filters or search term.'
+            }
+            action={
+              helpers.length === 0
+                ? {
+                    label: 'Add Helper',
+                    onClick: () => setShowAddDialog(true),
+                  }
+                : undefined
+            }
+            secondaryAction={
+              helpers.length > 0
+                ? {
+                    label: 'Clear Filters',
+                    onClick: () => {
+                      setSearchTerm('');
+                      setSelectedRole('all');
+                    },
+                  }
+                : undefined
+            }
+          />
         ) : (
           <div className="grid grid-cols-1 gap-4">
             {filteredHelpers.map((helper) => (
               <div
                 key={helper.id}
-                className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-amber-100 dark:border-slate-700"
+                className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-gray-200 dark:border-slate-700"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-bold text-sky-900 dark:text-white">
+                      <h3 className="text-lg font-bold text-foreground">
                         {helper?.name || 'Unnamed'}
                       </h3>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(helper?.role)}`}>
                         {helper?.role}
                       </span>
                     </div>
-                    <p className="text-sm text-sky-700 dark:text-slate-400">{helper?.email}</p>
+                    <p className="text-sm text-muted-foreground">{helper?.email}</p>
                     {helper?.role === 'VOLUNTEER' && (
                       <>
                         {helper?.availabilitySlots?.length > 0 ? (
-                          <p className="text-xs text-sky-600 dark:text-slate-500 mt-2">
+                          <p className="text-xs text-muted-foreground mt-2">
                             Available times: {helper.availabilitySlots.map((slot: any) =>
                               `${new Date(slot.start).toLocaleDateString()} ${new Date(slot.start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(slot.end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`
                             ).join(', ')}
                           </p>
                         ) : helper?.availability?.length > 0 ? (
-                          <p className="text-xs text-sky-600 dark:text-slate-500 mt-2">
+                          <p className="text-xs text-muted-foreground mt-2">
                             Available: {helper.availability.join(', ')}
                           </p>
                         ) : null}
@@ -248,6 +300,8 @@ export default function HelpersManagement() {
           }}
         />
       )}
+
+      <ConfirmDialog />
     </div>
   );
 }

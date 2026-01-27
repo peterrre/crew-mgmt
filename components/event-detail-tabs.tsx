@@ -41,31 +41,31 @@ export default function EventDetailTabs({ event }: EventDetailTabsProps) {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-5 mb-6">
-        <TabsTrigger value="overview" className="flex items-center gap-2">
+      <TabsList className="flex w-full overflow-x-auto sm:grid sm:grid-cols-5 mb-6 gap-1 sm:gap-0">
+        <TabsTrigger value="overview" className="flex items-center gap-2 min-w-[100px] sm:min-w-0 flex-shrink-0">
           <Info className="w-4 h-4" />
-          Overview
+          <span className="text-sm">Overview</span>
         </TabsTrigger>
-        <TabsTrigger value="crew" className="flex items-center gap-2">
+        <TabsTrigger value="crew" className="flex items-center gap-2 min-w-[100px] sm:min-w-0 flex-shrink-0">
           <Users className="w-4 h-4" />
-          Crew ({crewCount})
+          <span className="text-sm">Crew ({crewCount})</span>
         </TabsTrigger>
-        <TabsTrigger value="schedule" className="flex items-center gap-2">
+        <TabsTrigger value="schedule" className="flex items-center gap-2 min-w-[110px] sm:min-w-0 flex-shrink-0">
           <CalendarDays className="w-4 h-4" />
-          Schedule ({shiftsCount})
+          <span className="text-sm">Schedule ({shiftsCount})</span>
         </TabsTrigger>
-        <TabsTrigger value="applications" className="flex items-center gap-2">
+        <TabsTrigger value="applications" className="flex items-center gap-2 min-w-[130px] sm:min-w-0 flex-shrink-0">
           <UserPlus className="w-4 h-4" />
-          Applications
+          <span className="text-sm">Applications</span>
           {pendingApplicationsCount > 0 && (
             <span className="ml-1 px-2 py-0.5 bg-green-500 text-white text-xs font-medium rounded-full">
               {pendingApplicationsCount}
             </span>
           )}
         </TabsTrigger>
-        <TabsTrigger value="requests" className="flex items-center gap-2">
+        <TabsTrigger value="requests" className="flex items-center gap-2 min-w-[110px] sm:min-w-0 flex-shrink-0">
           <FileText className="w-4 h-4" />
-          Requests
+          <span className="text-sm">Requests</span>
           {pendingRequestsCount > 0 && (
             <span className="ml-1 px-2 py-0.5 bg-amber-500 text-white text-xs font-medium rounded-full">
               {pendingRequestsCount}
@@ -98,7 +98,7 @@ export default function EventDetailTabs({ event }: EventDetailTabsProps) {
                 <p className="mt-1">{event.contactPerson.name}</p>
               </div>
             )}
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
               <div className="bg-sky-50 dark:bg-sky-900/20 rounded-lg p-4">
                 <div className="text-2xl font-bold text-sky-600 dark:text-sky-400">{crewCount}</div>
                 <div className="text-sm text-muted-foreground">Crew Members</div>

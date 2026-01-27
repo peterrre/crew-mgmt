@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar, Loader2 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { themeConfig } from '@/lib/theme-config';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -59,14 +60,14 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4">
+    <div className={`min-h-screen flex items-center justify-center ${themeConfig.backgrounds.pageGradient} px-4`}>
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className={`w-16 h-16 ${themeConfig.backgrounds.logo} rounded-2xl flex items-center justify-center shadow-lg`}>
               <Calendar className="w-8 h-8 text-white" />
             </div>
           </div>

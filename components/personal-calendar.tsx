@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import CreateShiftRequestDialog from '@/components/create-shift-request-dialog';
+import { ShiftDetailSheet } from '@/components/shift-detail-sheet';
 
 const BigCalendar = dynamic(() => import('@/components/big-calendar'), {
   ssr: false,
@@ -29,6 +30,7 @@ export default function PersonalCalendar() {
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
+  const [showRequestDialog, setShowRequestDialog] = useState(false);
 
   useEffect(() => {
     fetchShifts();
@@ -73,13 +75,26 @@ export default function PersonalCalendar() {
         />
       )}
 
-      {selectedShift && (
+      <ShiftDetailSheet
+        shift={selectedShift}
+        open={!!selectedShift && !showRequestDialog}
+        onClose={() => setSelectedShift(null)}
+        onRequestChange={(shift) => {
+          setShowRequestDialog(true);
+        }}
+      />
+
+      {showRequestDialog && selectedShift && (
         <CreateShiftRequestDialog
           shift={selectedShift}
-          onClose={() => setSelectedShift(null)}
-          onSuccess={() => {
+          onClose={() => {
+            setShowRequestDialog(false);
             setSelectedShift(null);
-            fetchShifts(); // Refresh the calendar after successful request
+          }}
+          onSuccess={() => {
+            setShowRequestDialog(false);
+            setSelectedShift(null);
+            fetchShifts();
           }}
         />
       )}
