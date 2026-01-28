@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay, addDays, addWeeks } from 'date-fns';
+import { ChevronLeft, ChevronRight, CalendarDays, Columns3, CalendarRange, List } from 'lucide-react';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './big-calendar.css';
 
@@ -101,11 +102,11 @@ const CustomAgenda = ({ events, onSelectEvent }: { events: any[]; onSelectEvent?
   }
 
   return (
-    <div className="space-y-4 p-4 max-h-[600px] overflow-y-auto">
+    <div className="space-y-4 p-2 md:p-4 max-h-[600px] overflow-y-auto">
       {Object.entries(groupedByDate).map(([dateKey, dayEvents]) => (
-        <div key={dateKey} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden">
-          <div className="bg-sky-50 dark:bg-slate-700 px-4 py-3 border-b border-gray-200 dark:border-slate-600">
-            <h3 className="font-semibold text-sky-900 dark:text-white">
+        <div key={dateKey} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden shadow-sm">
+          <div className="bg-sky-50 dark:bg-slate-700 px-3 md:px-4 py-3 border-b border-gray-200 dark:border-slate-600">
+            <h3 className="font-semibold text-sm md:text-base text-sky-900 dark:text-white">
               {format(new Date(dateKey), 'EEEE, MMMM d, yyyy')}
             </h3>
           </div>
@@ -116,21 +117,25 @@ const CustomAgenda = ({ events, onSelectEvent }: { events: any[]; onSelectEvent?
                 <div
                   key={event.id || idx}
                   onClick={() => onSelectEvent?.(event)}
-                  className="flex items-center gap-4 px-4 py-3 hover:bg-amber-50 dark:hover:bg-slate-600 cursor-pointer transition-colors"
+                  className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 px-3 md:px-4 py-4 min-h-[56px] hover:bg-amber-50 dark:hover:bg-slate-600 cursor-pointer transition-colors active:bg-amber-100 dark:active:bg-slate-500"
                 >
-                  <div className={`w-3 h-3 rounded-full ${getRoleColor(event)}`} />
-                  <div className="w-32 text-sm text-gray-600 dark:text-slate-300 font-medium">
-                    {format(new Date(event.start), 'HH:mm')} - {format(new Date(event.end), 'HH:mm')}
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className={`w-3 h-3 md:w-3 md:h-3 rounded-full flex-shrink-0 ${getRoleColor(event)}`} />
+                    <div className="min-w-[110px] text-sm text-gray-600 dark:text-slate-300 font-medium">
+                      {format(new Date(event.start), 'HH:mm')} - {format(new Date(event.end), 'HH:mm')}
+                    </div>
                   </div>
-                  <div className="flex-1 flex items-center gap-2">
-                    {eventBadge && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                        {eventBadge}
-                      </span>
-                    )}
-                    <span className="font-medium text-gray-900 dark:text-white">{event.title}</span>
-                    <span className="text-gray-500 dark:text-slate-400">
-                      — {getAssignmentDisplay(event)}
+                  <div className="flex-1 flex flex-col md:flex-row md:items-center gap-1 md:gap-2 ml-6 md:ml-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {eventBadge && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                          {eventBadge}
+                        </span>
+                      )}
+                      <span className="font-medium text-gray-900 dark:text-white">{event.title}</span>
+                    </div>
+                    <span className="text-sm text-gray-500 dark:text-slate-400">
+                      {getAssignmentDisplay(event)}
                     </span>
                   </div>
                 </div>
@@ -313,19 +318,54 @@ export default function BigCalendar({
           </div>
         </div>
         <div className="rbc-toolbar" style={{ padding: '16px 0', marginBottom: '16px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-          <div className="rbc-btn-group">
-            <button type="button" onClick={() => handleNavigate(new Date())} className="min-h-[44px] md:min-h-auto">Today</button>
-            <button type="button" onClick={() => handleNavigate(new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000))} className="min-h-[44px] md:min-h-auto">Back</button>
-            <button type="button" onClick={() => handleNavigate(new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000))} className="min-h-[44px] md:min-h-auto">Next</button>
+          <div className="rbc-btn-group flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => handleNavigate(new Date())}
+              className="min-h-[44px] md:min-h-auto px-3"
+              title="Go to today"
+            >
+              {isMobile ? <CalendarDays className="w-5 h-5" /> : 'Today'}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleNavigate(new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000))}
+              className="min-h-[44px] min-w-[44px] md:min-h-auto flex items-center justify-center"
+              title="Previous week"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleNavigate(new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000))}
+              className="min-h-[44px] min-w-[44px] md:min-h-auto flex items-center justify-center"
+              title="Next week"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
           <span className="rbc-toolbar-label font-semibold text-sm md:text-base">
             {format(currentDate, isMobile ? 'MMM yyyy' : 'MMMM yyyy')}
           </span>
-          <div className="rbc-btn-group">
+          <div className="rbc-btn-group flex items-center gap-2">
             {!isMobile && <button type="button" onClick={() => handleView('month')}>Month</button>}
             {!isMobile && <button type="button" onClick={() => handleView('week')}>Week</button>}
-            <button type="button" onClick={() => handleView('day')} className="min-h-[44px] md:min-h-auto">Day</button>
-            <button type="button" className="rbc-active min-h-[44px] md:min-h-auto" onClick={() => handleView('agenda')}>Agenda</button>
+            <button
+              type="button"
+              onClick={() => handleView('day')}
+              className="min-h-[44px] md:min-h-auto px-3 flex items-center gap-2"
+              title="Day view"
+            >
+              {isMobile ? <CalendarRange className="w-5 h-5" /> : 'Day'}
+            </button>
+            <button
+              type="button"
+              className="rbc-active min-h-[44px] md:min-h-auto px-3 flex items-center gap-2"
+              onClick={() => handleView('agenda')}
+              title="Agenda view"
+            >
+              {isMobile ? <List className="w-5 h-5" /> : 'Agenda'}
+            </button>
           </div>
         </div>
         <CustomAgenda events={events} onSelectEvent={onSelectEvent} />
