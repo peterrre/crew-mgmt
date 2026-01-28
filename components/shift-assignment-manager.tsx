@@ -64,14 +64,23 @@ export default function ShiftAssignmentManager({
   const [error, setError] = useState<string | null>(null);
   const [userConflicts, setUserConflicts] = useState<Map<string, { title: string; start: Date; end: Date }>>(new Map());
 
-  const responsible = assignments.find((a) => a.role === 'RESPONSIBLE');
-  const helpers = assignments.filter((a) => a.role === 'HELPER');
-  const currentCount = assignments.length;
+  // Optimistic UI state
+  const [optimisticAssignments, setOptimisticAssignments] = useState<Assignment[]>(assignments);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
+
+  // Update optimistic state when props change
+  useEffect(() => {
+    setOptimisticAssignments(assignments);
+  }, [assignments]);
+
+  const responsible = optimisticAssignments.find((a) => a.role === 'RESPONSIBLE');
+  const helpers = optimisticAssignments.filter((a) => a.role === 'HELPER');
+  const currentCount = optimisticAssignments.length;
   const needsMore = currentCount < minHelpers;
   const atMax = maxHelpers > 0 && currentCount >= maxHelpers;
 
   // Get available crew members (not already assigned)
-  const assignedUserIds = new Set(assignments.map((a) => a.user.id));
+  const assignedUserIds = new Set(optimisticAssignments.map((a) => a.user.id));
   const availableCrew = crew.filter((c) => !assignedUserIds.has(c.user.id));
 
   // Fetch conflicts for available crew members
@@ -138,6 +147,20 @@ export default function ShiftAssignmentManager({
     setLoading(true);
     setError(null);
 
+    // Find the user being assigned
+    const user = crew.find((c) => c.user.id === selectedUserId)?.user;
+    if (!user) return;
+
+    // Optimistic update - add assignment immediately
+    const optimisticAssignment: Assignment = {
+      id: `temp-${Date.now()}`,
+      role,
+      user,
+    };
+    setOptimisticAssignments((prev) => [...prev, optimisticAssignment]);
+    setPendingAction('add');
+    setSelectedUserId('');
+
     try {
       const response = await fetch(`/api/shifts/${shiftId}/assignments`, {
         method: 'POST',
@@ -153,18 +176,26 @@ export default function ShiftAssignmentManager({
         throw new Error(data.error || 'Failed to add assignment');
       }
 
-      setSelectedUserId('');
+      // Success - refresh from server
       onAssignmentChange();
     } catch (err) {
+      // Rollback on error
+      setOptimisticAssignments(assignments);
       setError(err instanceof Error ? err.message : 'Failed to add assignment');
     } finally {
       setLoading(false);
+      setPendingAction(null);
     }
   };
 
   const handleRemoveAssignment = async (assignmentId: string) => {
     setLoading(true);
     setError(null);
+
+    // Optimistic update - remove assignment immediately
+    const previousAssignments = optimisticAssignments;
+    setOptimisticAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
+    setPendingAction('remove');
 
     try {
       const response = await fetch(`/api/shifts/${shiftId}/assignments`, {
@@ -178,11 +209,15 @@ export default function ShiftAssignmentManager({
         throw new Error(data.error || 'Failed to remove assignment');
       }
 
+      // Success - refresh from server
       onAssignmentChange();
     } catch (err) {
+      // Rollback on error
+      setOptimisticAssignments(previousAssignments);
       setError(err instanceof Error ? err.message : 'Failed to remove assignment');
     } finally {
       setLoading(false);
+      setPendingAction(null);
     }
   };
 
@@ -236,7 +271,7 @@ export default function ShiftAssignmentManager({
           Responsible Person
         </label>
         {responsible ? (
-          <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800">
+          <div className={`flex items-center justify-between bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-800 transition-opacity ${pendingAction ? 'opacity-60' : 'opacity-100'}`}>
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
               <span className="font-medium text-gray-900 dark:text-white">
@@ -245,6 +280,11 @@ export default function ShiftAssignmentManager({
               <Badge variant="outline" className="text-xs">
                 {responsible.user.role}
               </Badge>
+              {pendingAction && responsible.id.startsWith('temp-') && (
+                <Badge variant="secondary" className="text-xs">
+                  Saving...
+                </Badge>
+              )}
             </div>
             {canSetResponsible && helpers.length === 0 && (
               <Button
@@ -311,7 +351,7 @@ export default function ShiftAssignmentManager({
             {helpers.map((helper) => (
               <div
                 key={helper.id}
-                className="flex items-center justify-between bg-gray-50 dark:bg-slate-800 px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700"
+                className={`flex items-center justify-between bg-gray-50 dark:bg-slate-800 px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 transition-opacity ${pendingAction ? 'opacity-60' : 'opacity-100'}`}
               >
                 <div className="flex items-center gap-2">
                   <span className="text-gray-900 dark:text-white">
@@ -320,6 +360,11 @@ export default function ShiftAssignmentManager({
                   <Badge variant="outline" className="text-xs">
                     {helper.user.role}
                   </Badge>
+                  {pendingAction && helper.id.startsWith('temp-') && (
+                    <Badge variant="secondary" className="text-xs">
+                      Saving...
+                    </Badge>
+                  )}
                 </div>
                 {canManage && (
                   <Button
