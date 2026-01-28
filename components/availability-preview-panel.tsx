@@ -37,7 +37,18 @@ function isShiftMatching(shift: Shift, availability: AvailabilitySlot[]): boolea
     if (!slot.start || !slot.end) return false;
     const slotStart = new Date(slot.start);
     const slotEnd = new Date(slot.end);
-    return shiftStart >= slotStart && shiftEnd <= slotEnd;
+    const matches = shiftStart >= slotStart && shiftEnd <= slotEnd;
+
+    // Enhanced debug logging
+    if (matches) {
+      console.log('[AvailabilityPreview] MATCH FOUND!', {
+        shift: shift.title,
+        shiftTime: `${shiftStart.toISOString()} - ${shiftEnd.toISOString()}`,
+        slotTime: `${slotStart.toISOString()} - ${slotEnd.toISOString()}`
+      });
+    }
+
+    return matches;
   });
 }
 
@@ -50,23 +61,40 @@ export default function AvailabilityPreviewPanel({
   useEffect(() => {
     const fetchShifts = async () => {
       try {
-        // Use the unassigned shifts endpoint so volunteers can see available shifts
+        console.log('[AvailabilityPreview] === FETCH START ===');
         console.log('[AvailabilityPreview] Fetching unassigned shifts...');
         const response = await fetch('/api/shifts/unassigned');
         console.log('[AvailabilityPreview] Response status:', response.status);
+        console.log('[AvailabilityPreview] Response OK?', response.ok);
 
         if (response.ok) {
           const data = await response.json();
-          console.log('[AvailabilityPreview] Received shifts:', data.shifts?.length || 0, 'shifts');
-          console.log('[AvailabilityPreview] First shift:', data.shifts?.[0]);
+          console.log('[AvailabilityPreview] Data received:', data);
+          console.log('[AvailabilityPreview] Shifts array:', data.shifts);
+          console.log('[AvailabilityPreview] Number of shifts:', data.shifts?.length || 0);
+
+          if (data.shifts && data.shifts.length > 0) {
+            console.log('[AvailabilityPreview] First shift details:', {
+              id: data.shifts[0].id,
+              title: data.shifts[0].title,
+              start: data.shifts[0].start,
+              end: data.shifts[0].end,
+              event: data.shifts[0].event
+            });
+          }
+
           setShifts(data.shifts || []);
+          console.log('[AvailabilityPreview] State updated with', data.shifts?.length || 0, 'shifts');
         } else {
-          console.error('[AvailabilityPreview] Failed to fetch:', await response.text());
+          const errorText = await response.text();
+          console.error('[AvailabilityPreview] Failed to fetch. Status:', response.status, 'Error:', errorText);
         }
       } catch (error) {
-        console.error('[AvailabilityPreview] Error fetching shifts:', error);
+        console.error('[AvailabilityPreview] Error in fetch:', error);
+        console.error('[AvailabilityPreview] Error stack:', error instanceof Error ? error.stack : 'N/A');
       } finally {
         setLoading(false);
+        console.log('[AvailabilityPreview] === FETCH END ===');
       }
     };
 
@@ -74,14 +102,31 @@ export default function AvailabilityPreviewPanel({
   }, []);
 
   const { matchingShifts, nonMatchingShifts } = useMemo(() => {
-    if (!shifts.length) return { matchingShifts: [], nonMatchingShifts: [] };
+    console.log('[AvailabilityPreview] === MATCHING START ===');
+    console.log('[AvailabilityPreview] Shifts to match:', shifts.length);
+    console.log('[AvailabilityPreview] Availability slots:', availability.length);
 
-    console.log('[AvailabilityPreview] Matching shifts against', availability.length, 'availability slots');
+    if (!shifts.length) {
+      console.log('[AvailabilityPreview] No shifts to match, returning empty arrays');
+      return { matchingShifts: [], nonMatchingShifts: [] };
+    }
+
+    if (availability.length > 0) {
+      console.log('[AvailabilityPreview] Sample availability slot:', {
+        start: availability[0].start,
+        end: availability[0].end,
+        isRecurring: availability[0].isRecurring
+      });
+    }
+
     const matching: Shift[] = [];
     const nonMatching: Shift[] = [];
 
-    shifts.forEach((shift) => {
+    shifts.forEach((shift, index) => {
+      console.log(`[AvailabilityPreview] Checking shift ${index + 1}/${shifts.length}:`, shift.title);
       const matches = availability.length > 0 && isShiftMatching(shift, availability);
+      console.log(`[AvailabilityPreview] Shift "${shift.title}" matches?`, matches);
+
       if (matches) {
         matching.push(shift);
       } else {
@@ -89,7 +134,11 @@ export default function AvailabilityPreviewPanel({
       }
     });
 
-    console.log('[AvailabilityPreview] Results:', matching.length, 'matching,', nonMatching.length, 'non-matching');
+    console.log('[AvailabilityPreview] === MATCHING RESULTS ===');
+    console.log('[AvailabilityPreview] Matching shifts:', matching.length, matching.map(s => s.title));
+    console.log('[AvailabilityPreview] Non-matching shifts:', nonMatching.length, nonMatching.map(s => s.title));
+    console.log('[AvailabilityPreview] === MATCHING END ===');
+
     return { matchingShifts: matching, nonMatchingShifts: nonMatching };
   }, [shifts, availability]);
 

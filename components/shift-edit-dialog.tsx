@@ -262,6 +262,8 @@ export default function ShiftEditDialog({
           <div className="pt-4 border-t border-border">
             <ShiftAssignmentManager
               shiftId={shift.id}
+              shiftStart={currentShift.start}
+              shiftEnd={currentShift.end}
               assignments={currentShift.assignments || []}
               crew={crew}
               minHelpers={currentShift.minHelpers || 1}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -36,6 +36,8 @@ interface CrewMember {
 
 interface ShiftAssignmentManagerProps {
   shiftId: string;
+  shiftStart: Date;
+  shiftEnd: Date;
   assignments: Assignment[];
   crew: CrewMember[];
   minHelpers: number;
@@ -47,6 +49,8 @@ interface ShiftAssignmentManagerProps {
 
 export default function ShiftAssignmentManager({
   shiftId,
+  shiftStart,
+  shiftEnd,
   assignments,
   crew,
   minHelpers,
@@ -58,6 +62,7 @@ export default function ShiftAssignmentManager({
   const [loading, setLoading] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [userConflicts, setUserConflicts] = useState<Map<string, { title: string; start: Date; end: Date }>>(new Map());
 
   const responsible = assignments.find((a) => a.role === 'RESPONSIBLE');
   const helpers = assignments.filter((a) => a.role === 'HELPER');
@@ -68,6 +73,64 @@ export default function ShiftAssignmentManager({
   // Get available crew members (not already assigned)
   const assignedUserIds = new Set(assignments.map((a) => a.user.id));
   const availableCrew = crew.filter((c) => !assignedUserIds.has(c.user.id));
+
+  // Fetch conflicts for available crew members
+  useEffect(() => {
+    const fetchConflicts = async () => {
+      if (availableCrew.length === 0) return;
+
+      try {
+        // Fetch all shifts with assignments for the event
+        const response = await fetch(`/api/shifts?eventId=${shiftId.split('_')[0]}`);
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const allShifts = data.shifts || [];
+
+        const conflicts = new Map<string, { title: string; start: Date; end: Date }>();
+        const currentShiftStart = new Date(shiftStart);
+        const currentShiftEnd = new Date(shiftEnd);
+
+        // Check each available crew member for conflicts
+        availableCrew.forEach((member) => {
+          const userId = member.user.id;
+
+          // Find if this user is assigned to any shift that overlaps
+          const conflictingShift = allShifts.find((shift: any) => {
+            if (shift.id === shiftId) return false; // Skip current shift
+
+            const hasAssignment = shift.assignments?.some(
+              (a: any) => a.userId === userId
+            );
+            if (!hasAssignment) return false;
+
+            // Check for time overlap
+            const shiftStartTime = new Date(shift.start);
+            const shiftEndTime = new Date(shift.end);
+
+            return (
+              (shiftStartTime < currentShiftEnd && shiftEndTime > currentShiftStart) ||
+              (currentShiftStart < shiftEndTime && currentShiftEnd > shiftStartTime)
+            );
+          });
+
+          if (conflictingShift) {
+            conflicts.set(userId, {
+              title: conflictingShift.title,
+              start: new Date(conflictingShift.start),
+              end: new Date(conflictingShift.end),
+            });
+          }
+        });
+
+        setUserConflicts(conflicts);
+      } catch (error) {
+        console.error('Failed to fetch conflicts:', error);
+      }
+    };
+
+    fetchConflicts();
+  }, [availableCrew.length, shiftId, shiftStart, shiftEnd]);
 
   const handleAddAssignment = async (role: 'RESPONSIBLE' | 'HELPER') => {
     if (!selectedUserId) return;
@@ -155,6 +218,18 @@ export default function ShiftAssignmentManager({
         </div>
       )}
 
+      {/* Conflict warning */}
+      {selectedUserId && userConflicts.has(selectedUserId) && (
+        <div className="text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded border border-amber-200 dark:border-amber-800 flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <div>
+            <strong>Scheduling Conflict:</strong> This person is already assigned to{' '}
+            <strong>"{userConflicts.get(selectedUserId)?.title}"</strong> during this time.
+            Assigning them will fail.
+          </div>
+        </div>
+      )}
+
       {/* Responsible person */}
       <div className="space-y-2">
         <label className="text-xs font-medium text-gray-600 dark:text-slate-400 uppercase tracking-wide">
@@ -190,11 +265,24 @@ export default function ShiftAssignmentManager({
                 <SelectValue placeholder="Select responsible person..." />
               </SelectTrigger>
               <SelectContent>
-                {availableCrew.map((member) => (
-                  <SelectItem key={member.user.id} value={member.user.id}>
-                    {member.user.name || member.user.email} ({member.user.role})
-                  </SelectItem>
-                ))}
+                {availableCrew.map((member) => {
+                  const conflict = userConflicts.get(member.user.id);
+                  return (
+                    <SelectItem key={member.user.id} value={member.user.id}>
+                      <div className="flex items-center gap-2 w-full">
+                        <span>
+                          {member.user.name || member.user.email} ({member.user.role})
+                        </span>
+                        {conflict && (
+                          <Badge variant="destructive" className="text-xs ml-auto">
+                            <AlertCircle className="w-3 h-3 mr-1" />
+                            Conflict
+                          </Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
             <Button
@@ -262,11 +350,24 @@ export default function ShiftAssignmentManager({
               <SelectValue placeholder="Add helper..." />
             </SelectTrigger>
             <SelectContent>
-              {availableCrew.map((member) => (
-                <SelectItem key={member.user.id} value={member.user.id}>
-                  {member.user.name || member.user.email} ({member.user.role})
-                </SelectItem>
-              ))}
+              {availableCrew.map((member) => {
+                const conflict = userConflicts.get(member.user.id);
+                return (
+                  <SelectItem key={member.user.id} value={member.user.id}>
+                    <div className="flex items-center gap-2 w-full">
+                      <span>
+                        {member.user.name || member.user.email} ({member.user.role})
+                      </span>
+                      {conflict && (
+                        <Badge variant="destructive" className="text-xs ml-auto">
+                          <AlertCircle className="w-3 h-3 mr-1" />
+                          Conflict
+                        </Badge>
+                      )}
+                    </div>
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
           <Button

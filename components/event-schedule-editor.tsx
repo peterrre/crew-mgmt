@@ -99,12 +99,23 @@ export default function EventScheduleEditor({
   const [calendarDate, setCalendarDate] = useState(new Date(eventStartDate));
   const [calendarView, setCalendarView] = useState<View>('week');
 
-  // Helper function to check if a user has availability during a time period
+  // Helper function to check if a specific user has availability during a time period
   const checkHelperAvailability = useCallback(
     (userId: string, shiftStart: Date, shiftEnd: Date) => {
       return availability.some((slot) => {
         if (slot.userId !== userId) return false;
-        // Check if availability slot overlaps with shift
+        // Check if availability slot contains the entire shift (complete containment)
+        return slot.start <= shiftStart && slot.end >= shiftEnd;
+      });
+    },
+    [availability]
+  );
+
+  // Helper function to check if ANY volunteer has availability during a shift
+  const checkAnyVolunteerAvailability = useCallback(
+    (shiftStart: Date, shiftEnd: Date) => {
+      return availability.some((slot) => {
+        // Check if availability slot contains the entire shift (complete containment)
         return slot.start <= shiftStart && slot.end >= shiftEnd;
       });
     },
@@ -115,25 +126,29 @@ export default function EventScheduleEditor({
     let filtered = shifts;
     switch (filter) {
       case 'assigned':
-        filtered = shifts.filter((s) => s.helperId);
+        filtered = shifts.filter((s) => s.helperId || s.assignments?.length > 0);
         break;
       case 'unassigned':
-        filtered = shifts.filter((s) => !s.helperId);
+        // Show shifts with no assignments OR below minimum required helpers
+        filtered = shifts.filter((s) => {
+          const assignmentCount = s.assignments?.length || 0;
+          return assignmentCount === 0 || assignmentCount < s.minHelpers;
+        });
         break;
       default:
         filtered = shifts;
     }
 
-    // If "Matching" filter is enabled, only show shifts where helper has availability
+    // If "Matching" filter is enabled, only show shifts that match volunteer availability
     if (showMatchingOnly) {
       filtered = filtered.filter((shift) => {
-        if (!shift.helperId) return false;
-        return checkHelperAvailability(shift.helperId, shift.start, shift.end);
+        // Show shifts that have matching volunteer availability
+        return checkAnyVolunteerAvailability(shift.start, shift.end);
       });
     }
 
     return filtered;
-  }, [shifts, filter, showMatchingOnly, checkHelperAvailability]);
+  }, [shifts, filter, showMatchingOnly, checkAnyVolunteerAvailability]);
 
   // Merge shifts with availability for calendar display using custom hook
   const calendarEvents = useAvailabilityOverlay({
@@ -143,8 +158,14 @@ export default function EventScheduleEditor({
   });
 
   const counts = useMemo(() => {
-    const assigned = shifts.filter((s) => s.helperId).length;
-    const unassigned = shifts.filter((s) => !s.helperId).length;
+    const assigned = shifts.filter((s) => {
+      const assignmentCount = s.assignments?.length || 0;
+      return assignmentCount > 0 && assignmentCount >= s.minHelpers;
+    }).length;
+    const unassigned = shifts.filter((s) => {
+      const assignmentCount = s.assignments?.length || 0;
+      return assignmentCount === 0 || assignmentCount < s.minHelpers;
+    }).length;
     return { crew: assigned, volunteer: 0, unassigned, availability: availability.length };
   }, [shifts, availability]);
 
