@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
@@ -60,70 +60,38 @@ async function checkForOverlappingShifts(
 }
 
 /**
- * GET /api/shifts/:id/assignments
- * List all assignments for a shift
+ * Verify user has permission to manage shift assignments
+ * Returns true if user is Admin, Crew, or the current RESPONSIBLE of the shift
  */
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { id: shiftId } = await params;
-
-    const shift = await prisma.shift.findUnique({
-      where: { id: shiftId },
-      include: {
-        assignments: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-              },
-            },
-          },
-          orderBy: {
-            role: 'asc', // RESPONSIBLE comes before HELPER
-          },
-        },
-      },
-    });
-
-    if (!shift) {
-      return NextResponse.json({ error: 'Shift not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({
-      assignments: shift.assignments,
-      minHelpers: shift.minHelpers,
-      maxHelpers: shift.maxHelpers,
-    });
-  } catch (error) {
-    console.error('Error fetching shift assignments:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch assignments' },
-      { status: 500 }
-    );
+async function canManageAssignments(
+  shiftId: string,
+  userId: string,
+  userRole: string
+): Promise<boolean> {
+  // Admin and Crew can always manage
+  if (userRole === 'ADMIN' || userRole === 'CREW') {
+    return true;
   }
+
+  // Otherwise, must be the current RESPONSIBLE of the shift
+  const responsibleAssignment = await prisma.shiftAssignment.findFirst({
+    where: {
+      shiftId,
+      userId,
+      role: 'RESPONSIBLE',
+    },
+  });
+
+  return !!responsibleAssignment;
 }
 
 /**
- * POST /api/shifts/:id/assignments
- * Add a new assignment to a shift
- *
- * Permission: ADMIN can always add, RESPONSIBLE person can add HELPERS
+ * POST /api/shifts/[id]/assignments
+ * Add a user as an assignment to a shift
  */
 export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -132,26 +100,15 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const userRole = (session.user as any).role;
     const currentUserId = (session.user as any).id;
-    const currentUserRole = (session.user as any).role;
-    const { id: shiftId } = await params;
+    const shiftId = params.id;
 
-    const body = await request.json();
-    const { userId, role = 'HELPER' } = body;
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'userId is required' },
-        { status: 400 }
-      );
-    }
-
-    // Get shift with current assignments
+    // Get shift details
     const shift = await prisma.shift.findUnique({
       where: { id: shiftId },
       include: {
         assignments: true,
-        event: true,
       },
     });
 
@@ -159,30 +116,30 @@ export async function POST(
       return NextResponse.json({ error: 'Shift not found' }, { status: 404 });
     }
 
-    // Check permissions
-    const isAdmin = currentUserRole === 'ADMIN';
-    const isResponsible = shift.assignments.some(
-      (a) => a.userId === currentUserId && a.role === 'RESPONSIBLE'
+    // Check if user has permission to manage this shift
+    const hasPermission = await canManageAssignments(shiftId, currentUserId, userRole);
+    if (!hasPermission) {
+      return NextResponse.json(
+        { error: 'You do not have permission to manage this shift' },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const { userId, role: requestedRole } = body;
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Check if user is already assigned to this shift
+    const existingAssignment = shift.assignments.find(
+      (a) => a.userId === userId
     );
 
-    // Only ADMIN can set RESPONSIBLE role
-    if (role === 'RESPONSIBLE' && !isAdmin) {
-      return NextResponse.json(
-        { error: 'Only admins can assign the RESPONSIBLE role' },
-        { status: 403 }
-      );
-    }
-
-    // ADMIN or RESPONSIBLE can add HELPERS
-    if (!isAdmin && !isResponsible) {
-      return NextResponse.json(
-        { error: 'Only admins or the responsible person can add helpers' },
-        { status: 403 }
-      );
-    }
-
-    // Check if user is already assigned
-    const existingAssignment = shift.assignments.find((a) => a.userId === userId);
     if (existingAssignment) {
       return NextResponse.json(
         { error: 'User is already assigned to this shift' },
@@ -190,44 +147,58 @@ export async function POST(
       );
     }
 
+    // Determine role: if no RESPONSIBLE exists, this user becomes RESPONSIBLE
+    const hasResponsible = shift.assignments.some((a) => a.role === 'RESPONSIBLE');
+    const role: 'RESPONSIBLE' | 'HELPER' =
+      !hasResponsible || requestedRole === 'RESPONSIBLE' ? 'RESPONSIBLE' : 'HELPER';
+
+    // If user explicitly requested RESPONSIBLE but one already exists, reject
+    if (requestedRole === 'RESPONSIBLE' && hasResponsible) {
+      return NextResponse.json(
+        { error: 'This shift already has a responsible person' },
+        { status: 400 }
+      );
+    }
+
+    // Only Admin/Crew can assign RESPONSIBLE role
+    if (role === 'RESPONSIBLE' && userRole === 'VOLUNTEER') {
+      return NextResponse.json(
+        { error: 'Only Admin or Crew can assign a responsible person' },
+        { status: 403 }
+      );
+    }
+
     // Check max helpers limit
-    if (shift.maxHelpers && shift.assignments.length >= shift.maxHelpers) {
+    const currentHelperCount = shift.assignments.filter(
+      (a) => a.role === 'HELPER'
+    ).length;
+
+    if (role === 'HELPER' && currentHelperCount >= shift.maxHelpers) {
       return NextResponse.json(
-        { error: `Maximum number of helpers (${shift.maxHelpers}) already assigned` },
+        { error: 'Maximum number of helpers reached for this shift' },
         { status: 400 }
       );
     }
 
-    // Verify user is in event crew
-    const eventCrew = await prisma.eventCrew.findUnique({
-      where: {
-        eventId_userId: {
-          eventId: shift.eventId,
-          userId,
-        },
-      },
-    });
-
-    if (!eventCrew) {
-      return NextResponse.json(
-        { error: 'User must be assigned to event crew first' },
-        { status: 400 }
-      );
-    }
-
-    // Check for overlapping shift assignments for the same user
+    // Check overlap for the user being assigned
     const overlappingShifts = await checkForOverlappingShifts(
       userId,
       shift.eventId,
       shift.start,
       shift.end,
-      shift.id // Exclude the current shift
+      shiftId
     );
 
     if (overlappingShifts.length > 0) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true, email: true },
+      });
+      const userName = user?.name || user?.email || 'User';
       const conflictingShift = overlappingShifts[0];
+
       const formatTime = (date: Date) => {
-        return new Date(date).toLocaleString('en-US', {
+        return date.toLocaleString('en-US', {
           month: 'short',
           day: 'numeric',
           hour: 'numeric',
@@ -237,33 +208,42 @@ export async function POST(
 
       return NextResponse.json(
         {
-          error: `User is already assigned to "${conflictingShift.title}" (${formatTime(conflictingShift.start)} - ${formatTime(conflictingShift.end)}) which overlaps with this shift`,
+          error: `${userName} is already assigned to "${conflictingShift.title}" (${formatTime(conflictingShift.start)} - ${formatTime(conflictingShift.end)}) which overlaps with this shift`,
+          code: 'OVERLAP_CONFLICT',
         },
         { status: 400 }
       );
     }
 
-    // Create the assignment
-    const assignment = await prisma.$transaction(async (tx) => {
-      const newAssignment = await tx.shiftAssignment.create({
+    // Verify user is in event crew
+    const eventCrewMember = await prisma.eventCrew.findUnique({
+      where: {
+        eventId_userId: {
+          eventId: shift.eventId,
+          userId,
+        },
+      },
+    });
+
+    if (!eventCrewMember) {
+      return NextResponse.json(
+        { error: 'User must be a crew member of the event first' },
+        { status: 400 }
+      );
+    }
+
+    // Create assignment in transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create the assignment
+      await tx.shiftAssignment.create({
         data: {
           shiftId,
           userId,
-          role: role as 'RESPONSIBLE' | 'HELPER',
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-            },
-          },
+          role,
         },
       });
 
-      // Update legacy helperId for backward compatibility (only for RESPONSIBLE)
+      // Update legacy helperId if this is a RESPONSIBLE assignment
       if (role === 'RESPONSIBLE') {
         await tx.shift.update({
           where: { id: shiftId },
@@ -271,138 +251,43 @@ export async function POST(
         });
       }
 
-      return newAssignment;
+      // Return updated shift
+      return tx.shift.findUnique({
+        where: { id: shiftId },
+        include: {
+          assignments: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  role: true,
+                },
+              },
+            },
+            orderBy: {
+              role: 'asc',
+            },
+          },
+          event: {
+            select: {
+              id: true,
+              name: true,
+              startDate: true,
+              endDate: true,
+              location: true,
+            },
+          },
+        },
+      });
     });
 
-    return NextResponse.json({ assignment }, { status: 201 });
+    return NextResponse.json({ shift: result });
   } catch (error) {
     console.error('Error creating shift assignment:', error);
     return NextResponse.json(
-      { error: 'Failed to create assignment' },
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * DELETE /api/shifts/:id/assignments
- * Remove an assignment from a shift
- *
- * Body: { assignmentId: string } or { userId: string }
- *
- * Permission:
- * - ADMIN can remove anyone
- * - RESPONSIBLE can remove HELPERS (not self)
- * - HELPER can remove only self
- */
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const currentUserId = (session.user as any).id;
-    const currentUserRole = (session.user as any).role;
-    const { id: shiftId } = await params;
-
-    const body = await request.json();
-    const { assignmentId, userId: targetUserId } = body;
-
-    if (!assignmentId && !targetUserId) {
-      return NextResponse.json(
-        { error: 'assignmentId or userId is required' },
-        { status: 400 }
-      );
-    }
-
-    // Get shift with assignments
-    const shift = await prisma.shift.findUnique({
-      where: { id: shiftId },
-      include: {
-        assignments: true,
-      },
-    });
-
-    if (!shift) {
-      return NextResponse.json({ error: 'Shift not found' }, { status: 404 });
-    }
-
-    // Find the assignment to delete
-    const assignmentToDelete = assignmentId
-      ? shift.assignments.find((a) => a.id === assignmentId)
-      : shift.assignments.find((a) => a.userId === targetUserId);
-
-    if (!assignmentToDelete) {
-      return NextResponse.json(
-        { error: 'Assignment not found' },
-        { status: 404 }
-      );
-    }
-
-    // Check permissions
-    const isAdmin = currentUserRole === 'ADMIN';
-    const isResponsible = shift.assignments.some(
-      (a) => a.userId === currentUserId && a.role === 'RESPONSIBLE'
-    );
-    const isRemovingSelf = assignmentToDelete.userId === currentUserId;
-
-    // Permission check
-    if (!isAdmin) {
-      if (assignmentToDelete.role === 'RESPONSIBLE') {
-        // Only admin can remove RESPONSIBLE
-        return NextResponse.json(
-          { error: 'Only admins can remove the responsible person' },
-          { status: 403 }
-        );
-      }
-
-      if (!isResponsible && !isRemovingSelf) {
-        // HELPER can only remove self
-        return NextResponse.json(
-          { error: 'You can only remove yourself from this shift' },
-          { status: 403 }
-        );
-      }
-    }
-
-    // Prevent removing the only RESPONSIBLE if there are still HELPERS
-    if (assignmentToDelete.role === 'RESPONSIBLE') {
-      const hasHelpers = shift.assignments.some(
-        (a) => a.role === 'HELPER'
-      );
-      if (hasHelpers) {
-        return NextResponse.json(
-          { error: 'Cannot remove responsible person while helpers are assigned. Remove helpers first or assign a new responsible person.' },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Delete the assignment
-    await prisma.$transaction(async (tx) => {
-      await tx.shiftAssignment.delete({
-        where: { id: assignmentToDelete.id },
-      });
-
-      // Update legacy helperId if removing RESPONSIBLE
-      if (assignmentToDelete.role === 'RESPONSIBLE') {
-        await tx.shift.update({
-          where: { id: shiftId },
-          data: { helperId: null },
-        });
-      }
-    });
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting shift assignment:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete assignment' },
+      { error: 'Failed to create shift assignment' },
       { status: 500 }
     );
   }

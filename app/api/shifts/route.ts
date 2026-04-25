@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 /**
  * Check if a user has overlapping shift assignments for the given time range
  */
-async function checkForOverlappingShifts(
+export async function checkForOverlappingShifts(
   userId: string,
   eventId: string,
   start: Date,
@@ -262,6 +262,15 @@ export async function POST(request: Request) {
       }
     }
 
+    // Validate total assignments against minHelpers and maxHelpers
+    const totalAssignments = allUserIds.length;
+    if (totalAssignments < minHelpers || totalAssignments > maxHelpers) {
+      return NextResponse.json(
+        { error: `Shift must have between ${minHelpers} and ${maxHelpers} assignments (responsible + helpers). Provided: ${totalAssignments}` },
+        { status: 400 }
+      );
+    }
+
     // Check for overlapping shifts for all assigned users
     const shiftStart = new Date(start);
     const shiftEnd = new Date(end);
@@ -411,7 +420,7 @@ export async function PATCH(request: Request) {
       orderBy: { start: 'asc' },
     });
 
-    // Filter to shifts that need more helpers
+    // Filter to shifts that need more helpers (considering maxHelpers)
     const unassignedShifts = shiftsNeedingHelp.filter(
       (shift) => shift.assignments.length < shift.minHelpers
     );
@@ -429,7 +438,8 @@ export async function PATCH(request: Request) {
     let totalAssignments = 0;
 
     for (const shift of unassignedShifts) {
-      const neededCount = shift.minHelpers - shift.assignments.length;
+      const remainingCapacity = shift.maxHelpers - shift.assignments.length;
+      if (remainingCapacity <= 0) continue;
 
       // Find volunteers available for this shift
       const availableVolunteers = volunteers.filter((volunteer: any) => {
@@ -446,8 +456,8 @@ export async function PATCH(request: Request) {
         });
       });
 
-      // Assign up to neededCount volunteers
-      const volunteersToAssign = availableVolunteers.slice(0, neededCount);
+      // Assign up to remainingCapacity volunteers
+      const volunteersToAssign = availableVolunteers.slice(0, remainingCapacity);
 
       for (let i = 0; i < volunteersToAssign.length; i++) {
         const volunteer = volunteersToAssign[i];
