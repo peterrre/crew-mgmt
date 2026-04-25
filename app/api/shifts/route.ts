@@ -257,7 +257,7 @@ export async function POST(request: Request) {
           {
             error: `${userName} is already assigned to "${conflictingShift.title}" (${formatTime(conflictingShift.start)} - ${formatTime(conflictingShift.end)}) which overlaps with this shift`,
           },
-          { status: 400 }
+          { status: 409 }
         );
       }
     }
