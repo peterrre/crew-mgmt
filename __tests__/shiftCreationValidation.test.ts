@@ -25,17 +25,20 @@ jest.mock('@/lib/db', () => ({
       findMany: jest.fn(),
     },
     shift: {
+      findMany: jest.fn(),
+      create: jest.fn(),
+      findUnique: jest.fn(),
+    },
+    shiftAssignment: {
       create: jest.fn(),
     },
     $transaction: jest.fn((fn: any) => fn({
       shift: {
         create: jest.fn(),
+        findUnique: jest.fn(),
       },
       shiftAssignment: {
         create: jest.fn(),
-      },
-      shift: {
-        findUnique: jest.fn(),
       },
     })),
   },
@@ -68,11 +71,40 @@ describe('POST /app/api/shifts (create shift)', () => {
     // Mock event exists
     require('@/lib/db').prisma.event.findUnique.mockResolvedValue({ id: eventId });
     // Mock event crew includes the users
-    require('@/lib/db').prisma.eventCrew.findMany.mockResolvedValue([
+    require('/home/hermes/crew-mgmt/lib/db').prisma.eventCrew.findMany.mockResolvedValue([
       { eventId, userId: 'user1' },
       { eventId, userId: 'user2' },
       { eventId, userId: 'user3' },
     ]);
+    // Mock no overlapping shifts (for the overlap check)
+    require('@/lib/db').prisma.shift.findMany.mockResolvedValue([]);
+    // Mock shift creation to return a dummy shift
+    require('@/lib/db').prisma.shift.create.mockResolvedValue({
+      id: 'shift1',
+      title,
+      start: new Date(start),
+      end: new Date(end),
+      helperId: 'user1',
+      eventId,
+      minHelpers,
+      maxHelpers,
+    });
+    // Mock shiftAssignment creation
+    require('@/lib/db').prisma.shiftAssignment.create.mockResolvedValue({});
+    // Mock finding the created shift
+    require('@/lib/db').prisma.shift.findUnique.mockResolvedValue({
+      id: 'shift1',
+      title,
+      start: new Date(start),
+      end: new Date(end),
+      helperId: { id: 'user1', name: 'Responsible', email: 'resp@test.com', role: 'RESPONSIBLE' },
+      event: { id: eventId, name: 'Test Event', startDate: new Date(), endDate: new Date(), location: 'Test' },
+      assignments: [
+        { userId: 'user1', user: { id: 'user1', name: 'Responsible', email: 'resp@test.com', role: 'RESPONSIBLE' }, role: 'RESPONSIBLE' },
+        { userId: 'user2', user: { id: 'user2', name: 'Helper1', email: 'help1@test.com', role: 'HELPER' }, role: 'HELPER' },
+        { userId: 'user3', user: { id: 'user3', name: 'Helper2', email: 'help2@test.com', role: 'HELPER' }, role: 'HELPER' },
+      ],
+    });
   });
 
   it('should return 400 when total assignments < minHelpers', async () => {
@@ -86,23 +118,9 @@ describe('POST /app/api/shifts (create shift)', () => {
     expect(response).toHaveProperty('status', 400);
     expect(response.json).resolves.toEqual(
       expect.objectContaining({
-        error: expect.stringContaining('Missing required fields'),
+        error: expect.stringContaining('Shift must have between 5 and 2 assignments (responsible + helpers). Provided: 1'),
       })
     );
-    // Note: The current validation checks for missing fields first, so we get 400 for missing fields?
-    // Actually, the body has all required fields (title, start, end, eventId) but we are testing minHelpers/maxHelpers validation.
-    // However, the current code does not validate minHelpers/maxHelpers, so it would proceed.
-    // We need to adjust: the test expects that without our fix, the validation does not exist, so it would not return 400 for this reason.
-    // But the sprint plan says we are writing tests for the missing validation, so we expect the test to fail until we implement the validation.
-    // However, we are only writing the test, not implementing the fix.
-    // Let's change the test to expect that the validation is missing? Actually, we want to test the validation logic we are going to write.
-    // Since we are not implementing the fix, we cannot rely on the current code to return 400 for this reason.
-    // We'll skip this test for now and instead write a test that will pass after we implement the validation.
-    // But we are the Tester-Agent, we are only writing the test. We'll leave it as a placeholder and create a bug report.
-    // Instead, let's write a test that will fail until the validation is implemented.
-    // We'll change the test to expect that the validation is present and returns 400 when it should.
-    // Since we are not implementing, we expect the test to fail.
-    // We'll keep the test as is and note that it will fail until the validation is added.
   });
 
   it('should return 400 when total assignments > maxHelpers', async () => {
@@ -116,11 +134,9 @@ describe('POST /app/api/shifts (create shift)', () => {
     expect(response).toHaveProperty('status', 400);
     expect(response.json).resolves.toEqual(
       expect.objectContaining({
-        error: expect.stringContaining('Missing required fields'),
+        error: expect.stringContaining('Shift must have between 1 and 1 assignments (responsible + helpers). Provided: 2'),
       })
     );
-    // Same issue: the current code does not validate minHelpers/maxHelpers, so it will not return 400 for this reason.
-    // We'll note that this test will fail until the validation is implemented.
   });
 
   it('should proceed when total assignments are within [minHelpers, maxHelpers]', async () => {
@@ -131,10 +147,15 @@ describe('POST /app/api/shifts (create shift)', () => {
 
     const response = await createShift(request);
 
-    // Since we are not implementing the validation, we expect the current code to proceed (return 201 or 500 if other things fail)
-    // But we mocked the prisma calls, so it should return 201.
-    // However, we are not testing the success case in this test file? We'll leave it for now.
-    // We'll just note that the test will pass if the validation is implemented correctly.
+    // Since we mocked the prisma calls, we expect a 201 (created)
     expect(response).toHaveProperty('status', 201);
+    expect(response.json).resolves.toEqual(
+      expect.objectContaining({
+        shift: expect.objectContaining({
+          id: expect.any(String),
+          title,
+        }),
+      })
+    );
   });
 });
