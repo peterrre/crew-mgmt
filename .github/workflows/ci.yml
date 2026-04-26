@@ -28,6 +28,8 @@ jobs:
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'test-secret' }}
       NEXTAUTH_URL: 'http://localhost:3000'
       DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/crew_mgmt_test'
+      GITHUB_ID: 'dummy'
+      GITHUB_SECRET: 'dummy'
 
     steps:
       - uses: actions/checkout@v4

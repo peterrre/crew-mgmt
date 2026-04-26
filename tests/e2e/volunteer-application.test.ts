@@ -5,10 +5,8 @@ test.describe('Volunteer Application Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Start from the login page because the volunteer sign up link is there
     await page.goto('/login');
-    // Wait for the login page to be rendered (client-side)
-    await expect(page.getByText('Welcome back')).toBeAttached({ timeout: 10000 });
-    // Debug: save the HTML to see what we have
-    await require('fs').writeFileSync('/home/hermes/crew-mgmt/login.html', await page.content());
+    // Wait for the email input label to be attached (indicates the form is loaded)
+    await expect(page.getByLabel(/email/i)).toBeAttached({ timeout: 15000 });
   });
 
   test('should allow a volunteer to sign up and see confirmation', async ({ page }) => {
