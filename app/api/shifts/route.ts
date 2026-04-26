@@ -2,62 +2,14 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+import { checkForOverlappingShifts } from '@/lib/utils/overlap';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * Check if a user has overlapping shift assignments for the given time range
  */
-export async function checkForOverlappingShifts(
-  userId: string,
-  eventId: string,
-  start: Date,
-  end: Date,
-  excludeShiftId?: string
-) {
-  const overlappingShifts = await prisma.shift.findMany({
-    where: {
-      eventId,
-      ...(excludeShiftId && { id: { not: excludeShiftId } }),
-      assignments: {
-        some: {
-          userId: userId,
-        },
-      },
-      OR: [
-        {
-          // New shift starts during existing shift
-          AND: [
-            { start: { lte: start } },
-            { end: { gt: start } },
-          ],
-        },
-        {
-          // New shift ends during existing shift
-          AND: [
-            { start: { lt: end } },
-            { end: { gte: end } },
-          ],
-        },
-        {
-          // New shift completely contains existing shift
-          AND: [
-            { start: { gte: start } },
-            { end: { lte: end } },
-          ],
-        },
-      ],
-    },
-    select: {
-      id: true,
-      title: true,
-      start: true,
-      end: true,
-    },
-  });
-
-  return overlappingShifts;
-}
+// Note: The function is now imported from '@/lib/utils/overlap'
 
 export async function GET() {
   try {
@@ -266,7 +218,9 @@ export async function POST(request: Request) {
     const totalAssignments = allUserIds.length;
     if (totalAssignments < minHelpers || totalAssignments > maxHelpers) {
       return NextResponse.json(
-        { error: `Shift must have between ${minHelpers} and ${maxHelpers} assignments (responsible + helpers). Provided: ${totalAssignments}` },
+        {
+          error: `Shift must have between ${minHelpers} and ${maxHelpers} assignments (responsible + helpers). Provided: ${totalAssignments}`,
+        },
         { status: 400 }
       );
     }
@@ -303,7 +257,7 @@ export async function POST(request: Request) {
           {
             error: `${userName} is already assigned to "${conflictingShift.title}" (${formatTime(conflictingShift.start)} - ${formatTime(conflictingShift.end)}) which overlaps with this shift`,
           },
-          { status: 400 }
+          { status: 409 }
         );
       }
     }
@@ -422,7 +376,7 @@ export async function PATCH(request: Request) {
 
     // Filter to shifts that need more helpers (considering maxHelpers)
     const unassignedShifts = shiftsNeedingHelp.filter(
-      (shift) => shift.assignments.length < shift.minHelpers
+      (shift) => shift.assignments.length < shift.maxHelpers
     );
 
     if (unassignedShifts.length === 0) {
@@ -462,7 +416,8 @@ export async function PATCH(request: Request) {
       for (let i = 0; i < volunteersToAssign.length; i++) {
         const volunteer = volunteersToAssign[i];
         // First assignment is RESPONSIBLE, rest are HELPERS
-        const role = shift.assignments.length === 0 && i === 0 ? 'RESPONSIBLE' : 'HELPER';
+        const role =
+          shift.assignments.length === 0 && i === 0 ? 'RESPONSIBLE' : 'HELPER';
 
         await prisma.$transaction([
           prisma.shiftAssignment.create({

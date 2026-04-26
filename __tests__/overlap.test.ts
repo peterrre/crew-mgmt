@@ -1,64 +1,57 @@
 import { checkForOverlappingShifts } from '@/app/api/shifts/route';
 
 // Mock prisma
-const mockPrisma = {
-  shift: {
-    findMany: jest.fn(),
-  },
-};
-
-// Mock the prisma module
-jest.mock('@/lib/db', () => ({
-  prisma: mockPrisma,
-}));
+jest.mock('@/lib/db', () => {
+  const mockPrisma = {
+    shift: {
+      findMany: jest.fn(),
+    },
+  };
+  return { prisma: mockPrisma };
+});
 
 describe('checkForOverlappingShifts', () => {
   const userId = 'user1';
   const eventId = 'event1';
+  const start = new Date('2026-01-01T10:00:00Z');
+  const end = new Date('2026-01-01T12:00:00Z');
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should return empty array when no overlapping shifts', async () => {
-    mockPrisma.shift.findMany.mockResolvedValue([]);
+    // Mock
+    require('@/lib/db').prisma.shift.findMany.mockResolvedValue([]);
 
-    const result = await checkForOverlappingShifts(
-      userId,
-      eventId,
-      new Date('2026-01-01T10:00:00Z'),
-      new Date('2026-01-01T12:00:00Z')
-    );
+    const result = await checkForOverlappingShifts(userId, eventId, start, end);
 
     expect(result).toEqual([]);
-    expect(mockPrisma.shift.findMany).toHaveBeenCalledWith({
+    expect(require('@/lib/db').prisma.shift.findMany).toHaveBeenCalledWith({
       where: {
-        eventId: 'event1',
+        eventId,
         assignments: {
           some: {
-            userId: 'user1',
+            userId,
           },
         },
         OR: [
           {
-            // New shift starts during existing shift
             AND: [
-              { start: { lte: new Date('2026-01-01T10:00:00Z') } },
-              { end: { gt: new Date('2026-01-01T10:00:00Z') } },
+              { start: { lte: start } },
+              { end: { gt: start } },
             ],
           },
           {
-            // New shift ends during existing shift
             AND: [
-              { start: { lt: new Date('2026-01-01T12:00:00Z') } },
-              { end: { gte: new Date('2026-01-01T12:00:00Z') } },
+              { start: { lt: end } },
+              { end: { gte: end } },
             ],
           },
           {
-            // New shift completely contains existing shift
             AND: [
-              { start: { gte: new Date('2026-01-01T10:00:00Z') } },
-              { end: { lte: new Date('2026-01-01T12:00:00Z') } },
+              { start: { gte: start } },
+              { end: { lte: end } },
             ],
           },
         ],
@@ -79,35 +72,36 @@ describe('checkForOverlappingShifts', () => {
       start: new Date('2026-01-01T11:00:00Z'),
       end: new Date('2026-01-01T13:00:00Z'),
     };
-    mockPrisma.shift.findMany.mockResolvedValue([overlappingShift]);
+
+    // Mock
+    require('@/lib/db').prisma.shift.findMany.mockResolvedValue([overlappingShift]);
+
+    const result = await checkForOverlappingShifts(userId, eventId, start, end);
+
+    expect(result).toEqual([overlappingShift]);
+    expect(require('@/lib/db').prisma.shift.findMany).toHaveBeenCalled();
+  });
+
+  it('should exclude the shift itself when excludeShiftId is provided', async () => {
+    const overlappingShift = {
+      id: 'shift1',
+      title: 'Existing Shift',
+      start: new Date('2026-01-01T11:00:00Z'),
+      end: new Date('2026-01-01T13:00:00Z'),
+    };
+
+    // Mock
+    require('@/lib/db').prisma.shift.findMany.mockResolvedValue([overlappingShift]);
 
     const result = await checkForOverlappingShifts(
       userId,
       eventId,
-      new Date('2026-01-01T10:00:00Z'),
-      new Date('2026-01-01T12:00:00Z')
+      start,
+      end,
+      'shift1' // exclude this shift
     );
 
-    expect(result).toEqual([overlappingShift]);
-  });
-
-  it('should exclude the shift itself when excludeShiftId is provided', async () => {
-    mockPrisma.shift.findMany.mockResolvedValue([]);
-
-    await checkForOverlappingShifts(
-      userId,
-      eventId,
-      new Date('2026-01-01T10:00:00Z'),
-      new Date('2026-01-01T12:00:00Z'),
-      'shift123'
-    );
-
-    expect(mockPrisma.shift.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          id: { not: 'shift123' },
-        }),
-      })
-    );
+    expect(result).toEqual([]);
+    expect(require('@/lib/db').prisma.shift.findMany).toHaveBeenCalled();
   });
 });
