@@ -44,6 +44,17 @@ interface Helper {
   email: string;
 }
 
+// Define the missing types
+type RequestType = 'CANCEL' | 'SWAP' | 'MODIFY';
+
+interface ShiftRequestBody {
+  shiftId: string;
+  type: RequestType;
+  reason: string;
+  newHelperId?: string;
+  newStart?: Date | string;
+  newEnd?: Date | string;
+}
 
 export default function CreateShiftRequestDialog({
   shift,
@@ -99,6 +110,7 @@ export default function CreateShiftRequestDialog({
   }, [shift.id, toast]);
 
   const handleSubmit = async () => {
+    if (!reason.trim()) {
       toast({
         title: 'Error',
         description: 'Please provide a reason for your request.',
@@ -127,11 +139,11 @@ export default function CreateShiftRequestDialog({
 
     setLoading(true);
     try {
-    const body: ShiftRequestBody = {
-      shiftId: shift.id,
-      type,
-      reason,
-    };
+      const body: ShiftRequestBody = {
+        shiftId: shift.id,
+        type,
+        reason,
+      };
 
       if (type === 'SWAP') {
         body.newHelperId = newHelperId;
@@ -172,6 +184,7 @@ export default function CreateShiftRequestDialog({
     } finally {
       setLoading(false);
     }
+  };
 
   return (
     <Dialog open onOpenChange={onClose}>

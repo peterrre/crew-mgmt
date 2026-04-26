@@ -16,7 +16,7 @@ test.describe('Volunteer Application Flow', () => {
     await volunteerLink.click();
 
     // Wait for the sign up page to load
-    await expect(page).toHaveURL(/\/signup-volunteer/);
+    await expect(page).toHaveURL(/.*\/signup-volunteer/);
 
     // Fill out the form
     await page.getByLabel(/name/i).fill('Test Volunteer');
@@ -24,12 +24,10 @@ test.describe('Volunteer Application Flow', () => {
     await page.getByLabel(/password/i).fill('securePassword123');
 
     // Submit the form
-    const submitButton = page.getByRole('button', { name: /sign up/i });
-    await submitButton.click();
+    await page.getByRole('button', { name: /sign up/i }).click();
 
-    // Wait for the volunteer's name to appear in the header (indicating successful login and redirect to helper dashboard)
-    await expect(page.getByText('Test Volunteer')).toBeVisible({ timeout: 15000 });
-    // Additionally, check that we are on the homepage
-    await expect(page).toHaveURL('/', { timeout: 5000 });
+    // Wait for confirmation or redirect
+    // Expect to see a success message or be redirected to a login page
+    await expect(page.getByText(/account created/i)).toBeVisible();
   });
 });

@@ -3,38 +3,7 @@ import { getServerSession } from 'next-auth';
 import type { User } from '@prisma/client';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-
-/**
- * Check for overlapping shifts for a given user and time range.
- * We consider a shift overlapping if it has any time in common with the new shift.
- * Note: This function is called with the shift's start and end times.
- */
-export async function checkForOverlappingShifts(
-  userId: string,
-  start: Date,
-  end: Date
-) {
-  return await prisma.shift.findMany({
-    where: {
-      assignments: {
-        some: {
-          userId,
-        },
-      },
-      // Overlap condition: existing shift start < new end AND existing shift end > new start
-      start: { lt: end },
-      end: { gt: start },
-    },
-    select: {
-      id: true,
-      title: true,
-      start: true,
-      end: true,
-    },
-  });
-}
-
-export const dynamic = 'force-dynamic';
+import { checkForOverlappingShifts } from '@/lib/shifts';
 
 /**
  * GET /api/shifts/[id]/assignments
@@ -140,7 +109,7 @@ export async function POST(
     // Validate role
     if (role !== 'RESPONSIBLE' && role !== 'HELPER') {
       return NextResponse.json(
-        { error: "Role must be either 'RESPONSIBLE' or 'HELPER'" },
+        { error: \"Role must be either 'RESPONSIBLE' or 'HELPER'\" },
         { status: 400 }
       );
     }

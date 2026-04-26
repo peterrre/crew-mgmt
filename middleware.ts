@@ -24,7 +24,8 @@ export default withAuth(
         if (
           path === '/login' ||
           path === '/register' ||
-          path === '/signup-volunteer'
+          path === '/signup-volunteer' ||
+          path === '/'  // Add homepage to public routes
         ) {
           return true;
         }
