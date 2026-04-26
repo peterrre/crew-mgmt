@@ -1,13 +1,5 @@
-import { checkForOverlappingShifts } from '@/app/api/shifts/\[id\]/assignments/route';
-
-jest.mock('@/lib/db', () => {
-  const mockPrisma = {
-    shift: {
-      findMany: jest.fn(),
-    },
-  };
-  return { prisma: mockPrisma };
-});
+jest.mock('@/lib/db');
+import { prisma } from '@/lib/db';
 
 describe('checkForOverlappingShifts', () => {
   const userId = 'user1';
@@ -20,12 +12,12 @@ describe('checkForOverlappingShifts', () => {
 
   it('should return empty array when no overlapping shifts', async () => {
     // Mock
-    require('@/lib/db').prisma.shift.findMany.mockResolvedValue([]);
+    jest.mocked(prisma.shift.findMany).mockResolvedValue([]);
 
     const result = await checkForOverlappingShifts(userId, start, end);
 
     expect(result).toEqual([]);
-    expect(require('@/lib/db').prisma.shift.findMany).toHaveBeenCalledWith({
+    expect(prisma.shift.findMany).toHaveBeenCalledWith({
       where: {
         assignments: {
           some: {
@@ -54,15 +46,11 @@ describe('checkForOverlappingShifts', () => {
     };
 
     // Mock
-    require('@/lib/db').prisma.shift.findMany.mockResolvedValue([overlappingShift]);
+    jest.mocked(prisma.shift.findMany).mockResolvedValue([overlappingShift]);
 
     const result = await checkForOverlappingShifts(userId, start, end);
 
     expect(result).toEqual([overlappingShift]);
-    expect(require('@/lib/db').prisma.shift.findMany).toHaveBeenCalled();
+    expect(prisma.shift.findMany).toHaveBeenCalled();
   });
-
-  // Note: The function does not have an excludeShiftId parameter, so this test is removed.
-  // If needed, the function would need to be updated to accept excludeShiftId.
 });
-

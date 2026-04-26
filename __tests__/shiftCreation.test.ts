@@ -30,7 +30,7 @@ const prismaMock = {
 // Mock dependencies
 jest.mock('next/server', () => ({
   NextResponse: {
-    json: (body: any, init?: any) => {
+    json: (body: unknown, init?: { status?: number }) => {
       return {
         json: async () => body,
         status: init?.status ?? 200,

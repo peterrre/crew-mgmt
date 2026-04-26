@@ -101,7 +101,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
     }
   };
 
-  const fetchUnassignedShifts = async () => {
+  const fetchUnassignedShifts = useCallback(async () => {
     try {
       const response = await fetch('/api/shifts');
       if (response.ok) {
@@ -120,7 +120,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
     } catch (error) {
       console.error('Error fetching unassigned shifts:', error);
     }
-  };
+  }, [shift.isAvailability, shift.start, shift.end]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

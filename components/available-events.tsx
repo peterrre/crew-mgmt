@@ -54,7 +54,7 @@ export default function AvailableEvents() {
     } finally {
       setLoading(false);
     }
-  }, [fetchAvailableEvents]);
+}, [fetchAvailableEvents, toast]);
 
   const handleApply = async () => {
     if (!applyingTo) return;
