@@ -118,50 +118,50 @@ export default function AddEventCrewDialog({
   );
 
   return (
-    <div className=\"fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4\">
-      <div className=\"bg-card rounded-2xl max-w-md w-full shadow-2xl border max-h-[80vh] flex flex-col\">
-        <div className=\"flex items-center justify-between p-6 border-b border-border\">
-          <h2 className=\"text-xl font-bold text-card-foreground\">Add Crew to Event</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-card rounded-2xl max-w-md w-full shadow-2xl border max-h-[80vh] flex flex-col">
+        <div className="flex items-center justify-between p-6 border-b border-border">
+          <h2 className="text-xl font-bold text-card-foreground">Add Crew to Event</h2>
           <button
             onClick={onClose}
-            className=\"text-muted-foreground hover:text-foreground transition-colors\"
+            className="text-muted-foreground hover:text-foreground transition-colors"
           >
-            <X className=\"w-5 h-5\" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className=\"flex flex-col flex-1 overflow-hidden\">
-          <div className=\"p-6 pb-3\">
-            <Label htmlFor=\"search\">Search Users</Label>
-            <div className=\"relative mt-2\">
-              <Search className=\"absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground\" />
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="p-6 pb-3">
+            <Label htmlFor="search">Search Users</Label>
+            <div className="relative mt-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                id=\"search\"
+                id="search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder=\"Search by name or email...\"
-                className=\"pl-9\"
+                placeholder="Search by name or email..."
+                className="pl-9"
               />
             </div>
           </div>
 
-          <div className=\"flex-1 overflow-y-auto px-6\">
+          <div className="flex-1 overflow-y-auto px-6">
             {loadingUsers ? (
-              <div className=\"text-center py-8\">
-                <Loader2 className=\"w-6 h-6 animate-spin mx-auto text-muted-foreground\" />
+              <div className="text-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className=\"text-center py-8 text-muted-foreground\">
+              <div className="text-center py-8 text-muted-foreground">
                 {users.length === 0
                   ? 'All users are already assigned to this event'
                   : 'No users match your search'}
               </div>
             ) : (
-              <div className=\"space-y-2\">
+              <div className="space-y-2">
                 {filteredUsers.map((user) => (
                   <button
                     key={user.id}
-                    type=\"button\"
+                    type="button"
                     onClick={() => toggleUser(user.id)}
                     className={`w-full p-3 rounded-lg border transition-colors text-left flex items-center justify-between ${
                       selectedUserIds.includes(user.id)
@@ -170,8 +170,8 @@ export default function AddEventCrewDialog({
                     }`}
                   >
                     <div>
-                      <div className=\"flex items-center space-x-2\">
-                        <span className=\"font-medium text-foreground\">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium text-foreground">
                           {user.name || 'Unnamed'}
                         </span>
                         <span
@@ -182,10 +182,10 @@ export default function AddEventCrewDialog({
                           {user.role}
                         </span>
                       </div>
-                      <p className=\"text-sm text-muted-foreground\">{user.email}</p>
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
                     </div>
                     {selectedUserIds.includes(user.id) && (
-                      <Check className=\"w-5 h-5 text-amber-500\" />
+                      <Check className="w-5 h-5 text-amber-500" />
                     )}
                   </button>
                 ))}
@@ -194,29 +194,29 @@ export default function AddEventCrewDialog({
           </div>
 
           {error && (
-            <div className=\"mx-6 mt-3 text-sm text-destructive bg-destructive/10 p-3 rounded-lg\">
+            <div className="mx-6 mt-3 text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
               {error}
             </div>
           )}
 
-          <div className=\"p-6 border-t border-border\">
-            <div className=\"flex space-x-3\">
+          <div className="p-6 border-t border-border">
+            <div className="flex space-x-3">
               <Button
-                type=\"button\"
-                variant=\"outline\"
+                type="button"
+                variant="outline"
                 onClick={onClose}
-                className=\"flex-1\"
+                className="flex-1"
               >
                 Cancel
               </Button>
               <Button
-                type=\"submit\"
+                type="submit"
                 disabled={loading || selectedUserIds.length === 0}
-                className=\"flex-1 bg-amber-500 hover:bg-orange-600\"
+                className="flex-1 bg-amber-500 hover:bg-orange-600"
               >
                 {loading ? (
                   <>
-                    <Loader2 className=\"mr-2 h-4 w-4 animate-spin\" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Adding...
                   </>
                 ) : (

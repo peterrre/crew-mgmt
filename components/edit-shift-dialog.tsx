@@ -75,7 +75,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
     if (shift.isAvailability) {
       fetchUnassignedShifts();
     }
-  }, []);
+  }, [fetchUnassignedShifts, shift.isAvailability]);
 
   const fetchHelpers = async () => {
     try {

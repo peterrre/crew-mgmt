@@ -9,7 +9,7 @@ import { prisma } from '@/lib/db';
  * We consider a shift overlapping if it has any time in common with the new shift.
  * Note: This function is called with the shift's start and end times.
  */
-async function checkForOverlappingShifts(
+export async function checkForOverlappingShifts(
   userId: string,
   start: Date,
   end: Date

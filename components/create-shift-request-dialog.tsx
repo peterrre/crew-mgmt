@@ -59,7 +59,7 @@ export default function CreateShiftRequestDialog({
     if (type === 'SWAP') {
       fetchAvailableHelpers();
     }
-  }, [type, shift.id]);
+  }, [type, shift.id, fetchAvailableHelpers]);
 
   const fetchAvailableHelpers = async () => {
     setLoadingHelpers(true);

@@ -34,7 +34,7 @@ export default function AvailableEvents() {
 
   useEffect(() => {
     fetchAvailableEvents();
-  }, []);
+  }, [fetchAvailableEvents]);
 
   const fetchAvailableEvents = async () => {
     try {

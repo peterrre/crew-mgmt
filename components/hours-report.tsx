@@ -26,7 +26,7 @@ export default function HoursReport() {
     if (period !== 'custom') {
       fetchReport();
     }
-  }, [period]);
+  }, [period, fetchReport]);
 
   const fetchReport = async () => {
     setLoading(true);

@@ -67,7 +67,7 @@ export default function MyApplications() {
 
   useEffect(() => {
     fetchApplications();
-  }, []);
+  }, [fetchApplications]);
 
   const fetchApplications = async () => {
     try {
@@ -143,7 +143,7 @@ export default function MyApplications() {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-8">
-          <p className="text-gray-600 dark:text-slate-400">You haven't applied to any events yet.</p>
+          <p className="text-gray-600 dark:text-slate-400">You haven&apos;t applied to any events yet.</p>
         </CardContent>
       </Card>
     );

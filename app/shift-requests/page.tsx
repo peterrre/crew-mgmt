@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState , useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, LogOut, ArrowLeft, Clock, CheckCircle, XCircle, ChevronRight, AlertCircle } from 'lucide-react';
+import { Calendar, LogOut, ArrowLeft, Clock, CheckCircle, ChevronRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useToast } from '@/hooks/use-toast';
@@ -61,9 +61,9 @@ export default function ShiftRequestsDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [fetchDashboardData]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const response = await fetch('/api/shift-requests/dashboard');
       if (response.ok) {
@@ -88,7 +88,7 @@ export default function ShiftRequestsDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+}, [router, toast]);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/login' });

@@ -441,7 +441,7 @@ export default function EventApplicationsManager({
           <div className="space-y-4 py-4">
             {reviewingApplication?.message && (
               <div className="bg-gray-50 dark:bg-slate-800 rounded-md p-3">
-                <p className="text-xs text-gray-500 dark:text-slate-500 mb-1">Applicant's message:</p>
+                <p className="text-xs text-gray-500 dark:text-slate-500 mb-1">Applicant&apos;s message:</p>
                 <p className="text-sm">{reviewingApplication.message}</p>
               </div>
             )}
