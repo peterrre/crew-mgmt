@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import type { User } from '@prisma/client';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
 
@@ -14,8 +15,9 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
-    const userId = (session.user as any).id;
+    const user = session.user as User;
+    const userRole = user.role;
+    const userId = user.id;
 
     let requests;
 
@@ -98,8 +100,9 @@ export async function POST(request: Request) {
     }
 
     // Verify the shift belongs to the user (unless admin)
-    const userRole = (session.user as any).role;
-    const userId = (session.user as any).id;
+    const user = session.user as User;
+    const userRole = user.role;
+    const userId = user.id;
 
     const shift = await prisma.shift.findUnique({
       where: { id: shiftId },
@@ -143,6 +146,9 @@ export async function POST(request: Request) {
           requester: {
             select: { id: true, name: true, email: true },
           },
+          newHelper: {
+            select: { id: true, name: true, email: true },
+          },
           reviewer: {
             select: { id: true, name: true, email: true },
           },
@@ -175,6 +181,9 @@ export async function POST(request: Request) {
             select: { id: true, name: true, email: true },
           },
           newHelper: {
+            select: { id: true, name: true, email: true },
+          },
+          reviewer: {
             select: { id: true, name: true, email: true },
           },
         },
@@ -231,8 +240,8 @@ export async function PUT(request: Request) {
     });
 
     // Filter volunteers who are available during the shift time
-    const availableVolunteers = volunteers.filter((volunteer: any) => {
-      return volunteer.availabilitySlots.some((slot: any) => {
+    const availableVolunteers = volunteers.filter((volunteer) => {
+      return volunteer.availabilitySlots.some((slot) => {
         const slotStart = new Date(slot.start);
         const slotEnd = new Date(slot.end);
         return shift.start >= slotStart && shift.end <= slotEnd;
@@ -251,17 +260,17 @@ export async function PUT(request: Request) {
 
 // DEPRECATED: Use event-scoped API endpoint instead: /api/events/[id]/shift-requests/[requestId]
 // This endpoint now returns 405 Method Not Allowed to enforce event-centric architecture
-export async function PATCH(request: Request) {
+export async function PATCH() {
   return NextResponse.json(
     {
       error: 'Method not allowed. Use event-scoped endpoint: /api/events/[eventId]/shift-requests/[requestId]',
-      deprecationNotice: 'This endpoint has been deprecated in favor of event-centric request management.'
+      deprecationNotice: 'This endpoint has been deprecated in favor of event-centric request management.',
     },
     {
       status: 405,
       headers: {
-        'Allow': 'GET, POST, PUT'
-      }
+        Allow: 'GET, POST, PUT',
+      },
     }
   );
 }

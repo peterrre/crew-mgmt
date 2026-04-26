@@ -12,13 +12,9 @@ const prismaMock = {
   shiftAssignment: {
     create: jest.fn(),
   },
-  $transaction: jest.fn((callbacks) => {
-    // Simulate transaction by executing each callback and collecting results
-    const results = [];
-    for (const callback of callbacks) {
-      results.push(callback(prismaMock));
-    }
-    return results;
+  $transaction: jest.fn(async (promises) => {
+    // Wait for all promises to resolve
+    return Promise.all(promises);
   }),
 };
 
@@ -43,8 +39,7 @@ jest.mock('@/lib/db', () => ({
   prisma: prismaMock,
 }));
 
-// Now import the module under test
-import { PATCH } from '../app/api/shifts/route';
+let PATCH: any;
 
 describe('Auto-Assign Validation (respects maxHelpers)', () => {
   const session = {
@@ -59,8 +54,15 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.resetModules();
     // Mock session
     (require('next-auth').getServerSession as jest.Mock).mockResolvedValue(session);
+    // Default mocks for prisma methods
+    prismaMock.shiftAssignment.create.mockResolvedValue({});
+    prismaMock.shift.update.mockResolvedValue({});
+    // Re-import the module under test to get fresh mocks
+    const route = require('../app/api/shifts/route');
+    PATCH = route.PATCH;
   });
 
   it('should assign up to maxHelpers when shift has zero assignments', async () => {
@@ -123,6 +125,8 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
 
     // Check that shiftAssignment.create was called exactly 2 times
     expect(prismaMock.shiftAssignment.create).toHaveBeenCalledTimes(2);
+    // For the first assignment (responsible) we also expect a shift.update
+    expect(prismaMock.shift.update).toHaveBeenCalledTimes(1);
   });
 
   it('should not exceed maxHelpers when shift already has some assignments', async () => {
@@ -185,6 +189,8 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
 
     // Should have created exactly 1 assignment (because maxHelpers=2 and we already have 1)
     expect(prismaMock.shiftAssignment.create).toHaveBeenCalledTimes(1);
+    // No shift.update because the assignment is not responsible (the existing assignment is responsible)
+    expect(prismaMock.shift.update).toHaveBeenCalledTimes(0);
   });
 
   it('should assign zero when shift already at maxHelpers', async () => {
@@ -250,5 +256,6 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
 
     // Should have created 0 assignments (because already at maxHelpers)
     expect(prismaMock.shiftAssignment.create).toHaveBeenCalledTimes(0);
+    expect(prismaMock.shift.update).toHaveBeenCalledTimes(0);
   });
 });

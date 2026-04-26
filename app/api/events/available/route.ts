@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { User } from '@prisma/client';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
@@ -11,16 +12,17 @@ export const dynamic = 'force-dynamic';
  * - Filters out archived events and past events
  * - Excludes events where user is already crew or has an application
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
+    const user = session?.user as User | null;
 
-    if (!session?.user) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
-    const userRole = (session.user as any).role;
+    const userId = user.id;
+    const userRole = user.role;
 
     // Admins and Crew see all available events (for management purposes)
     // Volunteers see only events they haven't applied to
@@ -42,21 +44,19 @@ export async function GET(request: NextRequest) {
     const crewEventIds = new Set(existingCrew.map((c) => c.eventId));
 
     // Build where clause
-    const whereClause: any = {
+    const whereClause = {
       acceptingVolunteers: true,
       isArchived: false,
       endDate: { gte: now },
+      ...(userRole === 'VOLUNTEER' && {
+        NOT: {
+          OR: [
+            { id: { in: Array.from(appliedEventIds) } },
+            { id: { in: Array.from(crewEventIds) } },
+          ],
+        },
+      }),
     };
-
-    // For volunteers, exclude events they're already part of
-    if (userRole === 'VOLUNTEER') {
-      whereClause.NOT = {
-        OR: [
-          { id: { in: Array.from(appliedEventIds) } },
-          { id: { in: Array.from(crewEventIds) } },
-        ],
-      };
-    }
 
     const events = await prisma.event.findMany({
       where: whereClause,

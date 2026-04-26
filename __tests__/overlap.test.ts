@@ -90,8 +90,9 @@ describe('checkForOverlappingShifts', () => {
       end: new Date('2026-01-01T13:00:00Z'),
     };
 
-    // Mock
-    require('@/lib/db').prisma.shift.findMany.mockResolvedValue([overlappingShift]);
+    // Mock: when excludeShiftId is provided, we expect the function to filter out the shift,
+    // so we mock the return value to be an empty array (as if the shift was excluded).
+    require('@/lib/db').prisma.shift.findMany.mockResolvedValue([]);
 
     const result = await checkForOverlappingShifts(
       userId,
@@ -102,6 +103,42 @@ describe('checkForOverlappingShifts', () => {
     );
 
     expect(result).toEqual([]);
-    expect(require('@/lib/db').prisma.shift.findMany).toHaveBeenCalled();
+    expect(require('@/lib/db').prisma.shift.findMany).toHaveBeenCalledWith({
+      where: {
+        eventId,
+        id: { not: 'shift1' },
+        assignments: {
+          some: {
+            userId,
+          },
+        },
+        OR: [
+          {
+            AND: [
+              { start: { lte: start } },
+              { end: { gt: start } },
+            ],
+          },
+          {
+            AND: [
+              { start: { lt: end } },
+              { end: { gte: end } },
+            ],
+          },
+          {
+            AND: [
+              { start: { gte: start } },
+              { end: { lte: end } },
+            ],
+          },
+        ],
+      },
+      select: {
+        id: true,
+        title: true,
+        start: true,
+        end: true,
+      },
+    });
   });
 });

@@ -26,21 +26,28 @@ jest.mock('@/lib/db', () => ({
     },
     shift: {
       findMany: jest.fn(),
-      create: jest.fn(),
-      findUnique: jest.fn(),
+      // Note: create and findUnique are mocked inside the transaction
     },
     shiftAssignment: {
       create: jest.fn(),
     },
-    $transaction: jest.fn((fn: any) => fn({
-      shift: {
-        create: jest.fn(),
-        findUnique: jest.fn(),
-      },
-      shiftAssignment: {
-        create: jest.fn(),
-      },
-    })),
+    $transaction: jest.fn((fn: any) => {
+      // Create mock functions for the transaction
+      const mockShiftCreate = jest.fn();
+      const mockShiftFindUnique = jest.fn();
+      const mockShiftAssignmentCreate = jest.fn();
+
+      // Return an object that the transaction function will receive
+      return fn({
+        shift: {
+          create: mockShiftCreate,
+          findUnique: mockShiftFindUnique,
+        },
+        shiftAssignment: {
+          create: mockShiftAssignmentCreate,
+        }
+      });
+    }),
   },
 }));
 
@@ -71,15 +78,40 @@ describe('POST /app/api/shifts (create shift)', () => {
     // Mock event exists
     require('@/lib/db').prisma.event.findUnique.mockResolvedValue({ id: eventId });
     // Mock event crew includes the users
-    require('/home/hermes/crew-mgmt/lib/db').prisma.eventCrew.findMany.mockResolvedValue([
+    require('@/lib/db').prisma.eventCrew.findMany.mockResolvedValue([
       { eventId, userId: 'user1' },
       { eventId, userId: 'user2' },
       { eventId, userId: 'user3' },
     ]);
     // Mock no overlapping shifts (for the overlap check)
     require('@/lib/db').prisma.shift.findMany.mockResolvedValue([]);
-    // Mock shift creation to return a dummy shift
-    require('@/lib/db').prisma.shift.create.mockResolvedValue({
+
+    // Get the mock functions from the $transaction call
+    // We need to access the mock that was created in the $transaction mock implementation
+    // Since we can't access it directly, we'll set up the mocks by replacing the implementation of $transaction
+    // to capture the mock functions.
+
+    // Create mock functions
+    const mockShiftCreate = jest.fn();
+    const mockShiftFindUnique = jest.fn();
+    const mockShiftAssignmentCreate = jest.fn();
+
+    // Override the $transaction mock to return our mock functions
+    const prismaMock = require('@/lib/db').prisma;
+    prismaMock.$transaction.mockImplementation((fn) => 
+      fn({
+        shift: {
+          create: mockShiftCreate,
+          findUnique: mockShiftFindUnique,
+        },
+        shiftAssignment: {
+          create: mockShiftAssignmentCreate,
+        }
+      })
+    );
+
+    // Set up the mock implementations
+    mockShiftCreate.mockResolvedValue({
       id: 'shift1',
       title,
       start: new Date(start),
@@ -89,10 +121,7 @@ describe('POST /app/api/shifts (create shift)', () => {
       minHelpers,
       maxHelpers,
     });
-    // Mock shiftAssignment creation
-    require('@/lib/db').prisma.shiftAssignment.create.mockResolvedValue({});
-    // Mock finding the created shift
-    require('@/lib/db').prisma.shift.findUnique.mockResolvedValue({
+    mockShiftFindUnique.mockResolvedValue({
       id: 'shift1',
       title,
       start: new Date(start),
@@ -105,6 +134,7 @@ describe('POST /app/api/shifts (create shift)', () => {
         { userId: 'user3', user: { id: 'user3', name: 'Helper2', email: 'help2@test.com', role: 'HELPER' }, role: 'HELPER' },
       ],
     });
+    mockShiftAssignmentCreate.mockResolvedValue({});
   });
 
   it('should return 400 when total assignments < minHelpers', async () => {
