@@ -59,10 +59,6 @@ export default function ShiftRequestsDashboard() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
-
   const fetchDashboardData = useCallback(async () => {
     try {
       const response = await fetch('/api/shift-requests/dashboard');
@@ -88,7 +84,11 @@ export default function ShiftRequestsDashboard() {
     } finally {
       setLoading(false);
     }
-}, [router, toast]);
+  }, [router, toast]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/login' });

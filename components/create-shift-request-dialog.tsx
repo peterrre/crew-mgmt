@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -71,12 +71,6 @@ export default function CreateShiftRequestDialog({
   const [loadingHelpers, setLoadingHelpers] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (type === 'SWAP') {
-      fetchAvailableHelpers();
-    }
-  }, [type, shift.id, fetchAvailableHelpers]);
-
   const fetchAvailableHelpers = useCallback(async () => {
     setLoadingHelpers(true);
     try {
@@ -108,6 +102,12 @@ export default function CreateShiftRequestDialog({
       setLoadingHelpers(false);
     }
   }, [shift.id, toast]);
+
+  useEffect(() => {
+    if (type === 'SWAP') {
+      fetchAvailableHelpers();
+    }
+  }, [type, shift.id, fetchAvailableHelpers]);
 
   const handleSubmit = async () => {
     if (!reason.trim()) {

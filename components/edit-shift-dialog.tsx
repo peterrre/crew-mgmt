@@ -54,28 +54,12 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
 
   const formatLocalDateTime = (date: Date) => {
     const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
-
   const [formData, setFormData] = useState({
     title: shift.title,
     start: formatLocalDateTime(shift.start),
     end: formatLocalDateTime(shift.end),
     helperId: shift.helperId || '',
   });
-
-  useEffect(() => {
-    fetchHelpers();
-    fetchAvailabilitySlots();
-    if (shift.isAvailability) {
-      fetchUnassignedShifts();
-    }
-  }, [fetchUnassignedShifts, shift.isAvailability]);
 
   const fetchHelpers = async () => {
     try {
@@ -121,6 +105,22 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
       console.error('Error fetching unassigned shifts:', error);
     }
   }, [shift.isAvailability, shift.start, shift.end]);
+
+  useEffect(() => {
+    fetchHelpers();
+    fetchAvailabilitySlots();
+    if (shift.isAvailability) {
+      fetchUnassignedShifts();
+    }
+  }, [fetchUnassignedShifts, shift.isAvailability]);
+
+  useEffect(() => {
+    fetchHelpers();
+    fetchAvailabilitySlots();
+    if (shift.isAvailability) {
+      fetchUnassignedShifts();
+    }
+  }, [fetchUnassignedShifts, shift.isAvailability]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
