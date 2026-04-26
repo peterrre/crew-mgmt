@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -25,3 +25,8 @@ jobs:
       - run: npm run lint
 
       - run: npm run test -- --detectOpenHandles --forceExit
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - run: npm run test:e2e

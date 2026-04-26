@@ -21,7 +21,6 @@ export async function GET(
     }
 
     const userRole = (session.user as any).role;
-    const userId = (session.user as any).id;
     const eventId = params.id;
 
     // Only admin can list applications for an event

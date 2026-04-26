@@ -145,7 +145,7 @@ async function getHoursReport(
 async function getEventStatistics(searchParams: URLSearchParams) {
   const eventId = searchParams.get('eventId');
 
-  let whereClause: any = {};
+  const whereClause: any = {};
   if (eventId) {
     whereClause.id = eventId;
   }
@@ -228,7 +228,7 @@ async function getUpcomingShifts(
   const futureDate = new Date(now);
   futureDate.setDate(futureDate.getDate() + daysAhead);
 
-  let whereClause: any = {
+  const whereClause: any = {
     start: {
       gte: now,
       lte: futureDate,
