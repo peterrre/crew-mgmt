@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -65,11 +65,7 @@ export default function MyApplications() {
   const [withdrawing, setWithdrawing] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchApplications();
-  }, []);
-
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/volunteer-applications');
@@ -87,7 +83,11 @@ export default function MyApplications() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchApplications();
+  }, [fetchApplications]);
 
   const handleWithdraw = async (applicationId: string) => {
     try {
@@ -143,7 +143,7 @@ export default function MyApplications() {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-8">
-          <p className="text-gray-600 dark:text-slate-400">You haven't applied to any events yet.</p>
+          <p className="text-gray-600 dark:text-slate-400">You haven&apos;t applied to any events yet.</p>
         </CardContent>
       </Card>
     );

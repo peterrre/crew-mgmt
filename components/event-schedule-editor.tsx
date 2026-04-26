@@ -55,44 +55,16 @@ interface Shift {
   assignments: ShiftAssignment[];
 }
 
-interface CrewMember {
-  id: string;
-  userId: string;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-    role: string;
-  };
-}
-
-interface AvailabilitySlot {
-  id: string;
-  start: Date;
-  end: Date;
-  userId: string;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-  };
-}
-
 interface EventScheduleEditorProps {
   eventId: string;
   eventStartDate: Date;
-  eventEndDate: Date;
 }
 
-export default function EventScheduleEditor({
-  eventId,
-  eventStartDate,
-  eventEndDate,
-}: EventScheduleEditorProps) {
-  const { shifts, crew, availability, shiftsLoading, refreshShifts, refreshAll } = useEventData();
+export default function EventScheduleEditor({ eventId, eventStartDate }: EventScheduleEditorProps) {
+  const { shifts, crew, availability, shiftsLoading, refreshAll } = useEventData();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingShift, setEditingShift] = useState<Shift | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState<any>(null);
+  const [selectedSlot, setSelectedSlot] = useState<unknown>(null);
   const [filter, setFilter] = useState<'all' | 'assigned' | 'unassigned'>('all');
   const [showAvailability, setShowAvailability] = useState(true);
   const [showMatchingOnly, setShowMatchingOnly] = useState(false);
@@ -148,12 +120,12 @@ export default function EventScheduleEditor({
     return { crew: assigned, volunteer: 0, unassigned, availability: availability.length };
   }, [shifts, availability]);
 
-  const handleSelectSlot = useCallback((slotInfo: any) => {
+  const handleSelectSlot = useCallback((slotInfo: unknown) => {
     setSelectedSlot(slotInfo);
     setShowCreateDialog(true);
   }, []);
 
-  const handleSelectEvent = useCallback((event: any) => {
+  const handleSelectEvent = useCallback((event: unknown) => {
     // Don't open edit dialog for availability slots
     if (event.isAvailability) return;
     setEditingShift(event);

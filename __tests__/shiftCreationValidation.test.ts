@@ -1,6 +1,3 @@
-import { NextResponse } from 'next/server';
-import { POST as createShift } from '@/app/api/shifts/route';
-
 // Mock next-auth
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn(),
@@ -9,7 +6,7 @@ jest.mock('next-auth', () => ({
 // Mock next/server
 jest.mock('next/server', () => ({
   NextResponse: {
-    json: (body: any, init?: { status?: number }) => {
+    json: (body: unknown, init?: { status?: number }) => {
       return { json: () => Promise.resolve(body), ...init, status: init?.status };
     },
   },
@@ -51,6 +48,11 @@ jest.mock('@/lib/db', () => ({
   },
 }));
 
+// Mock overlap utility
+jest.mock('@/lib/utils/overlap', () => ({
+  checkForOverlappingShifts: jest.fn(),
+}));
+
 describe('POST /app/api/shifts (create shift)', () => {
   const session = { user: { id: 'admin1', role: 'ADMIN' } };
   const eventId = 'event1';
@@ -74,17 +76,19 @@ describe('POST /app/api/shifts (create shift)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock session to return admin user
-    require('next-auth').getServerSession.mockResolvedValue(session);
+    (jest.requireMock('next-auth').getServerSession as jest.Mock).mockResolvedValue(session);
     // Mock event exists
-    require('@/lib/db').prisma.event.findUnique.mockResolvedValue({ id: eventId });
+    (jest.requireMock('@/lib/db').prisma.event.findUnique as jest.Mock).mockResolvedValue({ id: eventId });
     // Mock event crew includes the users
-    require('@/lib/db').prisma.eventCrew.findMany.mockResolvedValue([
+    (jest.requireMock('@/lib/db').prisma.eventCrew.findMany as jest.Mock).mockResolvedValue([
       { eventId, userId: 'user1' },
       { eventId, userId: 'user2' },
       { eventId, userId: 'user3' },
     ]);
     // Mock no overlapping shifts (for the overlap check)
-    require('@/lib/db').prisma.shift.findMany.mockResolvedValue([]);
+    (jest.requireMock('@/lib/db').prisma.shift.findMany as jest.Mock).mockResolvedValue([]);
+    // Mock overlap utility to return no overlaps
+    (jest.requireMock('@/lib/utils/overlap').checkForOverlappingShifts as jest.Mock).mockResolvedValue([]);
 
     // Get the mock functions from the $transaction call
     // We need to access the mock that was created in the $transaction mock implementation
@@ -97,7 +101,7 @@ describe('POST /app/api/shifts (create shift)', () => {
     const mockShiftAssignmentCreate = jest.fn();
 
     // Override the $transaction mock to return our mock functions
-    const prismaMock = require('@/lib/db').prisma;
+    const prismaMock = jest.requireMock('@/lib/db').prisma;
     prismaMock.$transaction.mockImplementation((fn) => 
       fn({
         shift: {
@@ -137,11 +141,15 @@ describe('POST /app/api/shifts (create shift)', () => {
     mockShiftAssignmentCreate.mockResolvedValue({});
   });
 
+  // Import the route handler and get the POST function
+  const route = require('../app/api/shifts/route');
+  const createShift = route.POST;
+
   it('should return 400 when total assignments < minHelpers', async () => {
     const body = { ...requestBody, minHelpers: 5, helperIds: [] }; // only responsible -> 1 < 5
     const request = {
       json: jest.fn().mockResolvedValue(body),
-    } as Request;
+    } as unknown as Request;
 
     const response = await createShift(request);
 
@@ -157,7 +165,7 @@ describe('POST /app/api/shifts (create shift)', () => {
     const body = { ...requestBody, maxHelpers: 1, helperIds: ['user2'] }; // responsible + 1 helper = 2 > 1
     const request = {
       json: jest.fn().mockResolvedValue(body),
-    } as Request;
+    } as unknown as Request;
 
     const response = await createShift(request);
 
@@ -173,7 +181,7 @@ describe('POST /app/api/shifts (create shift)', () => {
     const body = { ...requestBody, minHelpers: 1, maxHelpers: 3 }; // responsible + 2 helpers = 3 -> within [1,3]
     const request = {
       json: jest.fn().mockResolvedValue(body),
-    } as Request;
+    } as unknown as Request;
 
     const response = await createShift(request);
 

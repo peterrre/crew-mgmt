@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,7 +51,6 @@ interface CrewMember {
 interface ShiftEditDialogProps {
   shift: Shift;
   crew: CrewMember[];
-  checkHelperAvailability: (userId: string, start: Date, end: Date) => boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -59,7 +58,6 @@ interface ShiftEditDialogProps {
 export default function ShiftEditDialog({
   shift,
   crew,
-  checkHelperAvailability,
   onClose,
   onSuccess,
 }: ShiftEditDialogProps) {
@@ -68,8 +66,8 @@ export default function ShiftEditDialog({
   const [error, setError] = useState('');
   const [currentShift, setCurrentShift] = useState(shift);
 
-  const currentUserId = (session?.user as any)?.id;
-  const currentUserRole = (session?.user as any)?.role;
+  const currentUserId = (session?.user as AuthUser)?.id;
+  const currentUserRole = (session?.user as AuthUser)?.role;
   const isAdmin = currentUserRole === 'ADMIN';
 
   // Check if current user is the responsible person
@@ -95,7 +93,7 @@ export default function ShiftEditDialog({
     start: formatLocalDateTime(shift.start),
     end: formatLocalDateTime(shift.end),
     minHelpers: shift.minHelpers || 1,
-    maxHelpers: shift.maxHelpers || 1,
+    maxHelpers: shift.maxHelpers || 1
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -113,7 +111,7 @@ export default function ShiftEditDialog({
           end: new Date(formData.end).toISOString(),
           minHelpers: formData.minHelpers,
           maxHelpers: formData.maxHelpers,
-        }),
+        })
       });
 
       const data = await response.json();
@@ -137,7 +135,7 @@ export default function ShiftEditDialog({
     setLoading(true);
     try {
       const response = await fetch(`/api/shifts/${shift.id}`, {
-        method: 'DELETE',
+        method: 'DELETE'
       });
 
       if (response.ok) {

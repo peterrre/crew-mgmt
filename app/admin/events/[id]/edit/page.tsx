@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { EventForm } from '@/components/event-form'
 import { updateEvent, getUsers } from '@/lib/actions/events'
 import { ArrowLeft } from 'lucide-react'
@@ -28,12 +28,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
   const [users, setUsers] = useState<{ id: string; name: string | null }[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchEvent()
-    getUsers().then(setUsers)
-  }, [])
-
-  const fetchEvent = async () => {
+  const fetchEvent = useCallback(async () => {
     try {
       const response = await fetch(`/api/events/${params.id}`)
       if (response.ok) {
@@ -45,7 +40,12 @@ export default function EditEventPage({ params }: EditEventPageProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id])
+
+  useEffect(() => {
+    fetchEvent()
+    getUsers().then(setUsers)
+  }, [fetchEvent])
 
   const handleCancel = () => {
     router.push(`/admin/events/${params.id}`)

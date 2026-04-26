@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Calendar, LogOut, ArrowLeft } from 'lucide-react';
 import { View } from 'react-big-calendar';
@@ -104,7 +102,6 @@ interface Shift {
 }
 
 export default function ScheduleEditor() {
-  const router = useRouter();
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);

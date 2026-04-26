@@ -21,48 +21,18 @@ import {
   Search,
   Loader2,
   Calendar,
-  User,
   AlertCircle,
+  User
 } from 'lucide-react';
-
-interface ShiftRequest {
-  id: string;
-  type: 'CANCEL' | 'SWAP' | 'MODIFY';
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  reason: string | null;
-  createdAt: string;
-  reviewedAt?: string | null;
-  shift: {
-    id: string;
-    title: string;
-    start: Date;
-    end: Date;
-  };
-  requester: {
-    id: string;
-    name: string | null;
-    email: string;
-    role: string;
-  };
-  newHelper?: {
-    id: string;
-    name: string | null;
-    email: string;
-  } | null;
-  reviewer?: {
-    id: string;
-    name: string | null;
-  } | null;
-  newStart?: Date | null;
-  newEnd?: Date | null;
-}
 
 interface EventRequestsManagerProps {
   eventId: string;
 }
 
+
+
 export default function EventRequestsManager({ eventId }: EventRequestsManagerProps) {
-  const { requests, requestsLoading, refreshRequests, refreshAll } = useEventData();
+  const { requests, requestsLoading, refreshAll } = useEventData();
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING');
   const [typeFilter, setTypeFilter] = useState<'all' | 'CANCEL' | 'SWAP' | 'MODIFY'>('all');
@@ -297,7 +267,7 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
             className="pl-10"
           />
         </div>
-        <Select value={typeFilter} onValueChange={(value: any) => setTypeFilter(value)}>
+        <Select value={typeFilter} onValueChange={(value: 'all' | 'CANCEL' | 'SWAP' | 'MODIFY') => setTypeFilter(value)}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filter by type" />
           </SelectTrigger>

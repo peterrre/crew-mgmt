@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState , useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -34,9 +34,9 @@ export default function AvailableEvents() {
 
   useEffect(() => {
     fetchAvailableEvents();
-  }, []);
+  });
 
-  const fetchAvailableEvents = async () => {
+  const fetchAvailableEvents = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/available-events');
@@ -54,7 +54,7 @@ export default function AvailableEvents() {
     } finally {
       setLoading(false);
     }
-  };
+}, [toast]);
 
   const handleApply = async () => {
     if (!applyingTo) return;

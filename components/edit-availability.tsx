@@ -259,7 +259,7 @@ export default function EditAvailability({ onClose }: EditAvailabilityProps) {
                     {showCopyWeek && (
                       <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
                         <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
-                          Copy current week's availability to:
+                          Copy current week&apos;s availability to:
                         </p>
                         <div className="flex gap-2 items-center">
                           <Button

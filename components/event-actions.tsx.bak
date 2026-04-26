@@ -22,6 +22,7 @@ interface EventActionsProps {
 }
 
 export function EventActions({ eventId, eventName }: EventActionsProps) {
+  const router = useRouter()
   const [isArchiving, setIsArchiving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 

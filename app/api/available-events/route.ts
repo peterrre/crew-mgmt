@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth-options'
+import { prisma } from '@/lib/db'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 /**
  * GET /api/available-events
@@ -12,20 +12,20 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = (session.user as any).id;
+    const userId = (session.user as { id: string }).id
 
     // Get events the user is already part of (via EventCrew)
     const existingAssignments = await prisma.eventCrew.findMany({
       where: { userId },
       select: { eventId: true },
-    });
-    const assignedEventIds = existingAssignments.map((ec) => ec.eventId);
+    })
+    const assignedEventIds = existingAssignments.map((ec) => ec.eventId)
 
     // Get events the user has pending applications for
     const pendingApplications = await prisma.volunteerApplication.findMany({
@@ -34,8 +34,8 @@ export async function GET() {
         status: 'PENDING',
       },
       select: { eventId: true },
-    });
-    const pendingEventIds = pendingApplications.map((app) => app.eventId);
+    })
+    const pendingEventIds = pendingApplications.map((app) => app.eventId)
 
     // Find available events
     const availableEvents = await prisma.event.findMany({
@@ -68,7 +68,7 @@ export async function GET() {
       orderBy: {
         startDate: 'asc',
       },
-    });
+    })
 
     // Add application status info to each event
     const eventsWithStatus = availableEvents.map((event) => ({
@@ -83,14 +83,14 @@ export async function GET() {
       shiftsCount: event._count.shifts,
       pendingApplicationsCount: event._count.volunteerApplications,
       hasApplied: pendingEventIds.includes(event.id),
-    }));
+    }))
 
-    return NextResponse.json({ events: eventsWithStatus });
+    return NextResponse.json({ events: eventsWithStatus })
   } catch (error) {
-    console.error('Error fetching available events:', error);
+    console.error('Error fetching available events:', error)
     return NextResponse.json(
       { error: 'Failed to fetch available events' },
       { status: 500 }
-    );
+    )
   }
 }

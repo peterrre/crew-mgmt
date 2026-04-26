@@ -30,7 +30,7 @@ const prismaMock = {
 // Mock dependencies
 jest.mock('next/server', () => ({
   NextResponse: {
-    json: (body: any, init?: any) => {
+    json: (body: unknown, init?: { status?: number }) => {
       return {
         json: async () => body,
         status: init?.status ?? 200,
@@ -38,9 +38,7 @@ jest.mock('next/server', () => ({
     },
   },
 }));
-jest.mock('next-auth', () => ({
-  getServerSession: jest.fn(),
-}));
+jest.mock('next-auth');
 jest.mock('@/lib/auth-options', () => ({
   authOptions: {},
 }));
@@ -66,7 +64,7 @@ describe('Shift Creation Validation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock session
-    (require('next-auth').getServerSession as jest.Mock).mockResolvedValue(session);
+    (jest.requireMock('next-auth').getServerSession as jest.Mock).mockResolvedValue(session);
     // Mock event exists
     prismaMock.event.findUnique.mockResolvedValue({ id: eventId });
     // Mock no overlapping shifts

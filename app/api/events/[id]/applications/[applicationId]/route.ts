@@ -1,9 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-options';
-import { prisma } from '@/lib/db';
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth-options'
+import { prisma } from '@/lib/db'
 
-export const dynamic = 'force-dynamic';
+interface AuthUser {
+  id: string
+  role: string
+}
+
+export const dynamic = 'force-dynamic'
 
 /**
  * PATCH /api/events/[id]/applications/[applicationId]
@@ -14,30 +19,31 @@ export async function PATCH(
   { params }: { params: { id: string; applicationId: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userRole = (session.user as any).role;
-    const userId = (session.user as any).id;
-    const { id: eventId, applicationId } = params;
+    const authUser = session.user as AuthUser
+    const userRole = authUser.role
+    const userId = authUser.id
+    const { id: eventId, applicationId } = params
 
     // Only admin can update application status
     if (userRole !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    const body = await request.json();
-    const { status, reviewNote } = body;
+    const body = await request.json()
+    const { status, reviewNote } = body
 
     // Validate status
     if (!status || (status !== 'APPROVED' && status !== 'REJECTED')) {
       return NextResponse.json(
         { error: 'Status must be either APPROVED or REJECTED' },
         { status: 400 }
-      );
+      )
     }
 
     // Find the application
@@ -46,10 +52,10 @@ export async function PATCH(
       include: {
         event: true,
       },
-    });
+    })
 
     if (!application) {
-      return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Application not found' }, { status: 404 })
     }
 
     // Ensure the application belongs to the event in the URL
@@ -57,7 +63,7 @@ export async function PATCH(
       return NextResponse.json(
         { error: 'Application does not belong to this event' },
         { status: 400 }
-      );
+      )
     }
 
     // Only pending applications can be updated
@@ -65,7 +71,7 @@ export async function PATCH(
       return NextResponse.json(
         { error: 'Only pending applications can be updated' },
         { status: 400 }
-      );
+      )
     }
 
     // Update the application
@@ -85,7 +91,7 @@ export async function PATCH(
           select: { id: true, name: true, email: true },
         },
       },
-    });
+    })
 
     // If approved, add user to event crew
     if (status === 'APPROVED') {
@@ -102,20 +108,20 @@ export async function PATCH(
         // If the error is a unique constraint violation, we can ignore it
         if (error.code === 'P2002') {
           // Already exists, ignore
-          return;
+          return
         }
         // Otherwise, rethrow
-        throw error;
-      });
+        throw error
+      })
     }
 
-    return NextResponse.json({ application: updatedApplication });
+    return NextResponse.json({ application: updatedApplication })
   } catch (error) {
-    console.error('Error updating volunteer application:', error);
+    console.error('Error updating volunteer application:', error)
     return NextResponse.json(
       { error: 'Failed to update application' },
       { status: 500 }
-    );
+    )
   }
 }
 
@@ -128,14 +134,15 @@ export async function DELETE(
   { params }: { params: { id: string; applicationId: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions)
 
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = (session.user as any).id;
-    const { id: eventId, applicationId } = params;
+    const authUser = session.user as AuthUser
+    const userId = authUser.id
+    const { id: eventId, applicationId } = params
 
     // Find the application
     const application = await prisma.volunteerApplication.findUnique({
@@ -143,10 +150,10 @@ export async function DELETE(
       include: {
         event: true,
       },
-    });
+    })
 
     if (!application) {
-      return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Application not found' }, { status: 404 })
     }
 
     // Ensure the application belongs to the event in the URL
@@ -154,12 +161,12 @@ export async function DELETE(
       return NextResponse.json(
         { error: 'Application does not belong to this event' },
         { status: 400 }
-      );
+      )
     }
 
     // Only the applicant can withdraw their own application
     if (application.userId !== userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
     // Only pending applications can be withdrawn
@@ -167,7 +174,7 @@ export async function DELETE(
       return NextResponse.json(
         { error: 'Only pending applications can be withdrawn' },
         { status: 400 }
-      );
+      )
     }
 
     // Update application status to WITHDRAWN
@@ -181,14 +188,14 @@ export async function DELETE(
         // We'll leave it as null to indicate no admin review.
         reviewNote: null,
       },
-    });
+    })
 
-    return NextResponse.json({ application: updatedApplication });
+    return NextResponse.json({ application: updatedApplication })
   } catch (error) {
-    console.error('Error withdrawing volunteer application:', error);
+    console.error('Error withdrawing volunteer application:', error)
     return NextResponse.json(
       { error: 'Failed to withdraw application' },
       { status: 500 }
-    );
+    )
   }
 }
