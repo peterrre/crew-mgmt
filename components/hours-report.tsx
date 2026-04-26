@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,7 +28,7 @@ export default function HoursReport() {
     }
   }, [period, fetchReport]);
 
-  const fetchReport = async () => {
+  const fetchReport = useCallback(async () => {
     setLoading(true);
     try {
       let url = `/api/reports/hours?period=${period}&t=${Date.now()}`;
@@ -45,7 +45,7 @@ export default function HoursReport() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [period, startDate, endDate]);
 
   const handleCustomSearch = () => {
     if (startDate && endDate) {

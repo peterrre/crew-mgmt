@@ -20,7 +20,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userRole = (session.user as any).role;
+    const userRole = (session.user as { role: string }).role;
     const eventId = params.id;
 
     // Only admin can list applications for an event
@@ -100,7 +100,7 @@ export async function POST(
     }
 
     // Only volunteers can apply
-    const userRole = (session.user as any).role;
+    const userRole = (session.user as { role: string }).role;
     if (userRole !== 'VOLUNTEER') {
       return NextResponse.json(
         { error: 'Only volunteers can apply for events' },

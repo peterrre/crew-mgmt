@@ -38,12 +38,7 @@ interface CreateShiftRequestDialogProps {
   onSuccess: () => void;
 }
 
-interface Helper {
-  id: string;
-  name: string | null;
-  email: string;
-}
-
+type RequestType = 'SWAP' | 'CANCEL' | 'MODIFY';
 
 export default function CreateShiftRequestDialog({
   shift,
@@ -55,7 +50,7 @@ export default function CreateShiftRequestDialog({
   const [newHelperId, setNewHelperId] = useState('');
   const [newStart, setNewStart] = useState('');
   const [newEnd, setNewEnd] = useState('');
-  const [availableHelpers, setAvailableHelpers] = useState<Helper[]>([]);
+  const [availableHelpers, setAvailableHelpers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingHelpers, setLoadingHelpers] = useState(false);
   const { toast } = useToast();
@@ -127,11 +122,11 @@ export default function CreateShiftRequestDialog({
 
     setLoading(true);
     try {
-    const body: ShiftRequestBody = {
-      shiftId: shift.id,
-      type,
-      reason,
-    };
+      const body: any = {
+        shiftId: shift.id,
+        type,
+        reason,
+      };
 
       if (type === 'SWAP') {
         body.newHelperId = newHelperId;
