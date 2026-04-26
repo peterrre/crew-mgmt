@@ -268,8 +268,3 @@ export async function POST(
     );
   }
 }
-
-/* 
-   DELETE /api/shifts/[id]/assignments/[userId] is handled in a separate file:
-   app/api/shifts/[id]/assignments/[userId]/route.ts
-*/

@@ -29,23 +29,23 @@ export default function EditEventPage({ params }: EditEventPageProps) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const response = await fetch(`/api/events/${params.id}`)
+        if (response.ok) {
+          const data = await response.json()
+          setEvent(data)
+        }
+      } catch (error) {
+        console.error('Error fetching event:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     fetchEvent()
     getUsers().then(setUsers)
-  }, [])
-
-  const fetchEvent = async () => {
-    try {
-      const response = await fetch(`/api/events/${params.id}`)
-      if (response.ok) {
-        const data = await response.json()
-        setEvent(data)
-      }
-    } catch (error) {
-      console.error('Error fetching event:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [params.id])
 
   const handleCancel = () => {
     router.push(`/admin/events/${params.id}`)
