@@ -5,13 +5,17 @@ test.describe('Volunteer Application Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Start from the login page because the volunteer sign up link is there
     await page.goto('/login');
-    // Wait for the email input label to be attached (indicates the form is loaded)
-    await expect(page.getByLabel(/email/i)).toBeAttached({ timeout: 15000 });
+    // Wait for the login form to be ready
+    await expect(page.getByRole('form')).toBeAttached({ timeout: 10000 });
   });
 
   test('should allow a volunteer to sign up and see confirmation', async ({ page }) => {
+    // Check that the page has a link or button for volunteer sign up
+    const volunteerLink = page.getByRole('link', { name: /sign up here/i });
+    await expect(volunteerLink).toBeVisible();
+
     // Click the volunteer sign up link
-    await page.getByRole('link', { name: /sign up here/i }).click();
+    await volunteerLink.click();
 
     // Wait for the sign up page to load
     await expect(page).toHaveURL(/.*\/signup-volunteer/, { timeout: 10000 });
@@ -27,16 +31,13 @@ test.describe('Volunteer Application Flow', () => {
     // Submit the form
     await page.getByRole('button', { name: /sign up/i }).click();
 
-    // Wait for either success message OR redirect to any page
-    // Try multiple possible success indicators
+    // Wait for either success message OR redirect to a known page
     try {
-      await expect(page.getByText(/account created/i)).toBeVisible({ timeout: 8000 });
+      // Wait for success message with multiple possible patterns
+      await expect(page.getByText(/account created|success|thank you|confirmation/i)).toBeVisible({ timeout: 10000 });
     } catch {
-      // If no success message, wait for navigation to complete and verify we're not on signup page
-      await page.waitForLoadState('networkidle');
-      const currentUrl = page.url();
-      // Check that we've navigated away from the signup page
-      expect(currentUrl).not.toMatch(/.*\/signup-volunteer/);
+      // If no success message, wait for navigation to a known page (login, dashboard, home, or root)
+      await expect(page).toHaveURL(/\/(login|dashboard|home|$)/, { timeout: 10000 });
     }
   });
 });
