@@ -1,5 +1,6 @@
 jest.mock('@/lib/db');
 import { prisma } from '@/lib/db';
+import { checkForOverlappingShifts } from '@/lib/shifts';
 
 describe('checkForOverlappingShifts', () => {
   const userId = 'user1';
