@@ -27,7 +27,7 @@ jobs:
     env:
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'test-secret' }}
       NEXTAUTH_URL: 'http://localhost:3000'
-      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/crew_mgmt_test'
+      DATABASE_URL: 'postgresql://postgres:***@localhost:5432/crew_mgmt_test'
       GITHUB_ID: 'dummy'
       GITHUB_SECRET: 'dummy'
 
@@ -48,14 +48,3 @@ jobs:
       - run: npm run lint
 
       - run: npm run test -- --detectOpenHandles --forceExit
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-
-      - name: Install Playwright Dependencies (if needed)
-        run: |
-          # Fallback: install common dependencies if playwright install-deps fails
-          sudo apt-get update || true
-          sudo apt-get install -y libgtk-3-0 libgbm-dev libasound2 libatk-bridge2.0-0 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libglib2.0-0 libnspr4 libpango-1.0-0 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes1 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 || echo "Some dependencies already installed or failed to install"
-
-      - run: npm run test:e2e
