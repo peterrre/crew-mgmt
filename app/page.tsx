@@ -1,6 +1,5 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { redirect } from 'next/navigation';
 import AdminDashboard from '@/components/admin-dashboard';
 import HelperDashboard from '@/components/helper-dashboard';
 
@@ -32,7 +31,7 @@ export default async function HomePage() {
     );
   }
 
-  const userRole = (session.user as any)?.role;
+  const userRole = (session.user as { role: string })?.role;
 
   if (userRole === 'ADMIN') {
     return <AdminDashboard />;
