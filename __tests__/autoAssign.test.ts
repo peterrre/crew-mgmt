@@ -38,9 +38,11 @@ jest.mock('@/lib/auth-options', () => ({
 jest.mock('@/lib/db', () => ({
   prisma: prismaMock,
 }));
-jest.mock('../app/api/shifts/route');
+jest.mock('@/lib/utils/overlap', () => ({
+  checkForOverlappingShifts: jest.fn(),
+}));
 
-let PATCH: unknown;
+let PATCH: any;
 
 describe('Auto-Assign Validation (respects maxHelpers)', () => {
   const session = {
@@ -61,8 +63,8 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
     // Default mocks for prisma methods
     prismaMock.shiftAssignment.create.mockResolvedValue({});
     prismaMock.shift.update.mockResolvedValue({});
-    // Re-import the module under test to get fresh mocks
-    const route = jest.requireMock('../app/api/shifts/route');
+    // Import the route module (which will use the mocked dependencies)
+    const route = require('../app/api/shifts/route');
     PATCH = route.PATCH;
   });
 
@@ -122,7 +124,7 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
     const response = await PATCH(request);
     expect(response.status).toBe(200);
     const responseBody = await response.json();
-    expect(responseBody.message).toMatch(/Created \\d+ assignments/);
+    expect(responseBody.message).toMatch(/Created [0-9]+ assignments/);
 
     // Check that shiftAssignment.create was called exactly 2 times
     expect(prismaMock.shiftAssignment.create).toHaveBeenCalledTimes(2);
@@ -186,7 +188,7 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
     const response = await PATCH(request);
     expect(response.status).toBe(200);
     const responseBody = await response.json();
-    expect(responseBody.message).toMatch(/Created \\d+ assignments/);
+    expect(responseBody.message).toMatch(/Created [0-9]+ assignments/);
 
     // Should have created exactly 1 assignment (because maxHelpers=2 and we already have 1)
     expect(prismaMock.shiftAssignment.create).toHaveBeenCalledTimes(1);
@@ -253,7 +255,7 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
     const response = await PATCH(request);
     expect(response.status).toBe(200);
     const responseBody = await response.json();
-    expect(responseBody.message).toMatch(/Created \\d+ assignments/);
+    expect(responseBody.message).toBe('No shifts need assignments');
 
     // Should have created 0 assignments (because already at maxHelpers)
     expect(prismaMock.shiftAssignment.create).toHaveBeenCalledTimes(0);

@@ -48,6 +48,11 @@ jest.mock('@/lib/db', () => ({
   },
 }));
 
+// Mock overlap utility
+jest.mock('@/lib/utils/overlap', () => ({
+  checkForOverlappingShifts: jest.fn(),
+}));
+
 describe('POST /app/api/shifts (create shift)', () => {
   const session = { user: { id: 'admin1', role: 'ADMIN' } };
   const eventId = 'event1';
@@ -82,6 +87,8 @@ describe('POST /app/api/shifts (create shift)', () => {
     ]);
     // Mock no overlapping shifts (for the overlap check)
     (jest.requireMock('@/lib/db').prisma.shift.findMany as jest.Mock).mockResolvedValue([]);
+    // Mock overlap utility to return no overlaps
+    (jest.requireMock('@/lib/utils/overlap').checkForOverlappingShifts as jest.Mock).mockResolvedValue([]);
 
     // Get the mock functions from the $transaction call
     // We need to access the mock that was created in the $transaction mock implementation
@@ -134,11 +141,15 @@ describe('POST /app/api/shifts (create shift)', () => {
     mockShiftAssignmentCreate.mockResolvedValue({});
   });
 
+  // Import the route handler and get the POST function
+  const route = require('../app/api/shifts/route');
+  const createShift = route.POST;
+
   it('should return 400 when total assignments < minHelpers', async () => {
     const body = { ...requestBody, minHelpers: 5, helperIds: [] }; // only responsible -> 1 < 5
     const request = {
       json: jest.fn().mockResolvedValue(body),
-    } as Request;
+    } as unknown as Request;
 
     const response = await createShift(request);
 
@@ -154,7 +165,7 @@ describe('POST /app/api/shifts (create shift)', () => {
     const body = { ...requestBody, maxHelpers: 1, helperIds: ['user2'] }; // responsible + 1 helper = 2 > 1
     const request = {
       json: jest.fn().mockResolvedValue(body),
-    } as Request;
+    } as unknown as Request;
 
     const response = await createShift(request);
 
@@ -170,7 +181,7 @@ describe('POST /app/api/shifts (create shift)', () => {
     const body = { ...requestBody, minHelpers: 1, maxHelpers: 3 }; // responsible + 2 helpers = 3 -> within [1,3]
     const request = {
       json: jest.fn().mockResolvedValue(body),
-    } as Request;
+    } as unknown as Request;
 
     const response = await createShift(request);
 
