@@ -1,4 +1,10 @@
-jest.mock('@/lib/db');
+jest.mock('@/lib/db', () => ({
+  prisma: {
+    shift: {
+      findMany: jest.fn()
+    }
+  }
+}));
 import { prisma } from '@/lib/db';
 import { checkForOverlappingShifts } from '@/lib/shifts';
 
