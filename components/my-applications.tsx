@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -65,11 +65,7 @@ export default function MyApplications() {
   const [withdrawing, setWithdrawing] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchApplications();
-  }, [fetchApplications]);
-
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch('/api/volunteer-applications');
@@ -87,7 +83,11 @@ export default function MyApplications() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchApplications();
+  }, [fetchApplications]);
 
   const handleWithdraw = async (applicationId: string) => {
     try {

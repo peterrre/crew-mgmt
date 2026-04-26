@@ -8,18 +8,6 @@ import { Plus, Trash2, Users } from 'lucide-react';
 import AddEventCrewDialog from '@/components/add-event-crew-dialog';
 import { useEventData } from '@/contexts/event-data-context';
 
-interface CrewMember {
-  id: string;
-  eventId: string;
-  userId: string;
-  createdAt: string;
-  user: {
-    id: string;
-    name: string | null;
-    email: string;
-    role: string;
-  };
-}
 
 interface EventCrewManagementProps {
   eventId: string;

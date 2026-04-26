@@ -61,7 +61,7 @@ export default function CreateShiftRequestDialog({
     }
   }, [type, shift.id, fetchAvailableHelpers]);
 
-  const fetchAvailableHelpers = async () => {
+  const fetchAvailableHelpers = useCallback(async () => {
     setLoadingHelpers(true);
     try {
       const response = await fetch('/api/shift-requests', {
@@ -91,7 +91,7 @@ export default function CreateShiftRequestDialog({
     } finally {
       setLoadingHelpers(false);
     }
-  };
+  }, [type, shift.id, toast]);
 
   const handleSubmit = async () => {
     if (!reason.trim()) {

@@ -34,7 +34,7 @@ export default function AvailableEvents() {
 
   useEffect(() => {
     fetchAvailableEvents();
-  }, [fetchAvailableEvents]);
+  });
 
   const fetchAvailableEvents = useCallback(async () => {
     try {
@@ -54,7 +54,7 @@ export default function AvailableEvents() {
     } finally {
       setLoading(false);
     }
-}, [fetchAvailableEvents, toast]);
+}, [toast]);
 
   const handleApply = async () => {
     if (!applyingTo) return;
