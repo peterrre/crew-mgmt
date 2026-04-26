@@ -1,15 +1,21 @@
+// Mock dependencies
+jest.mock('@/lib/db');
+const prismaMock = {
+  shift: {
+    findMany: jest.fn(),
+  },
+};
+
 jest.mock('@/lib/db', () => ({
-  prisma: {
-    shift: {
-      findMany: jest.fn()
-    }
-  }
+  prisma: prismaMock,
 }));
+
 import { prisma } from '@/lib/db';
-import { checkForOverlappingShifts } from '@/lib/shifts';
+import { checkForOverlappingShifts } from '@/lib/utils/overlap';
 
 describe('checkForOverlappingShifts', () => {
   const userId = 'user1';
+  const eventId = 'event1';
   const start = new Date('2026-01-01T10:00:00Z');
   const end = new Date('2026-01-01T12:00:00Z');
 
@@ -21,19 +27,37 @@ describe('checkForOverlappingShifts', () => {
     // Mock
     jest.mocked(prisma.shift.findMany).mockResolvedValue([]);
 
-    const result = await checkForOverlappingShifts(userId, start, end);
+    const result = await checkForOverlappingShifts(userId, eventId, start, end);
 
     expect(result).toEqual([]);
     expect(prisma.shift.findMany).toHaveBeenCalledWith({
       where: {
+        eventId,
         assignments: {
           some: {
             userId,
           },
         },
-        // Overlap condition: existing shift start < new end AND existing shift end > new start
-        start: { lt: end },
-        end: { gt: start },
+        OR: [
+          {
+            AND: [
+              { start: { lte: start } },
+              { end: { gt: start } },
+            ],
+          },
+          {
+            AND: [
+              { start: { lt: end } },
+              { end: { gte: end } },
+            ],
+          },
+          {
+            AND: [
+              { start: { gte: start } },
+              { end: { lte: end } },
+            ],
+          },
+        ],
       },
       select: {
         id: true,
@@ -55,7 +79,7 @@ describe('checkForOverlappingShifts', () => {
     // Mock
     jest.mocked(prisma.shift.findMany).mockResolvedValue([overlappingShift]);
 
-    const result = await checkForOverlappingShifts(userId, start, end);
+    const result = await checkForOverlappingShifts(userId, eventId, start, end);
 
     expect(result).toEqual([overlappingShift]);
     expect(prisma.shift.findMany).toHaveBeenCalled();
