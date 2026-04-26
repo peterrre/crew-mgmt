@@ -27,7 +27,7 @@ jobs:
     env:
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
       NEXTAUTH_URL: 'http://localhost:3000'
-      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/crew_mgmt_test'
+      DATABASE_URL: 'postgresql://postgres:postgrespostgres@localhost:5432/crew_mgmt_test'
 
     steps:
       - uses: actions/checkout@v4
