@@ -1,25 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import type { User, ShiftAssignmentRole } from '@prisma/client';
+import type { User } from '@prisma/client';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-
-/**
- * Helper to check if the user can manage assignments for a given shift.
- * Admin and Crew can always manage.
- * Otherwise, the user must be the RESPONSIBLE for the shift.
- */
-async function canManageAssignments(
-  shiftId: string,
-  userId: string,
-  userRole: string
-): Promise<boolean> {
-  if (userRole === 'ADMIN' || userRole === 'CREW') return true;
-  const responsible = await prisma.shiftAssignment.findFirst({
-    where: { shiftId, userId, role: 'RESPONSIBLE' },
-  });
-  return !!responsible;
-}
 
 export const dynamic = 'force-dynamic';
 

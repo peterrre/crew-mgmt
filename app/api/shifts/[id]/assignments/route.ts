@@ -1,25 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import type { User, ShiftAssignmentRole } from '@prisma/client';
+import type { User } from '@prisma/client';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
-
-/**
- * Helper to check if the user can manage assignments for a given shift.
- * Admin and Crew can always manage.
- * Otherwise, the user must be the RESPONSIBLE for the shift.
- */
-async function canManageAssignments(
-  shiftId: string,
-  userId: string,
-  userRole: string
-): Promise<boolean> {
-  if (userRole === 'ADMIN' || userRole === 'CREW') return true;
-  const responsible = await prisma.shiftAssignment.findFirst({
-    where: { shiftId, userId, role: 'RESPONSIBLE' },
-  });
-  return !!responsible;
-}
 
 /**
  * Check for overlapping shifts for a given user and time range.
@@ -241,10 +224,7 @@ export async function POST(
 
     // Check max helpers limit (only for HELPER role; RESPONSIBLE doesn't count toward helper limit?)
     // According to the schema, minHelpers and maxHelpers are for helpers (not including the responsible?).
-    // The legacy helperId is deprecated, but we still have the assignments table.
     // We'll interpret minHelpers and maxHelpers as applying to the number of HELPER assignments.
-    // However, the skill does not specify. Let's assume they are for total assignments (including responsible).
-    // We'll follow the skill: it mentions Max-Helper-Limit, so we'll count only HELPER roles for that limit.
     if (role === 'HELPER') {
       const currentHelpers = await prisma.shiftAssignment.count({
         where: { shiftId, role: 'HELPER' },
@@ -289,22 +269,7 @@ export async function POST(
   }
 }
 
-/**
- * DELETE /api/shifts/[id]/assignments/[userId]
- * Remove an assignment for a user from a shift.
- * Note: The userId is part of the URL path (handled by Next.js as [userId] in the file path).
- * We'll need to create a separate route file for the DELETE method? Actually, we can handle all methods in one route file.
- * But the skill suggests a separate DELETE route for [id]/assignments/[userId]. However, we are currently in [id]/assignments/route.ts.
- * To handle DELETE for a specific user, we need to create a file at [id]/assignments/[userId]/route.ts.
- * However, for simplicity and to follow the skill's example (which shows a DELETE route with [userId] in the path),
- * we will create another route file for the DELETE method.
- * But note: the skill says:
- *   2. Route: DELETE /api/shifts/[id]/assignments/[userId]
- * So we will create that file separately.
- * For now, we'll leave the DELETE method unimplemented in this file and create the other file.
- * However, the user asked to add and commit changes. We'll implement the DELETE in a separate step.
- * Let's return a 405 for DELETE in this file to indicate that the DELETE method is handled elsewhere.
- */
-} // End of the route.ts file for [id]/assignments
-
-// We'll handle DELETE in a separate file: [id]/assignments/[userId]/route.ts
+/* 
+   DELETE /api/shifts/[id]/assignments/[userId] is handled in a separate file:
+   app/api/shifts/[id]/assignments/[userId]/route.ts
+*/
