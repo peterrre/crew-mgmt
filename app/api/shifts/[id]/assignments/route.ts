@@ -109,7 +109,7 @@ export async function POST(
     // Validate role
     if (role !== 'RESPONSIBLE' && role !== 'HELPER') {
       return NextResponse.json(
-        { error: \"Role must be either 'RESPONSIBLE' or 'HELPER'\" },
+        { error: "Role must be either 'RESPONSIBLE' or 'HELPER'" },
         { status: 400 }
       );
     }
