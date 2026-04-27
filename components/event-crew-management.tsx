@@ -108,83 +108,83 @@ export default function EventCrewManagement({ eventId }: EventCrewManagementProp
 
   return (
     <div>
-      <div className=\"flex items-center justify-between mb-6\">
-        <div className=\"flex items-center space-x-2\">
-          <Users className=\"w-5 h-5 text-sky-600 dark:text-sky-400\" />
-          <h3 className=\"text-lg font-semibold text-sky-900 dark:text-white\">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-2">
+          <Users className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+          <h3 className="text-lg font-semibold text-sky-900 dark:text-white">
             Event Crew ({crew.length})
           </h3>
         </div>
         <Button
           onClick={() => setShowAddDialog(true)}
-          className=\"bg-amber-500 hover:bg-orange-600\"
+          className="bg-amber-500 hover:bg-orange-600"
         >
-          <Plus className=\"w-4 h-4 mr-2\" />
+          <Plus className="w-4 h-4 mr-2" />
           Add Crew
         </Button>
       </div>
 
-      <div className=\"flex space-x-4 mb-6\">
+      <div className="flex space-x-4 mb-6">
         <Input
-          placeholder=\"Search by name or email...\"
+          placeholder="Search by name or email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className=\"flex-1\"
+          className="flex-1"
         />
         <Select value={selectedRole} onValueChange={setSelectedRole}>
-          <SelectTrigger className=\"w-48\">
-            <SelectValue placeholder=\"Filter by role\" />
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Filter by role" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value=\"all\">All Roles</SelectItem>
-            <SelectItem value=\"ADMIN\">Admin</SelectItem>
-            <SelectItem value=\"CREW\">Crew</SelectItem>
-            <SelectItem value=\"VOLUNTEER\">Volunteer</SelectItem>
+            <SelectItem value="all">All Roles</SelectItem>
+            <SelectItem value="ADMIN">Admin</SelectItem>
+            <SelectItem value="CREW">Crew</SelectItem>
+            <SelectItem value="VOLUNTEER">Volunteer</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {crewLoading ? (
-        <div className=\"text-center py-12\">
-          <div className=\"inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin\"></div>
+        <div className="text-center py-12">
+          <div className="inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : filteredCrew.length === 0 ? (
-        <div className=\"bg-white dark:bg-slate-800 rounded-2xl p-12 text-center border border-amber-100 dark:border-slate-700\">
-          <Users className=\"w-12 h-12 mx-auto mb-4 text-sky-300 dark:text-slate-600\" />
-          <p className=\"text-sky-700 dark:text-slate-400\">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-12 text-center border border-amber-100 dark:border-slate-700">
+          <Users className="w-12 h-12 mx-auto mb-4 text-sky-300 dark:text-slate-600" />
+          <p className="text-sky-700 dark:text-slate-400">
             {crew.length === 0 ? 'No crew assigned yet. Add your first crew member!' : 'No crew members match your search criteria.'}
           </p>
         </div>
       ) : (
-        <div className=\"grid grid-cols-1 gap-4\">
+        <div className="grid grid-cols-1 gap-4">
           {filteredCrew.map((member) => (
             <div
               key={member.id}
-              className=\"bg-white dark:bg-slate-800 rounded-xl p-4 border border-amber-100 dark:border-slate-700 hover:border-amber-200 dark:hover:border-slate-600 transition-colors\"
+              className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-amber-100 dark:border-slate-700 hover:border-amber-200 dark:hover:border-slate-600 transition-colors"
             >
-              <div className=\"flex items-center justify-between\">
-                <div className=\"flex-1\">
-                  <div className=\"flex items-center space-x-3 mb-1\">
-                    <h4 className=\"font-semibold text-sky-900 dark:text-white\">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3 mb-1">
+                    <h4 className="font-semibold text-sky-900 dark:text-white">
                       {member.user.name || 'Unnamed'}
                     </h4>
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(member.user.role)}`}>
                       {member.user.role}
                     </span>
                   </div>
-                  <p className=\"text-sm text-sky-700 dark:text-slate-400\">{member.user.email}</p>
+                  <p className="text-sm text-sky-700 dark:text-slate-400">{member.user.email}</p>
                 </div>
                 <Button
-                  variant=\"outline\"
-                  size=\"sm\"
+                  variant="outline"
+                  size="sm"
                   onClick={() => handleRemove(member.userId)}
-                  className=\"text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/30\"
+                  className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/30"
                 >
-                  <Trash2 className=\"w-4 h-4\" />
+                  <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
-            ))}
-          )}
+            >
+          ))}
         </div>
       )}
 
