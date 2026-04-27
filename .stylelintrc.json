@@ -1,26 +1,3 @@
 {
-  "extends": "stylelint-config-standard",
-  "rules": {
-    "length-zero-no-unit": true,
-    "unit-no-unknown": [true, { "ignoreUnits": ["rem", "em", "px", "%", "vh", "vw"] }],
-    "declaration-block-no-redundant-longhand-properties": true,
-    "value-no-vendor-prefix": true,
-    "font-family-no-duplicate-values": true,
-    "font-weight-notation": ["numeric", { "ignore": ["normal", "bold"] }],
-    "function-calc-no-unspaced-operator": true,
-    "media-feature-name-no-unknown": [true, { "ignore": ["min-width", "max-width", "min-height", "max-height", "prefers-reduced-motion", "prefers-color-scheme"] }],
-    "selector-pseudo-class-no-unknown": [true, { "ignorePixels": true }],
-    "selector-type-no-unknown": [true, { "ignore": ["custom-elements"] }],
-    "string-no-newline": true,
-    "indentation": 2,
-    "number-leading-zero": "never",
-    "number-trailing-zero": "never",
-    "color-function-notation": "legacy",
-    "color-hex-length": "short",
-    "color-hex-case": "lower",
-    "color-no-invalid-hex": true,
-    "max-empty-lines": 2,
-    "alpha-value-notation": "number",
-    "rule-empty-line-before": ["always", { "ignore": ["after-comment"] }]
-  }
+  "extends": "stylelint-config-standard"
 }
