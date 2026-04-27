@@ -27,7 +27,7 @@ jobs:
     env:
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'test-secret' }}
       NEXTAUTH_URL: 'http://localhost:3000'
-      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/crew_mgmt_test'
+      DATABASE_URL: 'postgresql://postgres:***@localhost:5432/crew_mgmt_test'
       GITHUB_ID: 'dummy'
       GITHUB_SECRET: 'dummy'
 
@@ -45,6 +45,36 @@ jobs:
       - name: Setup Prisma
         run: npx prisma db push --accept-data-loss
 
-      - run: npm run lint
+      - name: Stylelint check
+        run: npx stylelint "**/*.{css,scss}"
 
-      - run: npm run test -- --detectOpenHandles --forceExit
+      - name: Build
+        run: npm run build
+
+      - name: Start server
+        run: npm run start &
+        env:
+          PORT: 3000
+
+      - name: Wait for server
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:3000 > /dev/null; then
+              echo "Server ready"
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Run Axe accessibility tests
+        run: npx playwright test
+
+      - name: Run Lighthouse CI
+        run: npx lhci collect && npx lhci assert
+
+      - name: Stop server
+        if: always()
+        run: pkill -f "next start" || true
+
+      - name: Run unit tests
+        run: npm run test -- --detectOpenHandles --forceExit
