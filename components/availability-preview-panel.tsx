@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo } from 'react';
-import { format } from 'date-fns';
-import { Calendar, Clock, Loader2, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect, useMemo } from "react";
+import { format } from "date-fns";
+import { Calendar, Clock, Loader2, CheckCircle2 } from "lucide-react";
 
 interface AvailabilitySlot {
   id?: string;
@@ -29,7 +29,10 @@ interface AvailabilityPreviewPanelProps {
   availability: AvailabilitySlot[];
 }
 
-function isShiftMatching(shift: Shift, availability: AvailabilitySlot[]): boolean {
+function isShiftMatching(
+  shift: Shift,
+  availability: AvailabilitySlot[],
+): boolean {
   const shiftStart = new Date(shift.start);
   const shiftEnd = new Date(shift.end);
 
@@ -51,13 +54,13 @@ export default function AvailabilityPreviewPanel({
     const fetchShifts = async () => {
       try {
         // Use the unassigned shifts endpoint so volunteers can see available shifts
-        const response = await fetch('/api/shifts/unassigned');
+        const response = await fetch("/api/shifts/unassigned");
         if (response.ok) {
           const data = await response.json();
           setShifts(data.shifts || []);
         }
       } catch (error) {
-        console.error('Error fetching shifts:', error);
+        console.error("Error fetching shifts:", error);
       } finally {
         setLoading(false);
       }
@@ -134,8 +137,8 @@ export default function AvailabilityPreviewPanel({
                     )}
                     <div className="flex items-center gap-1 mt-1 text-xs text-gray-600 dark:text-slate-400">
                       <Clock className="w-3 h-3" />
-                      {format(new Date(shift.start), 'MMM d, HH:mm')} -{' '}
-                      {format(new Date(shift.end), 'HH:mm')}
+                      {format(new Date(shift.start), "MMM d, HH:mm")} -{" "}
+                      {format(new Date(shift.end), "HH:mm")}
                     </div>
                   </div>
                 ))}
@@ -146,32 +149,39 @@ export default function AvailabilityPreviewPanel({
           {nonMatchingShifts.length > 0 && (
             <div>
               <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-2">
-                {availability.length === 0 ? 'All' : 'Other'} open shifts ({nonMatchingShifts.length})
+                {availability.length === 0 ? "All" : "Other"} open shifts (
+                {nonMatchingShifts.length})
               </p>
               <div className="space-y-2">
-                {nonMatchingShifts.slice(0, matchingShifts.length > 0 ? 3 : 8).map((shift) => (
-                  <div
-                    key={shift.id}
-                    className="bg-gray-100 dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700 opacity-75"
-                  >
-                    <p className="font-medium text-sm text-gray-700 dark:text-slate-300 truncate">
-                      {shift.title}
-                    </p>
-                    {shift.event?.name && (
-                      <p className="text-xs text-gray-500 dark:text-slate-400 truncate">
-                        {shift.event.name}
+                {nonMatchingShifts
+                  .slice(0, matchingShifts.length > 0 ? 3 : 8)
+                  .map((shift) => (
+                    <div
+                      key={shift.id}
+                      className="bg-gray-100 dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700 opacity-75"
+                    >
+                      <p className="font-medium text-sm text-gray-700 dark:text-slate-300 truncate">
+                        {shift.title}
                       </p>
-                    )}
-                    <div className="flex items-center gap-1 mt-1 text-xs text-gray-500 dark:text-slate-500">
-                      <Clock className="w-3 h-3" />
-                      {format(new Date(shift.start), 'MMM d, HH:mm')} -{' '}
-                      {format(new Date(shift.end), 'HH:mm')}
+                      {shift.event?.name && (
+                        <p className="text-xs text-gray-500 dark:text-slate-400 truncate">
+                          {shift.event.name}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1 mt-1 text-xs text-gray-500 dark:text-slate-500">
+                        <Clock className="w-3 h-3" />
+                        {format(new Date(shift.start), "MMM d, HH:mm")} -{" "}
+                        {format(new Date(shift.end), "HH:mm")}
+                      </div>
                     </div>
-                  </div>
-                ))}
-                {nonMatchingShifts.length > (matchingShifts.length > 0 ? 3 : 8) && (
+                  ))}
+                {nonMatchingShifts.length >
+                  (matchingShifts.length > 0 ? 3 : 8) && (
                   <p className="text-xs text-gray-400 dark:text-slate-500 text-center">
-                    +{nonMatchingShifts.length - (matchingShifts.length > 0 ? 3 : 8)} more
+                    +
+                    {nonMatchingShifts.length -
+                      (matchingShifts.length > 0 ? 3 : 8)}{" "}
+                    more
                   </p>
                 )}
               </div>

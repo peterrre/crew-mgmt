@@ -42,9 +42,6 @@ jobs:
 
       - run: npm ci
 
-      - name: Setup Prisma
-        run: npx prisma db push --accept-data-loss
-
       - name: Stylelint check
         run: npx stylelint "**/*.{css,scss}"
 
@@ -66,7 +63,7 @@ jobs:
             sleep 1
           done
 
-      - name: Run Axe accessibility tests
+      - name: Run Playwright tests (including Axe accessibility)
         run: npx playwright test
 
       - name: Run Lighthouse CI

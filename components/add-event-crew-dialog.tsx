@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { X, Loader2, Check, Search } from 'lucide-react';
+import { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { X, Loader2, Check, Search } from "lucide-react";
 
 interface User {
   id: string;
@@ -20,6 +20,114 @@ interface AddEventCrewDialogProps {
   onSuccess: () => void;
 }
 
+// ------------------------------------------------------------------
+// Pure helpers
+// ------------------------------------------------------------------
+
+function getRoleBadgeColor(role: string) {
+  switch (role) {
+    case "ADMIN":
+      return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+    case "CREW":
+      return "bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300";
+    case "VOLUNTEER":
+      return "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300";
+    default:
+      return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+  }
+}
+
+// ------------------------------------------------------------------
+// Custom hooks
+// ------------------------------------------------------------------
+
+function useAvailableUsers(existingCrewIds: string[]) {
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [error, setError] = useState("");
+  const [users, setUsers] = useState([]);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const response = await fetch("/api/helpers");
+      if (response.ok) {
+        const data = await response.json();
+        const availableUsers = (data?.helpers || []).filter(
+          (user: User) => !existingCrewIds.includes(user.id),
+        );
+        setUsers(availableUsers);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setError("Failed to load users");
+    } finally {
+      setLoadingUsers(false);
+    }
+  }, [existingCrewIds]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  return { users, loadingUsers, error, setError };
+}
+
+function useUserSelection() {
+  const [selectedUserIds, setSelectedUserIds] = useState([]);
+
+  const toggleUser = (userId: string) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
+    );
+  };
+
+  return { selectedUserIds, toggleUser };
+}
+
+function useCrewSubmission(
+  eventId: string,
+  selectedUserIds: string[],
+  onSuccess: () => void,
+) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedUserIds.length === 0) {
+      setError("Please select at least one user");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      for (const userId of selectedUserIds) {
+        const response = await fetch(`/api/events/${eventId}/crew`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || "Failed to add crew member");
+        }
+      }
+
+      onSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { loading, error, setError, handleSubmit };
+}
+
 export default function AddEventCrewDialog({
   eventId,
   existingCrewIds,
@@ -28,25 +136,25 @@ export default function AddEventCrewDialog({
 }: AddEventCrewDialogProps) {
   const [loading, setLoading] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchUsers = useCallback(async () => {
     try {
-      const response = await fetch('/api/helpers');
+      const response = await fetch("/api/helpers");
       if (response.ok) {
         const data = await response.json();
         // Filter out users already in the crew
         const availableUsers = (data?.helpers || []).filter(
-          (user: User) => !existingCrewIds.includes(user.id)
+          (user: User) => !existingCrewIds.includes(user.id),
         );
         setUsers(availableUsers);
       }
     } catch (error) {
-      console.error('Error fetching users:', error);
-      setError('Failed to load users');
+      console.error("Error fetching users:", error);
+      setError("Failed to load users");
     } finally {
       setLoadingUsers(false);
     }
@@ -60,38 +168,38 @@ export default function AddEventCrewDialog({
     setSelectedUserIds((prev) =>
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
+        : [...prev, userId],
     );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedUserIds.length === 0) {
-      setError('Please select at least one user');
+      setError("Please select at least one user");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       // Add each selected user to the event crew
       for (const userId of selectedUserIds) {
         const response = await fetch(`/api/events/${eventId}/crew`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId }),
         });
 
         if (!response.ok) {
           const data = await response.json();
-          throw new Error(data.error || 'Failed to add crew member');
+          throw new Error(data.error || "Failed to add crew member");
         }
       }
 
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -99,29 +207,31 @@ export default function AddEventCrewDialog({
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'ADMIN':
-        return 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300';
-      case 'CREW':
-        return 'bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300';
-      case 'VOLUNTEER':
-        return 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300';
+      case "ADMIN":
+        return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+      case "CREW":
+        return "bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300";
+      case "VOLUNTEER":
+        return "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300";
       default:
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+        return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
     }
   };
 
   const filteredUsers = users.filter(
     (user) =>
-      searchTerm === '' ||
+      searchTerm === "" ||
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-card rounded-2xl max-w-md w-full shadow-2xl border max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-xl font-bold text-card-foreground">Add Crew to Event</h2>
+          <h2 className="text-xl font-bold text-card-foreground">
+            Add Crew to Event
+          </h2>
           <button
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground transition-colors"
@@ -130,7 +240,10 @@ export default function AddEventCrewDialog({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
           <div className="p-6 pb-3">
             <Label htmlFor="search">Search Users</Label>
             <div className="relative mt-2">
@@ -153,8 +266,8 @@ export default function AddEventCrewDialog({
             ) : filteredUsers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 {users.length === 0
-                  ? 'All users are already assigned to this event'
-                  : 'No users match your search'}
+                  ? "All users are already assigned to this event"
+                  : "No users match your search"}
               </div>
             ) : (
               <div className="space-y-2">
@@ -165,24 +278,26 @@ export default function AddEventCrewDialog({
                     onClick={() => toggleUser(user.id)}
                     className={`w-full p-3 rounded-lg border transition-colors text-left flex items-center justify-between ${
                       selectedUserIds.includes(user.id)
-                        ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
-                        : 'border-border hover:border-amber-300 dark:hover:border-amber-700'
+                        ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20"
+                        : "border-border hover:border-amber-300 dark:hover:border-amber-700"
                     }`}
                   >
                     <div>
                       <div className="flex items-center space-x-2">
                         <span className="font-medium text-foreground">
-                          {user.name || 'Unnamed'}
+                          {user.name || "Unnamed"}
                         </span>
                         <span
                           className={`px-2 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(
-                            user.role
+                            user.role,
                           )}`}
                         >
                           {user.role}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user.email}
+                      </p>
                     </div>
                     {selectedUserIds.includes(user.id) && (
                       <Check className="w-5 h-5 text-amber-500" />
@@ -220,8 +335,8 @@ export default function AddEventCrewDialog({
                     Adding...
                   </>
                 ) : (
-                  `Add ${selectedUserIds.length || ''} Crew Member${
-                    selectedUserIds.length !== 1 ? 's' : ''
+                  `Add ${selectedUserIds.length || ""} Crew Member${
+                    selectedUserIds.length !== 1 ? "s" : ""
                   }`
                 )}
               </Button>
