@@ -1,0 +1,33 @@
+{
+  "ci": {
+    "collect": {
+      "url": [
+        "http://localhost:3000",
+        "http://localhost:3000/about",
+        "http://localhost:3000/dashboard"
+      ],
+      "settings": {
+        "preset": "desktop",
+        "emulatedFormFactor": "desktop",
+        "screenEmulation": {
+          "mobile": false,
+          "width": 1366,
+          "height": 768,
+          "deviceScaleFactor": 1,
+          "disabled": false
+        }
+      }
+    },
+    "assert": {
+      "preset": "lighthouse:recommended",
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.9 }],
+        "first-contentful-pixel": ["error", { "maxNumericValue": 1500 }],
+        "interactive": ["error", { "maxNumericValue": 3000 }]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}
