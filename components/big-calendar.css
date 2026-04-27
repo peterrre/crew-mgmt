@@ -27,6 +27,7 @@
   padding: 4px 8px;
   cursor: pointer;
   transition: opacity 0.2s;
+  min-height: 20px;
 }
 
 .rbc-event:hover {
@@ -62,11 +63,6 @@
   background-color: #1f2937;
   border-color: #4b5563;
   color: #f9fafb;
-}
-
-.rbc-toolbar button:hover {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
 }
 
 .dark .rbc-toolbar button:hover {
@@ -170,7 +166,12 @@
   white-space: nowrap;
 }
 
-.dark .rbc-agenda-view table.rbc-agenda-table tbody > tr > td.rbc-agenda-date-cell {
+.dark
+  .rbc-agenda-view
+  table.rbc-agenda-table
+  tbody
+  > tr
+  > td.rbc-agenda-date-cell {
   color: #f9fafb;
 }
 
@@ -182,7 +183,12 @@
   white-space: nowrap;
 }
 
-.dark .rbc-agenda-view table.rbc-agenda-table tbody > tr > td.rbc-agenda-time-cell {
+.dark
+  .rbc-agenda-view
+  table.rbc-agenda-table
+  tbody
+  > tr
+  > td.rbc-agenda-time-cell {
   color: #cbd5e1;
 }
 
@@ -190,15 +196,16 @@
   color: #1e293b;
 }
 
-.dark .rbc-agenda-view table.rbc-agenda-table tbody > tr > td.rbc-agenda-event-cell {
+.dark
+  .rbc-agenda-view
+  table.rbc-agenda-table
+  tbody
+  > tr
+  > td.rbc-agenda-event-cell {
   color: #f1f5f9;
 }
 
 /* Overlapping events */
-.rbc-event {
-  min-height: 20px;
-}
-
 .rbc-row-segment {
   padding: 0 2px;
 }
@@ -214,7 +221,7 @@
 }
 
 .rbc-event-overlaps {
-  box-shadow: -1px 1px 3px rgba(0,0,0,0.2);
+  box-shadow: -1px 1px 3px rgb(0 0 0 / 20%);
 }
 
 .rbc-agenda-event-cell {
