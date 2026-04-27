@@ -6,60 +6,43 @@
   :root {
     --background: 54 100% 96%;
     --foreground: 199 89% 20%;
-
     --card: 54 100% 98%;
     --card-foreground: 199 89% 20%;
-
     --popover: 54 100% 98%;
     --popover-foreground: 199 89% 20%;
-
     --primary: 199 89% 48%;
     --primary-foreground: 54 100% 98%;
-
     --secondary: 36 100% 60%;
     --secondary-foreground: 199 89% 15%;
-
     --muted: 54 60% 90%;
     --muted-foreground: 199 40% 40%;
-
     --accent: 36 100% 60%;
     --accent-foreground: 199 89% 15%;
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 54 100% 98%;
-
     --border: 54 50% 80%;
     --input: 54 50% 85%;
     --ring: 199 89% 48%;
-
     --radius: 0.5rem;
   }
 
   .dark {
     --background: 199 89% 10%;
     --foreground: 54 100% 96%;
-
     --card: 199 89% 15%;
     --card-foreground: 54 100% 96%;
-
     --popover: 199 89% 15%;
     --popover-foreground: 54 100% 96%;
-
     --primary: 36 100% 60%;
     --primary-foreground: 199 89% 10%;
-
     --secondary: 199 89% 48%;
     --secondary-foreground: 54 100% 96%;
-
     --muted: 199 60% 20%;
     --muted-foreground: 54 60% 70%;
-
     --accent: 36 100% 60%;
     --accent-foreground: 199 89% 10%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 54 100% 96%;
-
     --border: 199 60% 25%;
     --input: 199 60% 25%;
     --ring: 36 100% 60%;
@@ -70,6 +53,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

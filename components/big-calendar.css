@@ -214,7 +214,7 @@
 }
 
 .rbc-event-overlaps {
-  box-shadow: -1px 1px 3px rgba(0,0,0,0.2);
+  box-shadow: -1px 1px 3px rgb(0 0 0 / 20%);
 }
 
 .rbc-agenda-event-cell {
