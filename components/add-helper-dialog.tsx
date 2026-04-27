@@ -1,64 +1,116 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { X, Loader2 } from 'lucide-react';
+} from "@/components/ui/select";
+import { X, Loader2 } from "lucide-react";
+
+// Custom hook for form state management
+function useAddHelperForm() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "VOLUNTEER",
+    availability: "",
+  });
+
+  const resetForm = useCallback(() => {
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      role: "VOLUNTEER",
+      availability: "",
+    });
+  }, []);
+
+  const updateFormField = useCallback(
+    (field: keyof typeof formData, value: any) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    },
+    [],
+  );
+
+  const handleSubmit = useCallback(
+    async (onClose: () => void, onSuccess: () => void) => {
+      e.preventDefault(); // Note: e will be passed from caller
+      setLoading(true);
+      setError("");
+
+      try {
+        const response = await fetch("/api/helpers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            availability: formData.availability
+              ? formData.availability.split(",").map((s) => s.trim())
+              : [],
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setError(data.error || "Failed to create helper");
+          return;
+        }
+
+        onSuccess();
+        resetForm();
+      } catch (err) {
+        setError("Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [formData, resetForm],
+  );
+
+  return {
+    formData,
+    setFormField: updateFormField,
+    loading,
+    error,
+    handleSubmit,
+    resetForm,
+  };
+}
 
 interface AddHelperDialogProps {
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function AddHelperDialog({ onClose, onSuccess }: AddHelperDialogProps) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'VOLUNTEER',
-    availability: '',
-  });
+export default function AddHelperDialog({
+  onClose,
+  onSuccess,
+}: AddHelperDialogProps) {
+  // Extract form logic into custom hook
+  const {
+    formData,
+    setFormField: setFormData,
+    loading,
+    error,
+    handleSubmit,
+    resetForm,
+  } = useAddHelperForm();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Wrap handleSubmit to pass e and call with onClose/onSuccess
+  const handleSubmitWrapper = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/helpers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          availability: formData.availability
-            ? formData.availability.split(',').map((s) => s.trim())
-            : [],
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Failed to create helper');
-        return;
-      }
-
-      onSuccess();
-    } catch (err) {
-      setError('Something went wrong');
-    } finally {
-      setLoading(false);
-    }
+    handleSubmit(onClose, onSuccess);
   };
 
   return (
@@ -74,13 +126,13 @@ export default function AddHelperDialog({ onClose, onSuccess }: AddHelperDialogP
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmitWrapper} className="p-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => setFormData("name", e.target.value)}
               required
               placeholder="John Doe"
             />
@@ -92,7 +144,7 @@ export default function AddHelperDialog({ onClose, onSuccess }: AddHelperDialogP
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) => setFormData("email", e.target.value)}
               required
               placeholder="john@example.com"
             />
@@ -104,7 +156,7 @@ export default function AddHelperDialog({ onClose, onSuccess }: AddHelperDialogP
               id="password"
               type="password"
               value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              onChange={(e) => setFormData("password", e.target.value)}
               required
               placeholder="••••••••"
               minLength={6}
@@ -115,7 +167,7 @@ export default function AddHelperDialog({ onClose, onSuccess }: AddHelperDialogP
             <Label htmlFor="role">Role</Label>
             <Select
               value={formData.role}
-              onValueChange={(value) => setFormData({ ...formData, role: value })}
+              onValueChange={(value) => setFormData("role", value)}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -128,23 +180,25 @@ export default function AddHelperDialog({ onClose, onSuccess }: AddHelperDialogP
             </Select>
           </div>
 
-          {formData.role === 'VOLUNTEER' && (
+          {formData.role === "VOLUNTEER" && (
             <div className="space-y-2">
               <Label htmlFor="availability">Availability (optional)</Label>
               <Input
                 id="availability"
                 value={formData.availability}
-                onChange={(e) =>
-                  setFormData({ ...formData, availability: e.target.value })
-                }
+                onChange={(e) => setFormData("availability", e.target.value)}
                 placeholder="e.g., Weekends, Evenings"
               />
-              <p className="text-xs text-muted-foreground">Separate with commas</p>
+              <p className="text-xs text-muted-foreground">
+                Separate with commas
+              </p>
             </div>
           )}
 
           {error && (
-            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">{error}</div>
+            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
+              {error}
+            </div>
           )}
 
           <div className="flex space-x-3 pt-4">
@@ -167,7 +221,7 @@ export default function AddHelperDialog({ onClose, onSuccess }: AddHelperDialogP
                   Adding...
                 </>
               ) : (
-                'Add Helper'
+                "Add Helper"
               )}
             </Button>
           </div>

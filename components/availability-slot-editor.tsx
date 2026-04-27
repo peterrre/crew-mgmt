@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { X, Trash2 } from 'lucide-react';
-import { format } from 'date-fns';
+} from "@/components/ui/select";
+import { X, Trash2 } from "lucide-react";
+import { format } from "date-fns";
 
 interface AvailabilitySlot {
   id?: string;
@@ -35,10 +35,10 @@ interface AvailabilitySlotEditorProps {
 function formatForInput(isoString: string): string {
   const date = new Date(isoString);
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const mins = String(date.getMinutes()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const mins = String(date.getMinutes()).padStart(2, "0");
   return `${year}-${month}-${day}T${hours}:${mins}`;
 }
 
@@ -53,7 +53,7 @@ export default function AvailabilitySlotEditor({
     ...slot,
     start: formatForInput(slot.start),
     end: formatForInput(slot.end),
-    recurrenceEnd: slot.recurrenceEnd ? formatForInput(slot.recurrenceEnd) : '',
+    recurrenceEnd: slot.recurrenceEnd ? formatForInput(slot.recurrenceEnd) : "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -80,7 +80,7 @@ export default function AvailabilitySlotEditor({
     });
   };
 
-  const displayDate = format(new Date(slot.start), 'EEEE, MMMM d, yyyy');
+  const displayDate = format(new Date(slot.start), "EEEE, MMMM d, yyyy");
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
@@ -88,7 +88,7 @@ export default function AvailabilitySlotEditor({
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {isNew ? 'Add Availability' : 'Edit Availability'}
+              {isNew ? "Add Availability" : "Edit Availability"}
             </h3>
             <p className="text-sm text-gray-500 dark:text-slate-400">
               {displayDate}
@@ -138,7 +138,9 @@ export default function AvailabilitySlotEditor({
                 setFormData((prev) => ({
                   ...prev,
                   isRecurring: !!checked,
-                  recurrencePattern: checked ? prev.recurrencePattern || 'weekly' : undefined,
+                  recurrencePattern: checked
+                    ? prev.recurrencePattern || "weekly"
+                    : undefined,
                 }))
               }
             />
@@ -152,9 +154,12 @@ export default function AvailabilitySlotEditor({
               <div>
                 <Label htmlFor="pattern">Repeat Pattern</Label>
                 <Select
-                  value={formData.recurrencePattern || 'weekly'}
+                  value={formData.recurrencePattern || "weekly"}
                   onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, recurrencePattern: value }))
+                    setFormData((prev) => ({
+                      ...prev,
+                      recurrencePattern: value,
+                    }))
                   }
                 >
                   <SelectTrigger>
@@ -172,7 +177,7 @@ export default function AvailabilitySlotEditor({
                 <Input
                   id="recurrence-end"
                   type="datetime-local"
-                  value={formData.recurrenceEnd || ''}
+                  value={formData.recurrenceEnd || ""}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
@@ -204,7 +209,7 @@ export default function AvailabilitySlotEditor({
               type="submit"
               className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
             >
-              {isNew ? 'Add' : 'Save'}
+              {isNew ? "Add" : "Save"}
             </Button>
           </div>
         </form>
