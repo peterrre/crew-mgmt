@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "extends": "stylelint-config-standard",
   "rules": {
     "length-zero-no-unit": true,
@@ -23,4 +24,7 @@
     "alpha-value-notation": "number",
     "rule-empty-line-before": ["always", { "ignore": ["after-comment"] }]
   }
+=======
+  "extends": "stylelint-config-standard"
+>>>>>>> bot/tester-ux-setup-sprint3
 }
