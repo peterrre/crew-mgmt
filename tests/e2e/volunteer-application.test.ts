@@ -24,7 +24,7 @@ test.describe('Volunteer Application Flow', () => {
     await volunteerLink.click();
 
     // Wait for the sign up page to load
-    await expect(page).toHaveURL(/.*\/signup-volunteer/, { timeout: 10000 });
+    await expect(page).toHaveURL(/.*\\/signup-volunteer/, { timeout: 10000 });
 
     // Fill out the form with all required fields
     await page.getByLabel(/name/i).fill(testName);
