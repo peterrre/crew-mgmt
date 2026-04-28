@@ -75,7 +75,7 @@ function useAvailableUsers(existingCrewIds: string[]) {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function useUserSelection() {
-  const [selectedUserIds, setSelectedUserIds] = useState([]);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 
   const toggleUser = (userId: string) => {
     setSelectedUserIds((prev) =>

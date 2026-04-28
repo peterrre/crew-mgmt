@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,10 +10,8 @@ import {
 import { UserCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Assignment } from "@/types/shift";
-import { fetchAvailableUsers } from "@/lib/api/users";
 
 interface AssignmentPanelProps {
-  shiftId: string;
   assignments: Assignment[];
   minHelpers: number;
   maxHelpers: number;
@@ -27,7 +25,6 @@ interface AssignmentPanelProps {
 }
 
 export const AssignmentPanel = ({
-  shiftId,
   assignments,
   minHelpers,
   maxHelpers,
@@ -39,7 +36,6 @@ export const AssignmentPanel = ({
   onRemoveAssignment,
   onClose,
 }: AssignmentPanelProps) => {
-  const [loadingUsers, setLoadingUsers] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   const responsible = assignments.find((a) => a.role === "RESPONSIBLE");
@@ -48,25 +44,6 @@ export const AssignmentPanel = ({
   const isUnderMin = helperCount < minHelpers;
   const isOverMax = helperCount > maxHelpers;
   const isUserAssigned = assignments.some((a) => a.userId === currentUserId);
-
-  const loadAvailableUsers = useCallback(async () => {
-    if (!(isAdmin || isCrew)) return;
-    setLoadingUsers(true);
-    try {
-            await fetchAvailableUsers({ shiftId });
-      // users are not used in UI; fetched for side effect only
-    } catch (err: unknown) {
-      toast.error("Failed to load users");
-    } finally {
-      setLoadingUsers(false);
-    }
-  }, [isAdmin, isCrew, shiftId]);
-
-  useEffect(() => {
-    if (isAdmin || isCrew) {
-      loadAvailableUsers();
-    }
-  }, [isAdmin, isCrew, loadAvailableUsers]);
 
   const handleAssignResponsible = async () => {
     if (!selectedUserId) return;
@@ -96,19 +73,15 @@ export const AssignmentPanel = ({
           {!isVolunteer && (isAdmin || isCrew) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={loadingUsers}
-                >
-                  {loadingUsers ? "Loading..." : "Assign"}
+                <Button variant="outline" size="sm">
+                  Assign
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onSelect={handleAssignResponsible} disabled={loadingUsers}>
+                <DropdownMenuItem onSelect={handleAssignResponsible}>
                   Assign Responsible
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={handleAssignHelper} disabled={loadingUsers}>
+                <DropdownMenuItem onSelect={handleAssignHelper}>
                   Assign Helper
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -128,28 +101,31 @@ export const AssignmentPanel = ({
                 <div className="flex items-center space-x-2">
                   {responsible.user?.name ?? "Unknown"}
                   {currentUserId && responsible.userId === currentUserId && (
-                    <Badge variant="secondary" size="icon">Me</Badge>
+                    <Badge variant="secondary">
+                      Me
+                    </Badge>
                   )}
-                  {!isVolunteer && (isAdmin || isCrew || responsible.userId === currentUserId) && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" aria-label="More options">
-                          <UserCircle className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-36">
-                        <DropdownMenuItem
-                          onSelect={async () => {
-                            if (responsible.id) {
-                              await onRemoveAssignment(responsible.id);
-                            }
-                          }}
-                        >
-                          Remove
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
+                  {!isVolunteer &&
+                    (isAdmin || isCrew || responsible.userId === currentUserId) && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" aria-label="More options">
+                            <UserCircle className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-36">
+                          <DropdownMenuItem
+                            onSelect={async () => {
+                              if (responsible.id) {
+                                await onRemoveAssignment(responsible.id);
+                              }
+                            }}
+                          >
+                            Remove
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                 </div>
               </>
             ) : (
@@ -160,7 +136,7 @@ export const AssignmentPanel = ({
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      setSelectedUserId;
+                      setSelectedUserId(null);
                       handleAssignResponsible();
                     }}
                   >
@@ -200,9 +176,8 @@ export const AssignmentPanel = ({
               <Button
                 variant="outline"
                 size="sm"
-                disabled={loadingUsers}
                 onClick={() => {
-                  setSelectedUserId;
+                  setSelectedUserId(null);
                   handleAssignHelper();
                 }}
               >
@@ -213,36 +188,42 @@ export const AssignmentPanel = ({
 
           {helpers.length > 0 ? (
             helpers.map((helper) => (
-              <div key={helper.id} className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
+              <div
+                key={helper.id}
+                className="flex items-center space-x-2 p-2 bg-gray-50 rounded"
+              >
                 <div className="flex-shrink-0 h-6 w-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">
                   H
                 </div>
                 <div className="flex-1">
                   <div className="font-medium">{helper.user?.name ?? "Unknown"}</div>
                   {currentUserId && helper.userId === currentUserId && (
-                    <Badge variant="secondary" size="xs" className="ml-1">Me</Badge>
+                    <Badge variant="secondary" className="ml-1">
+                      Me
+                    </Badge>
                   )}
                 </div>
-                {!isVolunteer && (isAdmin || isCrew || helper.userId === currentUserId) && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" aria-label="More options">
-                        <UserCircle className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-36">
-                      <DropdownMenuItem
-                        onSelect={async () => {
-                          if (helper.id) {
-                            await onRemoveAssignment(helper.id);
-                          }
-                        }}
-                      >
-                        Remove
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
+                {!isVolunteer &&
+                  (isAdmin || isCrew || helper.userId === currentUserId) && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" aria-label="More options">
+                          <UserCircle className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-36">
+                        <DropdownMenuItem
+                          onSelect={async () => {
+                            if (helper.id) {
+                              await onRemoveAssignment(helper.id);
+                            }
+                          }}
+                        >
+                          Remove
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
               </div>
             ))
           ) : (
@@ -251,34 +232,34 @@ export const AssignmentPanel = ({
             </div>
           )}
         </div>
-
-        {/* Volunteer self-assign section */}
-        {isVolunteer && !isUserAssigned && (
-          <div className="border-t pt-4">
-            <h3 className="font-medium mb-2">Join this shift</h3>
-            <div className="space-y-2">
-              {!responsible && (
-                <Button
-                  variant="default"
-                  onClick={() => onSelfAssign("RESPONSIBLE")}
-                  className="w-full"
-                >
-                  Take as Responsible
-                </Button>
-              )}
-              {helperCount < maxHelpers && (
-                <Button
-                  variant="outline"
-                  onClick={() => onSelfAssign("HELPER")}
-                  className="w-full"
-                >
-                  Join as Helper
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Volunteer self-assign section */}
+      {isVolunteer && !isUserAssigned && (
+        <div className="border-t pt-4">
+          <h3 className="font-medium mb-2">Join this shift</h3>
+          <div className="space-y-2">
+            {!responsible && (
+              <Button
+                variant="default"
+                onClick={() => onSelfAssign("RESPONSIBLE")}
+                className="w-full"
+              >
+                Take as Responsible
+              </Button>
+            )}
+            {helperCount < maxHelpers && (
+              <Button
+                variant="outline"
+                onClick={() => onSelfAssign("HELPER")}
+                className="w-full"
+              >
+                Join as Helper
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
