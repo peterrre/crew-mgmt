@@ -141,8 +141,7 @@ describe('AssignmentPanel', () => {
       });
       render(<AssignmentPanel {...props} />);
       const respDiv = screen.getByText('Responsible');
-      const moreOptions = { aria-label: /more options/i };
-      const moreBtn = screen.getByRole('button', moreOptions);
+      const moreBtn = screen.getByRole("button", { aria-label: /more options/i });
       await fireEvent.click(moreBtn);
       const removeItem = screen.getByRole('menuitem', { name: /remove/i });
       expect(removeItem).toBeInTheDocument();
@@ -159,8 +158,7 @@ describe('AssignmentPanel', () => {
       });
       render(<AssignmentPanel {...props} />);
       const helperDiv = screen.getByText('Helpers (1)');
-      const moreOptions = { aria-label: /more options/i };
-      const moreBtns = screen.getAllByRole('button', moreOptions);
+      const moreBtns = screen.getAllByRole("button", { aria-label: /more options/i });
       const moreBtn = moreBtns[1]; // second more btn
       await fireEvent.click(moreBtn);
       const removeItem = screen.getByRole('menuitem', { name: /remove/i });
