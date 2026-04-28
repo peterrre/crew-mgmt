@@ -125,10 +125,10 @@ export default function EventScheduleEditor({ eventId, eventStartDate }: EventSc
     setShowCreateDialog(true);
   }, []);
 
-  const handleSelectEvent = useCallback((event: unknown) => {
+  const handleSelectEvent = useCallback((event: Shift & { isAvailability?: boolean }) => {
     // Don't open edit dialog for availability slots
     if (event.isAvailability) return;
-    setEditingShift(event);
+    setEditingShift(event as Shift);
   }, []);
 
   return (
