@@ -58,9 +58,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-@layer utilities {
-  .text-foreground {
-    @apply text-foregroundPrimary;
-  }
-}

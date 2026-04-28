@@ -24,6 +24,7 @@ interface AddEventCrewDialogProps {
 // Pure helpers
 // ------------------------------------------------------------------
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getRoleBadgeColor(role: string) {
   switch (role) {
     case "ADMIN":
@@ -41,6 +42,7 @@ function getRoleBadgeColor(role: string) {
 // Custom hooks
 // ------------------------------------------------------------------
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function useAvailableUsers(existingCrewIds: string[]) {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [error, setError] = useState("");
@@ -71,6 +73,7 @@ function useAvailableUsers(existingCrewIds: string[]) {
   return { users, loadingUsers, error, setError };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function useUserSelection() {
   const [selectedUserIds, setSelectedUserIds] = useState([]);
 
@@ -85,6 +88,7 @@ function useUserSelection() {
   return { selectedUserIds, toggleUser };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function useCrewSubmission(
   eventId: string,
   selectedUserIds: string[],

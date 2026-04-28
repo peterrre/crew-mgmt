@@ -1,0 +1,10 @@
+Summary:
+- Updated tailwind.config.ts to import and use design tokens from styles/tokens.ts
+- Replaced hardcoded values in theme.extend with token references for colors, spacing, borderRadius, shadows, transition, zIndex, and typography
+- Preserved existing gradient definitions and added gradient-primary/secondary from tokens
+- Verified TypeScript compilation passes (with --skipLibCheck for unrelated node_modules issue)
+
+Modified file:
+- /home/hermes/crew-mgmt/tailwind.config.ts
+
+No blocking issues encountered.

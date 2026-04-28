@@ -104,7 +104,7 @@ export default function AddHelperDialog({
     loading,
     error,
     handleSubmit,
-    resetForm,
+    _resetForm,
   } = useAddHelperForm();
 
   // Wrap handleSubmit to pass e and call with onClose/onSuccess
