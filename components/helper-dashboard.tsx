@@ -157,6 +157,7 @@ export default function HelperDashboard() {
                 variant="ghost"
                 size="icon"
                 onClick={handleSignOut}
+                aria-label="Sign out"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <LogOut className="w-5 h-5" />
