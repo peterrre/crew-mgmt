@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function LoginPage() {
@@ -45,40 +45,41 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-backgroundSecondary to-background px-4 relative overflow-hidden">
-      {/* Background blur blobs */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue/10 dark:bg-blue/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple/10 dark:bg-purple/5 rounded-full blur-3xl pointer-events-none" />
+    <main className="min-h-screen flex items-center justify-center bg-backgroundSecondary px-4 relative overflow-hidden">
+      {/* Subtle ambient background orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple/10 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Theme toggle */}
       <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />
       </div>
 
       <div className="max-w-md w-full space-y-8 relative z-10">
-        {/* Logo + heading */}
+        {/* Logo + Title */}
         <div className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue to-purple rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 transition-transform duration-300">
-              <Calendar className="w-8 h-8 text-white" />
+          <div className="flex justify-center mb-5">
+            <div className="w-16 h-16 bg-gradient-primary rounded-[1.25rem] flex items-center justify-center shadow-lg shadow-blue/20 transition-transform duration-300 hover:scale-105">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                <line x1="16" x2="16" y1="2" y2="6"/>
+                <line x1="8" x2="8" y1="2" y2="6"/>
+                <line x1="3" x2="21" y1="10" y2="10"/>
+              </svg>
             </div>
           </div>
           <h1 className="text-3xl font-semibold tracking-tight text-foregroundPrimary">
             Welcome back
           </h1>
           <p className="mt-2 text-sm text-foregroundSecondary">
-            Sign in to manage your event crew
+            Sign in to manage your crew
           </p>
         </div>
 
-        {/* Glassmorphism card */}
-        <div className="backdrop-blur-xl bg-background/70 dark:bg-backgroundTertiary/70 rounded-2xl shadow-xl border border-border/50 p-8 transition-all duration-300">
+        {/* Form Card */}
+        <div className="bg-background rounded-2xl shadow-lg border border-border/50 p-8 transition-shadow duration-300 hover:shadow-xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label
-                htmlFor="email"
-                className="text-foregroundPrimary font-medium"
-              >
+              <Label htmlFor="email" className="text-foregroundPrimary font-medium text-sm">
                 Email
               </Label>
               <Input
@@ -89,16 +90,13 @@ export default function LoginPage() {
                   setFormData({ ...formData, email: e.target.value })
                 }
                 required
-                className="h-12 rounded-xl border-border bg-backgroundSecondary/60 text-foregroundPrimary placeholder:text-foregroundTertiary focus:ring-2 focus:ring-blue/30 focus:border-blue transition-all duration-200"
+                className="h-12 rounded-xl border-border bg-backgroundSecondary text-foregroundPrimary placeholder:text-foregroundTertiary focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
                 placeholder="you@example.com"
               />
             </div>
 
             <div className="space-y-2">
-              <Label
-                htmlFor="password"
-                className="text-foregroundPrimary font-medium"
-              >
+              <Label htmlFor="password" className="text-foregroundPrimary font-medium text-sm">
                 Password
               </Label>
               <Input
@@ -109,21 +107,23 @@ export default function LoginPage() {
                   setFormData({ ...formData, password: e.target.value })
                 }
                 required
-                className="h-12 rounded-xl border-border bg-backgroundSecondary/60 text-foregroundPrimary placeholder:text-foregroundTertiary focus:ring-2 focus:ring-blue/30 focus:border-blue transition-all duration-200"
+                className="h-12 rounded-xl border-border bg-backgroundSecondary text-foregroundPrimary placeholder:text-foregroundTertiary focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200"
                 placeholder="••••••••"
               />
             </div>
 
+            {/* Error Message */}
             {error && (
               <div className="text-sm text-red bg-red/10 p-3 rounded-xl border border-red/20">
                 {error}
               </div>
             )}
 
+            {/* Submit Button */}
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-xl bg-blue hover:opacity-90 text-blueForeground font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 transition-all duration-300"
+              className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primaryForeground font-semibold shadow-md shadow-primary/20 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60"
             >
               {loading ? (
                 <>
@@ -136,12 +136,13 @@ export default function LoginPage() {
             </Button>
           </form>
 
+          {/* CTA Links */}
           <div className="mt-8 space-y-3 text-center">
             <p className="text-sm text-foregroundSecondary">
               Don&apos;t have an account?{' '}
               <Link
                 href="/register"
-                className="font-semibold text-blue hover:opacity-80 transition-colors duration-200"
+                className="font-semibold text-primary hover:text-primary/80 transition-colors duration-200"
               >
                 Register
               </Link>
@@ -150,13 +151,18 @@ export default function LoginPage() {
               Volunteer?{' '}
               <Link
                 href="/signup-volunteer"
-                className="font-semibold text-yellow hover:opacity-80 transition-colors duration-200"
+                className="font-semibold text-yellow hover:text-yellow/80 transition-colors duration-200"
               >
                 Sign up here
               </Link>
             </p>
           </div>
         </div>
+
+        {/* Subtle footer */}
+        <p className="text-center text-xs text-foregroundTertiary">
+          By signing in, you agree to our Terms and Privacy Policy.
+        </p>
       </div>
     </main>
   );

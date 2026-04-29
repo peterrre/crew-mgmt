@@ -128,7 +128,7 @@ export const AssignmentPanel = ({
                 <div className="flex items-center space-x-2">
                   {responsible.user?.name ?? "Unknown"}
                   {currentUserId && responsible.userId === currentUserId && (
-                    <Badge variant="secondary" size="icon">Me</Badge>
+                    <Badge variant="secondary" className="ml-1 text-xs">Me</Badge>
                   )}
                   {!isVolunteer && (isAdmin || isCrew || responsible.userId === currentUserId) && (
                     <DropdownMenu>
@@ -220,7 +220,7 @@ export const AssignmentPanel = ({
                 <div className="flex-1">
                   <div className="font-medium">{helper.user?.name ?? "Unknown"}</div>
                   {currentUserId && helper.userId === currentUserId && (
-                    <Badge variant="secondary" size="xs" className="ml-1">Me</Badge>
+                    <Badge variant="secondary" className="ml-1 text-xs">Me</Badge>
                   )}
                 </div>
                 {!isVolunteer && (isAdmin || isCrew || helper.userId === currentUserId) && (
