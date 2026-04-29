@@ -11,18 +11,18 @@ export const colors = {
   foregroundSecondary: '#6E6E73',
   foregroundTertiary: '#AEAEB2',
 
-  // Accent colors
-  blue: '#0A84FF',
+  // Accent colors (Apple-inspired)
+  blue: '#007AFF',
   blueForeground: '#FFFFFF',
   green: '#34C759',
   greenForeground: '#FFFFFF',
   red: '#FF3B30',
   redForeground: '#FFFFFF',
-  yellow: '#FF9F0A',
+  yellow: '#FF9500',
   yellowForeground: '#FFFFFF',
-  purple: '#BF5AF2',
+  purple: '#AF52DE',
   purpleForeground: '#FFFFFF',
-  orange: '#FF9F0A',
+  orange: '#FF9500',
   orangeForeground: '#FFFFFF',
 
   // Grays
@@ -40,8 +40,8 @@ export const colors = {
   shadowLarge: '0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -2px rgba(0, 0, 0, 0.05)',
 
   // Gradients (for subtle UI accents)
-  gradientPrimary: 'linear-gradient(135deg, #0A84FF 0%, #34C759 100%)',
-  gradientSecondary: 'linear-gradient(135deg, #BF5AF2 0%, #FF9F0A 100%)',
+  gradientPrimary: 'linear-gradient(135deg, #007AFF 0%, #34C759 100%)',
+  gradientSecondary: 'linear-gradient(135deg, #AF52DE 0%, #FF9500 100%)',
 };
 
 export const typography = {
