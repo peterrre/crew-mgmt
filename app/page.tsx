@@ -45,7 +45,7 @@ export default async function HomePage() {
           </Link>
           <Link
             href="/register"
-            className="px-5 py-2 text-sm font-semibold text-white bg-[#0051D5] rounded-xl hover:bg-[#0044B5] transition-all duration-200 shadow-md"
+            className="px-5 py-2 text-sm font-semibold text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 transition-all duration-200 shadow-md"
           >
             Get started
           </Link>
@@ -75,7 +75,7 @@ export default async function HomePage() {
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-10">
           <Link
             href="/register"
-            className="group inline-flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-white bg-[#0051D5] rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
+            className="group inline-flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-primary-foreground bg-primary rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 hover:bg-primary/90 transition-all duration-300"
           >
             Start free
             <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
