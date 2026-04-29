@@ -60,27 +60,31 @@ export default function SignupVolunteerPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Heart className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-md">
+              <Heart className="w-8 h-8 text-primary-foreground" />
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Join as Volunteer</h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
-            Help make our festivals amazing!
+          <h2 className="text-3xl font-semibold tracking-tight text-foreground">
+            Join as Volunteer
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Help make our festivals amazing
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-green-100 dark:border-slate-700">
+        <div className="bg-card text-card-foreground rounded-2xl shadow-sm border border-border p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name" className="dark:text-slate-200">Full Name</Label>
+              <Label htmlFor="name" className="text-foreground">
+                Full Name
+              </Label>
               <Input
                 id="name"
                 type="text"
@@ -89,13 +93,15 @@ export default function SignupVolunteerPage() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                className="h-11 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                className="h-11 bg-background border-input"
                 placeholder="John Doe"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="dark:text-slate-200">Email</Label>
+              <Label htmlFor="email" className="text-foreground">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -104,13 +110,15 @@ export default function SignupVolunteerPage() {
                   setFormData({ ...formData, email: e.target.value })
                 }
                 required
-                className="h-11 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                className="h-11 bg-background border-input"
                 placeholder="you@example.com"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="dark:text-slate-200">Password</Label>
+              <Label htmlFor="password" className="text-foreground">
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -119,22 +127,23 @@ export default function SignupVolunteerPage() {
                   setFormData({ ...formData, password: e.target.value })
                 }
                 required
-                className="h-11 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                className="h-11 bg-background border-input"
                 placeholder="••••••••"
                 minLength={6}
               />
             </div>
 
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 p-3 rounded-lg">
+              <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
                 {error}
               </div>
             )}
 
             <Button
               type="submit"
+              size="lg"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
               disabled={loading}
-              className="w-full h-11 bg-amber-500 hover:bg-orange-600 dark:bg-amber-600 dark:hover:bg-orange-700"
             >
               {loading ? (
                 <>
@@ -148,11 +157,11 @@ export default function SignupVolunteerPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 dark:text-slate-400">
+            <p className="text-sm text-muted-foreground">
               Already have an account?{' '}
               <Link
                 href="/login"
-                className="font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                className="font-medium text-primary hover:text-primary/80 transition-colors"
               >
                 Sign in
               </Link>
