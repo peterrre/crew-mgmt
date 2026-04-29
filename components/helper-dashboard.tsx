@@ -105,27 +105,27 @@ export default function HelperDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] dark:bg-[#0D0D0F] relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Ambient background blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-400/15 dark:bg-blue-500/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-purple-400/15 dark:bg-purple-500/10 rounded-full blur-[120px]" />
-        <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-green-400/10 dark:bg-green-500/10 rounded-full blur-[100px]" />
+        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/15 dark:bg-primary/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-purple-500/15 dark:bg-purple-500/10 rounded-full blur-[120px]" />
+        <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-green-500/10 dark:bg-green-500/10 rounded-full blur-[100px]" />
       </div>
 
-      {/* Apple-Style Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-2xl bg-white/60 dark:bg-white/5 border-b border-[#E5E5EA]/60 dark:border-white/5">
+      {/* Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-2xl bg-card/60 border-b border-border/60">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#007AFF] to-[#5856D6] rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Calendar className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-sm">
+                <Calendar className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-[#1D1D1F] dark:text-white tracking-tight">
+                <h1 className="text-lg font-semibold text-foreground tracking-tight">
                   {session?.user?.name || 'User'}
                 </h1>
-                <p className="text-[11px] text-[#6E6E73] dark:text-[#AEAEB2]">
+                <p className="text-[11px] text-muted-foreground">
                   {userRole || 'Crew'}
                 </p>
               </div>
@@ -136,7 +136,7 @@ export default function HelperDashboard() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-[#E5E5EA] dark:border-white/10 text-[#1D1D1F] dark:text-white hover:bg-[#F5F5F7] dark:hover:bg-white/10 rounded-full transition-colors"
+                  className="border-border hover:bg-muted rounded-full transition-colors"
                 >
                   <User className="w-4 h-4 mr-2" />
                   Profile
@@ -147,7 +147,7 @@ export default function HelperDashboard() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowEditAvailability(true)}
-                  className="border-[#E5E5EA] dark:border-white/10 text-[#1D1D1F] dark:text-white hover:bg-[#F5F5F7] dark:hover:bg-white/10 rounded-full transition-colors"
+                  className="border-border hover:bg-muted rounded-full transition-colors"
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Availability
@@ -157,7 +157,7 @@ export default function HelperDashboard() {
                 variant="ghost"
                 size="icon"
                 onClick={handleSignOut}
-                className="text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#AEAEB2] dark:hover:text-white transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <LogOut className="w-5 h-5" />
               </Button>
@@ -170,10 +170,10 @@ export default function HelperDashboard() {
       <main className="relative z-10 max-w-7xl mx-auto px-6 py-12">
         {/* Welcome */}
         <div className="mb-10">
-          <h2 className="text-[32px] font-semibold tracking-tight text-[#1D1D1F] dark:text-white leading-tight">
+          <h2 className="text-[32px] font-semibold tracking-tight text-foreground leading-tight">
             My Schedule
           </h2>
-          <p className="text-[15px] text-[#6E6E73] dark:text-[#AEAEB2] mt-1">
+          <p className="text-[15px] text-muted-foreground mt-1">
             View your assigned shifts and upcoming events
           </p>
         </div>
@@ -183,11 +183,11 @@ export default function HelperDashboard() {
         {/* Available Events - For volunteers */}
         {isVolunteer && (
           <div className="mt-12">
-            <h3 className="text-xl font-semibold text-[#1D1D1F] dark:text-white mb-4 flex items-center">
-              <Search className="w-5 h-5 mr-2 text-[#007AFF]" />
+            <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center">
+              <Search className="w-5 h-5 mr-2 text-primary" />
               Available Events
             </h3>
-            <p className="text-[13px] text-[#6E6E73] dark:text-[#AEAEB2] mb-4">
+            <p className="text-[13px] text-muted-foreground mb-4">
               Browse events accepting volunteers and submit your application
             </p>
             <AvailableEvents />
@@ -196,20 +196,20 @@ export default function HelperDashboard() {
 
         {/* My Events */}
         <div className="mt-12">
-          <h3 className="text-xl font-semibold text-[#1D1D1F] dark:text-white mb-4 flex items-center">
-            <CalendarDays className="w-5 h-5 mr-2 text-[#34C759]" />
+          <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center">
+            <CalendarDays className="w-5 h-5 mr-2 text-green-500" />
             My Events
           </h3>
           {eventsLoading ? (
-            <Card className="backdrop-blur-2xl bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/5 rounded-3xl">
+            <Card className="bg-card/60 backdrop-blur-2xl border border-border/40 rounded-3xl">
               <CardContent className="flex items-center justify-center py-8">
-                <p className="text-[#6E6E73] dark:text-[#AEAEB2]">Loading events...</p>
+                <p className="text-muted-foreground">Loading events...</p>
               </CardContent>
             </Card>
           ) : myEvents.length === 0 ? (
-            <Card className="backdrop-blur-2xl bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/5 rounded-3xl">
+            <Card className="bg-card/60 backdrop-blur-2xl border border-border/40 rounded-3xl">
               <CardContent className="flex items-center justify-center py-8">
-                <p className="text-[#6E6E73] dark:text-[#AEAEB2]">
+                <p className="text-muted-foreground">
                   You are not assigned to any events yet
                 </p>
               </CardContent>
@@ -219,13 +219,13 @@ export default function HelperDashboard() {
               {myEvents.map((event) => (
                 <Card
                   key={event.id}
-                  className="backdrop-blur-2xl bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/5 rounded-3xl hover:shadow-xl hover:shadow-black/5 transition-all duration-300"
+                  className="bg-card/60 backdrop-blur-2xl border border-border/40 rounded-3xl hover:shadow-lg transition-all duration-300"
                 >
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg text-[#1D1D1F] dark:text-white">
+                    <CardTitle className="text-lg text-foreground">
                       {event.name}
                     </CardTitle>
-                    <CardDescription className="flex items-center gap-1 text-[#6E6E73] dark:text-[#AEAEB2]">
+                    <CardDescription className="flex items-center gap-1 text-muted-foreground">
                       <Calendar className="w-3 h-3" />
                       {new Date(event.startDate).toLocaleDateString()} -{' '}
                       {new Date(event.endDate).toLocaleDateString()}
@@ -233,20 +233,20 @@ export default function HelperDashboard() {
                   </CardHeader>
                   <CardContent>
                     {event.location && (
-                      <p className="text-sm text-[#6E6E73] dark:text-[#AEAEB2] mb-2 flex items-center gap-1">
+                      <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {event.location}
                       </p>
                     )}
                     {event.description && (
-                      <p className="text-sm text-[#AEAEB2] dark:text-[#6E6E73] mb-3 line-clamp-2">
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                         {event.description}
                       </p>
                     )}
                     <div className="flex items-center gap-3">
                       <Badge
                         variant="outline"
-                        className="text-[#007AFF] border-[#007AFF]/30 bg-[#007AFF]/5"
+                        className="text-primary border-primary/30 bg-primary/5"
                       >
                         {event.myShiftsCount} of {event.totalShiftsCount} shifts
                       </Badge>
@@ -261,8 +261,8 @@ export default function HelperDashboard() {
         {/* My Applications */}
         {isVolunteer && (
           <div className="mt-12">
-            <h3 className="text-xl font-semibold text-[#1D1D1F] dark:text-white mb-4 flex items-center">
-              <FileText className="w-5 h-5 mr-2 text-[#AF52DE]" />
+            <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-purple-500" />
               My Applications
             </h3>
             <MyApplications />
@@ -272,30 +272,30 @@ export default function HelperDashboard() {
         {/* My Shift Requests */}
         {isVolunteer && (
           <div className="mt-12">
-            <h3 className="text-xl font-semibold text-[#1D1D1F] dark:text-white mb-4 flex items-center">
-              <ClipboardList className="w-5 h-5 mr-2 text-[#FF9500]" />
+            <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center">
+              <ClipboardList className="w-5 h-5 mr-2 text-accent" />
               My Shift Requests
             </h3>
             <Tabs defaultValue="pending" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-white/60 dark:bg-white/5 border border-[#E5E5EA] dark:border-white/10 rounded-xl">
+              <TabsList className="grid w-full grid-cols-2 bg-muted border border-border rounded-xl">
                 <TabsTrigger
                   value="pending"
-                  className="data-[state=active]:bg-[#1D1D1F] data-[state=active]:text-white rounded-lg transition-all"
+                  className="data-[state=active]:bg-foreground data-[state=active]:text-background rounded-lg transition-all"
                 >
                   Pending
                 </TabsTrigger>
                 <TabsTrigger
                   value="approved"
-                  className="data-[state=active]:bg-[#1D1D1F] data-[state=active]:text-white rounded-lg transition-all"
+                  className="data-[state=active]:bg-foreground data-[state=active]:text-background rounded-lg transition-all"
                 >
                   Approved
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="pending">
                 {requests.filter((r) => r.status === 'PENDING').length === 0 ? (
-                  <Card className="backdrop-blur-2xl bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/5 rounded-3xl mt-4">
+                  <Card className="bg-card/60 backdrop-blur-2xl border border-border/40 rounded-3xl mt-4">
                     <CardContent className="flex items-center justify-center py-8">
-                      <p className="text-[#6E6E73] dark:text-[#AEAEB2]">
+                      <p className="text-muted-foreground">
                         No pending shift requests
                       </p>
                     </CardContent>
@@ -312,9 +312,9 @@ export default function HelperDashboard() {
               </TabsContent>
               <TabsContent value="approved">
                 {requests.filter((r) => r.status === 'APPROVED').length === 0 ? (
-                  <Card className="backdrop-blur-2xl bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/5 rounded-3xl mt-4">
+                  <Card className="bg-card/60 backdrop-blur-2xl border border-border/40 rounded-3xl mt-4">
                     <CardContent className="flex items-center justify-center py-8">
-                      <p className="text-[#6E6E73] dark:text-[#AEAEB2]">
+                      <p className="text-muted-foreground">
                         No approved shift requests
                       </p>
                     </CardContent>
@@ -341,33 +341,32 @@ export default function HelperDashboard() {
   );
 }
 
-// Extracted sub-component to reduce nesting and improve readability
 function RequestCard({ request }: { request: ShiftRequest }) {
   return (
-    <Card className="backdrop-blur-2xl bg-white/60 dark:bg-white/5 border border-white/40 dark:border-white/5 rounded-3xl">
+    <Card className="bg-card/60 backdrop-blur-2xl border border-border/40 rounded-3xl">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-lg text-[#1D1D1F] dark:text-white">
+            <CardTitle className="text-lg text-foreground">
               {request.shift.title}
             </CardTitle>
-            <CardDescription className="text-[#6E6E73] dark:text-[#AEAEB2]">
+            <CardDescription className="text-muted-foreground">
               {new Date(request.shift.start).toLocaleString()} -{' '}
               {new Date(request.shift.end).toLocaleString()}
             </CardDescription>
           </div>
           <div className="flex gap-2">
-            <Badge className="bg-[#FF9500]/10 text-[#FF9500] border-[#FF9500]/20">
+            <Badge className="bg-accent/10 text-accent border-accent/20">
               {request.status}
             </Badge>
             <Badge
               className={`
               ${
                 request.type === 'CANCEL'
-                  ? 'bg-[#FF3B30]/10 text-[#FF3B30]'
+                  ? 'bg-destructive/10 text-destructive'
                   : request.type === 'SWAP'
-                    ? 'bg-[#007AFF]/10 text-[#007AFF]'
-                    : 'bg-[#AF52DE]/10 text-[#AF52DE]'
+                    ? 'bg-primary/10 text-primary'
+                    : 'bg-purple-500/10 text-purple-500'
               }
             `}
             >
@@ -377,10 +376,10 @@ function RequestCard({ request }: { request: ShiftRequest }) {
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-[#6E6E73] dark:text-[#AEAEB2] mb-2">
+        <p className="text-sm text-muted-foreground mb-2">
           <strong>Reason:</strong> {request.reason}
         </p>
-        <p className="text-xs text-[#AEAEB2] dark:text-[#6E6E73]">
+        <p className="text-xs text-muted-foreground">
           Requested: {new Date(request.createdAt).toLocaleString()}
           {request.reviewedAt && (
             <>
