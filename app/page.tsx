@@ -1,108 +1,144 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import AdminDashboard from '@/components/admin-dashboard';
-import HelperDashboard from '@/components/helper-dashboard';
-import { Button } from '@/components/ui/button';
-import { Calendar, Users, Clock, Shield } from 'lucide-react';
 import Link from 'next/link';
+import { Calendar, Users, Shield, ArrowRight, Sparkles } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
 
-  // If no session, show landing page with links
-  if (!session) {
-    return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4 relative overflow-hidden">
-        {/* Decorative background blur orbs */}
-        <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-blue-200/20 dark:bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-[-15%] right-[-10%] w-[500px] h-[500px] bg-purple-200/20 dark:bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+  if (session) {
+    const userRole = (session.user as { role: string })?.role;
+    if (userRole === 'ADMIN') {
+      const AdminDashboard = (await import('@/components/admin-dashboard')).default;
+      return <AdminDashboard />;
+    }
+    const HelperDashboard = (await import('@/components/helper-dashboard')).default;
+    return <HelperDashboard />;
+  }
 
-        <div className="max-w-lg w-full text-center space-y-10 relative z-10">
-          {/* Logo + Title */}
-          <div className="space-y-4">
-            <div className="flex justify-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#007AFF] to-[#5856D6] rounded-[22px] flex items-center justify-center shadow-xl shadow-blue-500/20 transition-transform duration-300 hover:scale-105">
-                <Calendar className="w-10 h-10 text-white" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-4xl font-semibold tracking-tight text-[#1D1D1F] dark:text-white">
-                Crew Management
-              </h1>
-              <p className="text-[#6E6E73] dark:text-slate-400 text-lg leading-relaxed max-w-sm mx-auto">
-                Organize events, manage shifts, and coordinate your team — all in one beautiful place.
-              </p>
-            </div>
+  return (
+    <main className="min-h-screen flex flex-col bg-background relative overflow-hidden">
+      {/* Subtle gradient blobs */}
+      <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-blue/10 dark:bg-blue/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-[-15%] right-[-10%] w-[500px] h-[500px] bg-purple/10 dark:bg-purple/5 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Navigation */}
+      <nav className="relative z-10 flex items-center justify-between px-6 py-4 md:px-12">
+        <div className="flex items-center gap-2">
+          <div className="w-9 h-9 bg-gradient-to-br from-blue to-purple rounded-xl flex items-center justify-center shadow-md">
+            <Calendar className="w-5 h-5 text-white" />
           </div>
+          <span className="text-lg font-semibold text-foregroundPrimary tracking-tight">
+            Crew Mgmt
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            href="/login"
+            className="px-5 py-2 text-sm font-medium text-foregroundPrimary hover:text-blue transition-colors duration-200"
+          >
+            Sign in
+          </Link>
+          <Link
+            href="/register"
+            className="px-5 py-2 text-sm font-semibold text-white bg-[#0051D5] rounded-xl hover:bg-[#0044B5] transition-all duration-200 shadow-md"
+          >
+            Get started
+          </Link>
+        </div>
+      </nav>
 
-          {/* Feature highlights */}
-          <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
-            <div className="flex flex-col items-center space-y-2 p-3 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
-              <div className="w-10 h-10 rounded-lg bg-[#007AFF]/10 flex items-center justify-center">
-                <Users className="w-5 h-5 text-[#007AFF]" />
-              </div>
-              <span className="text-xs font-medium text-[#1D1D1F] dark:text-slate-200">Team</span>
+      {/* Hero Section */}
+      <section className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-20 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full bg-backgroundSecondary border border-border text-sm text-foregroundSecondary">
+          <Sparkles className="w-4 h-4 text-yellow" />
+          Festival crew management, simplified
+        </div>
+
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foregroundPrimary tracking-tight leading-tight max-w-3xl">
+          Organize your crew.
+          <br />
+          <span className="bg-gradient-to-r from-blue to-purple bg-clip-text text-transparent">
+            Rock your festival.
+          </span>
+        </h1>
+
+        <p className="mt-6 text-lg md:text-xl text-foregroundSecondary max-w-xl leading-relaxed">
+          Effortless shift planning, smart helper assignments, and real-time
+          availability — all in one beautiful interface.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center gap-4 mt-10">
+          <Link
+            href="/register"
+            className="group inline-flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-white bg-[#0051D5] rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
+          >
+            Start free
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
+          </Link>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 px-8 py-3.5 text-base font-medium text-foregroundPrimary bg-backgroundSecondary border border-border rounded-2xl hover:border-blue/30 hover:text-blue transition-all duration-200"
+          >
+            Sign in
+          </Link>
+        </div>
+      </section>
+
+      {/* Feature Cards */}
+      <section className="relative z-10 px-6 pb-20 md:px-12">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="group p-6 bg-background/80 backdrop-blur-xl rounded-2xl border border-border shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+            <div className="w-12 h-12 bg-blue/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue/15 transition-colors duration-200">
+              <Calendar className="w-6 h-6 text-blue" />
             </div>
-            <div className="flex flex-col items-center space-y-2 p-3 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
-              <div className="w-10 h-10 rounded-lg bg-[#34C759]/10 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-[#34C759]" />
-              </div>
-              <span className="text-xs font-medium text-[#1D1D1F] dark:text-slate-200">Shifts</span>
-            </div>
-            <div className="flex flex-col items-center space-y-2 p-3 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
-              <div className="w-10 h-10 rounded-lg bg-[#AF52DE]/10 flex items-center justify-center">
-                <Shield className="w-5 h-5 text-[#AF52DE]" />
-              </div>
-              <span className="text-xs font-medium text-[#1D1D1F] dark:text-slate-200">Secure</span>
-            </div>
-          </div>
-
-          {/* Glassmorphism card with CTAs */}
-          <div className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 rounded-2xl shadow-2xl shadow-black/5 p-8 space-y-4 border border-white/40 dark:border-slate-700/50">
-            <Button
-              asChild
-              size="lg"
-              className="w-full h-12 rounded-xl bg-[#0051D5] hover:bg-[#0044B5] text-white font-semibold shadow-lg shadow-blue-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 active:translate-y-0"
-            >
-              <Link href="/login">Sign In</Link>
-            </Button>
-
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="w-full h-12 rounded-xl border-[#E5E5EA] dark:border-slate-600 hover:bg-[#F5F5F7] dark:hover:bg-slate-700 text-[#1D1D1F] dark:text-slate-200 font-medium transition-all duration-200"
-            >
-              <Link href="/signup-volunteer">Volunteer Sign Up</Link>
-            </Button>
-
-            <p className="text-sm text-[#6E6E73] dark:text-slate-400 pt-2">
-              New crew member?{' '}
-              <Link
-                href="/register"
-                className="font-semibold text-[#0051D5] hover:text-[#0044B5] dark:text-[#0A84FF] dark:hover:text-[#409CFF] transition-colors duration-200"
-              >
-                Create an account
-              </Link>
+            <h2 className="text-lg font-semibold text-foregroundPrimary mb-2">
+              Smart Scheduling
+            </h2>
+            <p className="text-sm text-foregroundSecondary leading-relaxed">
+              Drag-and-drop shift calendar with overlap prevention and
+              auto-assignment of available helpers.
             </p>
           </div>
 
-          {/* Footer */}
-          <p className="text-xs text-[#555558] dark:text-slate-500">
-            Secure, fast, and beautifully designed for your team.
-          </p>
+          <div className="group p-6 bg-background/80 backdrop-blur-xl rounded-2xl border border-border shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+            <div className="w-12 h-12 bg-green/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-green/15 transition-colors duration-200">
+              <Users className="w-6 h-6 text-green" />
+            </div>
+            <h2 className="text-lg font-semibold text-foregroundPrimary mb-2">
+              Crew Management
+            </h2>
+            <p className="text-sm text-foregroundSecondary leading-relaxed">
+              Track volunteer availability, skills, and preferences. Assign the
+              right person to the right shift.
+            </p>
+          </div>
+
+          <div className="group p-6 bg-background/80 backdrop-blur-xl rounded-2xl border border-border shadow-md hover:-translate-y-0.5 transition-all duration-300">
+            <div className="w-12 h-12 bg-purple/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple/15 transition-colors duration-200">
+              <Shield className="w-6 h-6 text-purple" />
+            </div>
+            <h2 className="text-lg font-semibold text-foregroundPrimary mb-2">
+              Role-based Access
+            </h2>
+            <p className="text-sm text-foregroundSecondary leading-relaxed">
+              Admin dashboards, helper views, and volunteer sign-up — each
+              tailored to their needs.
+            </p>
+          </div>
         </div>
-      </main>
-    );
-  }
+      </section>
 
-  const userRole = (session.user as { role: string })?.role;
-
-  if (userRole === 'ADMIN') {
-    return <AdminDashboard />;
-  }
-
-  return <HelperDashboard />;
+      {/* Footer */}
+      <footer className="relative z-10 px-6 py-6 border-t border-border text-center">
+        <p className="text-sm text-foregroundSecondary">
+          Crew Management — Built with care for festival teams.
+        </p>
+      </footer>
+    </main>
+  );
 }

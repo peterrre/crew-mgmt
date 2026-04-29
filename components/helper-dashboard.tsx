@@ -52,7 +52,6 @@ export default function HelperDashboard() {
     fetchMyEvents();
     if (isVolunteer) {
       fetchRequests();
-      // Refresh requests every 30 seconds to show updates
       const interval = setInterval(fetchRequests, 30000);
       return () => clearInterval(interval);
     }
@@ -90,20 +89,20 @@ export default function HelperDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-700 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Apple-Style Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-b border-white/40 dark:border-slate-700/50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-green-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#007AFF] to-[#5856D6] rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h1 className="text-lg font-semibold text-[#1D1D1F] dark:text-white">
                   {session?.user?.name || 'User'}
                 </h1>
-                <p className="text-xs text-gray-600 dark:text-slate-400">{userRole}</p>
+                <p className="text-xs text-[#6E6E73] dark:text-slate-400">{userRole}</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -112,7 +111,7 @@ export default function HelperDashboard() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-sky-600 border-sky-600 hover:bg-sky-50 dark:text-sky-400 dark:border-sky-400 dark:hover:bg-slate-800"
+                  className="border-[#E5E5EA] dark:border-slate-600 text-[#1D1D1F] dark:text-slate-200 hover:bg-[#F5F5F7] dark:hover:bg-slate-700"
                 >
                   <User className="w-4 h-4 mr-2" />
                   Edit Profile
@@ -123,7 +122,7 @@ export default function HelperDashboard() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowEditAvailability(true)}
-                  className="text-blue-600 border-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-400 dark:hover:bg-slate-800"
+                  className="border-[#E5E5EA] dark:border-slate-600 text-[#1D1D1F] dark:text-slate-200 hover:bg-[#F5F5F7] dark:hover:bg-slate-700"
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Availability
@@ -133,7 +132,7 @@ export default function HelperDashboard() {
                 variant="ghost"
                 size="sm"
                 onClick={handleSignOut}
-                className="text-gray-600 hover:text-gray-900 dark:text-slate-300 dark:hover:text-white"
+                className="text-[#6E6E73] hover:text-[#1D1D1F] dark:text-slate-300 dark:hover:text-white"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign out
@@ -145,21 +144,25 @@ export default function HelperDashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">My Schedule</h2>
-          <p className="text-gray-600 dark:text-slate-400">View your assigned shifts</p>
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold tracking-tight text-[#1D1D1F] dark:text-white mb-2">
+            My Schedule
+          </h2>
+          <p className="text-[#6E6E73] dark:text-slate-400">
+            View your assigned shifts
+          </p>
         </div>
 
         <PersonalCalendar />
 
         {/* Available Events Section - For volunteers to apply */}
         {isVolunteer && (
-          <div className="mt-8">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-              <Search className="w-5 h-5 mr-2" />
+          <div className="mt-12">
+            <h3 className="text-xl font-semibold text-[#1D1D1F] dark:text-white mb-4 flex items-center">
+              <Search className="w-5 h-5 mr-2 text-[#007AFF]" />
               Available Events
             </h3>
-            <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">
+            <p className="text-sm text-[#6E6E73] dark:text-slate-400 mb-4">
               Browse events accepting volunteers and submit your application
             </p>
             <AvailableEvents />
@@ -167,48 +170,53 @@ export default function HelperDashboard() {
         )}
 
         {/* My Events Section */}
-        <div className="mt-8">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-            <CalendarDays className="w-5 h-5 mr-2" />
+        <div className="mt-12">
+          <h3 className="text-xl font-semibold text-[#1D1D1F] dark:text-white mb-4 flex items-center">
+            <CalendarDays className="w-5 h-5 mr-2 text-[#34C759]" />
             My Events
           </h3>
           {eventsLoading ? (
-            <Card>
+            <Card className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50">
               <CardContent className="flex items-center justify-center py-8">
-                <p className="text-gray-600 dark:text-slate-400">Loading events...</p>
+                <p className="text-[#6E6E73] dark:text-slate-400">Loading events...</p>
               </CardContent>
             </Card>
           ) : myEvents.length === 0 ? (
-            <Card>
+            <Card className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50">
               <CardContent className="flex items-center justify-center py-8">
-                <p className="text-gray-600 dark:text-slate-400">You are not assigned to any events yet</p>
+                <p className="text-[#6E6E73] dark:text-slate-400">You are not assigned to any events yet</p>
               </CardContent>
             </Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {myEvents.map((event) => (
-                <Card key={event.id} className="hover:shadow-md transition-shadow">
+                <Card
+                  key={event.id}
+                  className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300"
+                >
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">{event.name}</CardTitle>
-                    <CardDescription className="flex items-center gap-1">
+                    <CardTitle className="text-lg text-[#1D1D1F] dark:text-white">
+                      {event.name}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-1 text-[#6E6E73] dark:text-slate-400">
                       <Calendar className="w-3 h-3" />
                       {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {event.location && (
-                      <p className="text-sm text-gray-600 dark:text-slate-400 mb-2 flex items-center gap-1">
+                      <p className="text-sm text-[#6E6E73] dark:text-slate-400 mb-2 flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {event.location}
                       </p>
                     )}
                     {event.description && (
-                      <p className="text-sm text-gray-500 dark:text-slate-500 mb-3 line-clamp-2">
+                      <p className="text-sm text-[#AEAEB2] dark:text-slate-500 mb-3 line-clamp-2">
                         {event.description}
                       </p>
                     )}
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="text-sky-600 border-sky-600">
+                      <Badge variant="outline" className="text-[#0051D5] border-[#0051D5]">
                         {event.myShiftsCount} of {event.totalShiftsCount} shifts
                       </Badge>
                     </div>
@@ -221,9 +229,9 @@ export default function HelperDashboard() {
 
         {/* My Applications Section - For volunteers to track their event applications */}
         {isVolunteer && (
-          <div className="mt-8">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-              <FileText className="w-5 h-5 mr-2" />
+          <div className="mt-12">
+            <h3 className="text-xl font-semibold text-[#1D1D1F] dark:text-white mb-4 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-[#AF52DE]" />
               My Applications
             </h3>
             <MyApplications />
@@ -231,41 +239,42 @@ export default function HelperDashboard() {
         )}
 
         {isVolunteer && (
-          <div className="mt-8">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-              <ClipboardList className="w-5 h-5 mr-2" />
+          <div className="mt-12">
+            <h3 className="text-xl font-semibold text-[#1D1D1F] dark:text-white mb-4 flex items-center">
+              <ClipboardList className="w-5 h-5 mr-2 text-[#FF9500]" />
               My Shift Requests
             </h3>
             <Tabs defaultValue="pending" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-2 bg-[#F5F5F7] dark:bg-slate-800">
                 <TabsTrigger value="pending">Pending</TabsTrigger>
                 <TabsTrigger value="approved">Approved</TabsTrigger>
               </TabsList>
               <TabsContent value="pending">
                 {requests.filter(r => r.status === 'PENDING').length === 0 ? (
-                  <Card>
+                  <Card className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50">
                     <CardContent className="flex items-center justify-center py-8">
-                      <p className="text-gray-600 dark:text-slate-400">No pending shift requests</p>
+                      <p className="text-[#6E6E73] dark:text-slate-400">No pending shift requests</p>
                     </CardContent>
                   </Card>
                 ) : (
                   <div className="space-y-4">
                     {requests.filter(r => r.status === 'PENDING').map((request) => (
-                      <Card key={request.id}>
+                      <Card
+                        key={request.id}
+                        className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50"
+                      >
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div>
-                              <CardTitle className="text-lg">{request.shift.title}</CardTitle>
-                              <CardDescription>
+                              <CardTitle className="text-lg text-[#1D1D1F] dark:text-white">
+                                {request.shift.title}
+                              </CardTitle>
+                              <CardDescription className="text-[#6E6E73] dark:text-slate-400">
                                 {new Date(request.shift.start).toLocaleString()} - {new Date(request.shift.end).toLocaleString()}
                               </CardDescription>
                             </div>
                             <div className="flex gap-2">
-                              <Badge className={`${
-                                request.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                                request.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                                'bg-red-100 text-red-800'
-                              }`}>
+                              <Badge className="bg-[#FF9500]/10 text-[#B36B00] border-[#FF9500]/20">
                                 {request.status}
                               </Badge>
                               <Badge className={`${
@@ -279,10 +288,10 @@ export default function HelperDashboard() {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-gray-600 dark:text-slate-400 mb-2">
+                          <p className="text-sm text-[#6E6E73] dark:text-slate-400 mb-2">
                             <strong>Reason:</strong> {request.reason}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-slate-500">
+                          <p className="text-xs text-[#AEAEB2] dark:text-slate-500">
                             Requested: {new Date(request.createdAt).toLocaleString()}
                           </p>
                         </CardContent>
@@ -293,25 +302,30 @@ export default function HelperDashboard() {
               </TabsContent>
               <TabsContent value="approved">
                 {requests.filter(r => r.status === 'APPROVED').length === 0 ? (
-                  <Card>
+                  <Card className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50">
                     <CardContent className="flex items-center justify-center py-8">
-                      <p className="text-gray-600 dark:text-slate-400">No approved shift requests</p>
+                      <p className="text-[#6E6E73] dark:text-slate-400">No approved shift requests</p>
                     </CardContent>
                   </Card>
                 ) : (
                   <div className="space-y-4">
                     {requests.filter(r => r.status === 'APPROVED').map((request) => (
-                      <Card key={request.id}>
+                      <Card
+                        key={request.id}
+                        className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50"
+                      >
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div>
-                              <CardTitle className="text-lg">{request.shift.title}</CardTitle>
-                              <CardDescription>
+                              <CardTitle className="text-lg text-[#1D1D1F] dark:text-white">
+                                {request.shift.title}
+                              </CardTitle>
+                              <CardDescription className="text-[#6E6E73] dark:text-slate-400">
                                 {new Date(request.shift.start).toLocaleString()} - {new Date(request.shift.end).toLocaleString()}
                               </CardDescription>
                             </div>
                             <div className="flex gap-2">
-                              <Badge className="bg-green-100 text-green-800">
+                              <Badge className="bg-[#34C759]/10 text-[#1E8733] border-[#34C759]/20">
                                 {request.status}
                               </Badge>
                               <Badge className={`${
@@ -325,10 +339,10 @@ export default function HelperDashboard() {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-gray-600 dark:text-slate-400 mb-2">
+                          <p className="text-sm text-[#6E6E73] dark:text-slate-400 mb-2">
                             <strong>Reason:</strong> {request.reason}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-slate-500">
+                          <p className="text-xs text-[#AEAEB2] dark:text-slate-500">
                             Requested: {new Date(request.createdAt).toLocaleString()}
                             {request.reviewedAt && (
                               <> • Approved: {new Date(request.reviewedAt).toLocaleString()}</>
