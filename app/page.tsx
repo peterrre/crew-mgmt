@@ -1,90 +1,98 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import AdminDashboard from '@/components/admin-dashboard';
+import HelperDashboard from '@/components/helper-dashboard';
+import { Button } from '@/components/ui/button';
+import { Calendar, Users, Clock, Shield } from 'lucide-react';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
 
+  // If no session, show landing page with links
   if (!session) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-backgroundSecondary px-6">
-        <div className="max-w-3xl w-full text-center space-y-10">
-          {/* Logo & Hero */}
-          <div className="space-y-6">
+      <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4 relative overflow-hidden">
+        {/* Decorative background blur orbs */}
+        <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-blue-200/20 dark:bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-[-15%] right-[-10%] w-[500px] h-[500px] bg-purple-200/20 dark:bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-lg w-full text-center space-y-10 relative z-10">
+          {/* Logo + Title */}
+          <div className="space-y-4">
             <div className="flex justify-center">
-              <div className="w-20 h-20 bg-gradient-primary rounded-[1.25rem] flex items-center justify-center shadow-lg shadow-blue/20">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-                  <line x1="16" x2="16" y1="2" y2="6"/>
-                  <line x1="8" x2="8" y1="2" y2="6"/>
-                  <line x1="3" x2="21" y1="10" y2="10"/>
-                </svg>
+              <div className="w-20 h-20 bg-gradient-to-br from-[#007AFF] to-[#5856D6] rounded-[22px] flex items-center justify-center shadow-xl shadow-blue-500/20 transition-transform duration-300 hover:scale-105">
+                <Calendar className="w-10 h-10 text-white" />
               </div>
             </div>
-            <h1 className="text-5xl font-bold tracking-tight text-foregroundPrimary">
-              Crew Manager
-            </h1>
-            <p className="text-xl text-foregroundSecondary max-w-lg mx-auto leading-relaxed">
-              Schedule smarter. Work simpler. <br className="hidden sm:block" />
-              Everything your event crew needs in one place.
+            <div className="space-y-2">
+              <h1 className="text-4xl font-semibold tracking-tight text-[#1D1D1F] dark:text-white">
+                Crew Management
+              </h1>
+              <p className="text-[#6E6E73] dark:text-slate-400 text-lg leading-relaxed max-w-sm mx-auto">
+                Organize events, manage shifts, and coordinate your team — all in one beautiful place.
+              </p>
+            </div>
+          </div>
+
+          {/* Feature highlights */}
+          <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
+            <div className="flex flex-col items-center space-y-2 p-3 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+              <div className="w-10 h-10 rounded-lg bg-[#007AFF]/10 flex items-center justify-center">
+                <Users className="w-5 h-5 text-[#007AFF]" />
+              </div>
+              <span className="text-xs font-medium text-[#1D1D1F] dark:text-slate-200">Team</span>
+            </div>
+            <div className="flex flex-col items-center space-y-2 p-3 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+              <div className="w-10 h-10 rounded-lg bg-[#34C759]/10 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-[#34C759]" />
+              </div>
+              <span className="text-xs font-medium text-[#1D1D1F] dark:text-slate-200">Shifts</span>
+            </div>
+            <div className="flex flex-col items-center space-y-2 p-3 rounded-xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+              <div className="w-10 h-10 rounded-lg bg-[#AF52DE]/10 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-[#AF52DE]" />
+              </div>
+              <span className="text-xs font-medium text-[#1D1D1F] dark:text-slate-200">Secure</span>
+            </div>
+          </div>
+
+          {/* Glassmorphism card with CTAs */}
+          <div className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 rounded-2xl shadow-2xl shadow-black/5 p-8 space-y-4 border border-white/40 dark:border-slate-700/50">
+            <Button
+              asChild
+              size="lg"
+              className="w-full h-12 rounded-xl bg-[#0051D5] hover:bg-[#0044B5] text-white font-semibold shadow-lg shadow-blue-500/25 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <Link href="/login">Sign In</Link>
+            </Button>
+
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="w-full h-12 rounded-xl border-[#E5E5EA] dark:border-slate-600 hover:bg-[#F5F5F7] dark:hover:bg-slate-700 text-[#1D1D1F] dark:text-slate-200 font-medium transition-all duration-200"
+            >
+              <Link href="/signup-volunteer">Volunteer Sign Up</Link>
+            </Button>
+
+            <p className="text-sm text-[#6E6E73] dark:text-slate-400 pt-2">
+              New crew member?{' '}
+              <Link
+                href="/register"
+                className="font-semibold text-[#0051D5] hover:text-[#0044B5] dark:text-[#0A84FF] dark:hover:text-[#409CFF] transition-colors duration-200"
+              >
+                Create an account
+              </Link>
             </p>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="/login"
-              className="inline-flex items-center justify-center h-14 px-10 rounded-2xl bg-foregroundPrimary text-white font-semibold text-lg hover:bg-foregroundPrimary/90 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 w-full sm:w-auto"
-            >
-              Sign In
-            </a>
-            <a
-              href="/signup-volunteer"
-              className="inline-flex items-center justify-center h-14 px-10 rounded-2xl bg-background text-foregroundPrimary font-semibold text-lg border border-border hover:bg-backgroundSecondary transition-all duration-200 w-full sm:w-auto"
-            >
-              Volunteer Sign Up
-            </a>
-          </div>
-
-          {/* Feature Teasers */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-12">
-            <div className="bg-background rounded-2xl p-6 shadow-sm border border-border/50 text-center">
-              <div className="w-12 h-12 bg-blue/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </div>
-              <h3 className="font-semibold text-foregroundPrimary mb-1">Crew & Volunteers</h3>
-              <p className="text-sm text-foregroundSecondary">Manage your entire team</p>
-            </div>
-            <div className="bg-background rounded-2xl p-6 shadow-sm border border-border/50 text-center">
-              <div className="w-12 h-12 bg-purple/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-                  <line x1="16" x2="16" y1="2" y2="6"/>
-                  <line x1="8" x2="8" y1="2" y2="6"/>
-                  <line x1="3" x2="21" y1="10" y2="10"/>
-                </svg>
-              </div>
-              <h3 className="font-semibold text-foregroundPrimary mb-1">Shift Calendar</h3>
-              <p className="text-sm text-foregroundSecondary">Visual scheduling</p>
-            </div>
-            <div className="bg-background rounded-2xl p-6 shadow-sm border border-border/50 text-center">
-              <div className="w-12 h-12 bg-yellow/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-yellow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 20h9"/>
-                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-                </svg>
-              </div>
-              <h3 className="font-semibold text-foregroundPrimary mb-1">Self-Service</h3>
-              <p className="text-sm text-foregroundSecondary">Volunteer applications</p>
-            </div>
-          </div>
+          {/* Footer */}
+          <p className="text-xs text-[#555558] dark:text-slate-500">
+            Secure, fast, and beautifully designed for your team.
+          </p>
         </div>
       </main>
     );
@@ -96,11 +104,5 @@ export default async function HomePage() {
     return <AdminDashboard />;
   }
 
-  // For non-admin users, redirect via client-side or rely on middleware.
-  // We return a minimal placeholder here.
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-backgroundSecondary">
-      <p className="text-foregroundSecondary">Redirecting...</p>
-    </div>
-  );
+  return <HelperDashboard />;
 }

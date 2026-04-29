@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Calendar } from "react-big-calendar";
 import moment from "moment";
+import { momentLocalizer } from "react-big-calendar";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Toaster, toast } from "sonner";
-import { useSession, Session } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { Shift, Assignment } from "@/types/shift";
 import {
   fetchShifts,
@@ -31,7 +32,8 @@ interface ShiftCalendarProps {
 }
 
 export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
-  const { data: session, status } = useSession<Session>();
+  const localizer = momentLocalizer(moment);
+  const { data: session, status } = useSession();
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
@@ -40,9 +42,9 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   const [openPanel, setOpenPanel] = useState(false);
 
   // Role-based helpers (Admin only / Crew / Volunteer)
-  const isAdmin = session?.user?.role === "ADMIN";
-  const isCrew = session?.user?.role === "CREW";
-  const isVolunteer = session?.user?.role === "VOLUNTEER";
+  const isAdmin = (session?.user as any)?.role === "ADMIN";
+  const isCrew = (session?.user as any)?.role === "CREW";
+  const isVolunteer = (session?.user as any)?.role === "VOLUNTEER";
 
   // Load data
   useEffect(() => {
@@ -93,7 +95,7 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   // Check if current user is assigned to shift (any role)
   const isUserAssigned = (shiftId: string) => {
     return getAssignmentsForShift(shiftId).some(
-      (a) => a.userId === session?.user?.id,
+      (a) => a.userId === (session?.user as any)?.id,
     );
   };
 
@@ -112,32 +114,9 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   };
 
   // Handle shift click (existing shift)
-  const handleSelectEvent = (info: {
-    event: Shift;
-    start: Date;
-    end: Date;
-    resource?: any;
-  }) => {
-    setSelectedShift(info.event);
+  const handleSelectEvent = (event: Shift) => {
+    setSelectedShift(event);
     setOpenPanel(true);
-  };
-
-  // Handle drag and drop (resize/move) – basic implementation
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-  const handleEventDrop = (_info: {
-    event: Shift;
-    start: Date;
-    end: Date;
-    resource?: any;
-  }) => {
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-    const _updatedShift = {
-      ..._info.event,
-      start: _info.start,
-      end: _info.end,
-    };
-    // TODO: call API to update shift timing, with overlap check
-    toast.success("Shift timing updated (placeholder)");
   };
 
   // Assign current user as helper/responsible (volunteer self-service)
@@ -145,7 +124,7 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
     if (!selectedShift) return;
     try {
       await assignUserToShift(selectedShift.id, {
-        userId: session?.user!.id,
+        userId: (session?.user as any)!.id,
         role,
       });
       // Refetch assignments
@@ -175,18 +154,14 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
 
   // Event prop getter for styling
   const eventPropGetter = (event: Shift) => {
-    const responsible = getResponsible(assignments, event.id);
-    const helpers = getHelpers(assignments, event.id);
+    const responsible = getResponsible(event.id);
+    const helpers = getHelpers(event.id);
     const minHelpers = event.minHelpers ?? 0;
     const maxHelpers = event.maxHelpers ?? 999;
     const helperCount = helpers.length;
     const isUnderMin = helperCount < minHelpers;
     const isOverMax = helperCount > maxHelpers;
-    const userIsAssigned = isUserAssigned(
-      assignments,
-      event.id,
-      session?.user?.id,
-    );
+    const userIsAssigned = isUserAssigned(event.id);
 
     return {
       style: {
@@ -233,7 +208,7 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
       </div>
 
       <Calendar
-        localizer={{ ...moment }} // using moment localizer via rbcs-moment
+        localizer={localizer}
         events={shifts}
         startAccessor="start"
         endAccessor="end"
@@ -241,7 +216,6 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
         tooltipAccessor="title"
         onSelectSlot={handleSelectSlot}
         onSelectEvent={handleSelectEvent}
-        onEventDrop={handleEventDrop}
         eventPropGetter={eventPropGetter}
         views={["month", "week", "day"]}
         style={{ height: 600 }}
@@ -279,13 +253,10 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
           {selectedShift ? (
             <AssignmentPanel
               shiftId={selectedShift.id}
-              assignments={getAssignmentsForShift(
-                assignments,
-                selectedShift.id,
-              )}
+              assignments={getAssignmentsForShift(selectedShift.id)}
               minHelpers={selectedShift.minHelpers ?? 0}
               maxHelpers={selectedShift.maxHelpers ?? 999}
-              currentUserId={session?.user?.id}
+              currentUserId={(session?.user as any)?.id}
               isAdmin={isAdmin}
               isCrew={isCrew}
               isVolunteer={isVolunteer}

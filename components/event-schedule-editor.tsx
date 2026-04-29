@@ -58,6 +58,7 @@ interface Shift {
 interface EventScheduleEditorProps {
   eventId: string;
   eventStartDate: Date;
+  eventEndDate?: Date;
 }
 
 export default function EventScheduleEditor({ eventId, eventStartDate }: EventScheduleEditorProps) {
@@ -120,15 +121,15 @@ export default function EventScheduleEditor({ eventId, eventStartDate }: EventSc
     return { crew: assigned, volunteer: 0, unassigned, availability: availability.length };
   }, [shifts, availability]);
 
-  const handleSelectSlot = useCallback((slotInfo: unknown) => {
+  const handleSelectSlot = useCallback((slotInfo: { start: Date; end: Date } | any) => {
     setSelectedSlot(slotInfo);
     setShowCreateDialog(true);
   }, []);
 
-  const handleSelectEvent = useCallback((event: unknown) => {
+  const handleSelectEvent = useCallback((event: { isAvailability?: boolean; [key: string]: any }) => {
     // Don't open edit dialog for availability slots
     if (event.isAvailability) return;
-    setEditingShift(event);
+    setEditingShift(event as Shift);
   }, []);
 
   return (
@@ -225,7 +226,6 @@ export default function EventScheduleEditor({ eventId, eventStartDate }: EventSc
         <ShiftEditDialog
           shift={editingShift}
           crew={crew}
-          checkHelperAvailability={checkHelperAvailability}
           onClose={() => setEditingShift(null)}
           onSuccess={async () => {
             setEditingShift(null);

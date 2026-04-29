@@ -123,7 +123,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primaryForeground font-semibold shadow-md shadow-primary/20 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60"
+              className="w-full h-12 rounded-xl bg-[#0051D5] hover:bg-[#0044B5] text-white font-semibold shadow-md shadow-blue-500/20 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60"
             >
               {loading ? (
                 <>
@@ -142,7 +142,7 @@ export default function LoginPage() {
               Don&apos;t have an account?{' '}
               <Link
                 href="/register"
-                className="font-semibold text-primary hover:text-primary/80 transition-colors duration-200"
+                className="font-semibold text-[#0051D5] hover:text-[#0044B5] dark:text-[#0A84FF] dark:hover:text-[#409CFF] transition-colors duration-200"
               >
                 Register
               </Link>
@@ -151,7 +151,7 @@ export default function LoginPage() {
               Volunteer?{' '}
               <Link
                 href="/signup-volunteer"
-                className="font-semibold text-yellow hover:text-yellow/80 transition-colors duration-200"
+                className="font-semibold text-[#8A5300] hover:text-[#6B4100] transition-colors duration-200"
               >
                 Sign up here
               </Link>
@@ -160,7 +160,7 @@ export default function LoginPage() {
         </div>
 
         {/* Subtle footer */}
-        <p className="text-center text-xs text-foregroundTertiary">
+        <p className="text-center text-xs text-foregroundSecondary">
           By signing in, you agree to our Terms and Privacy Policy.
         </p>
       </div>
