@@ -22,6 +22,7 @@ import {
   removeUserFromShift,
 } from "@/lib/api/shifts";
 import { AssignmentPanel } from "./AssignmentPanel";
+import { colors } from "@/styles/tokens";
 
 interface ShiftCalendarProps {
   eventId?: string; // optional filter by event
@@ -94,13 +95,9 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
     );
   };
 
-  // Check if user is responsible for shift
-  const isUserResponsible = (shiftId: string) => {
-    const resp = getResponsible(shiftId);
-    return resp?.id === session?.user?.id;
-  };
 
   // Handle shift select (click)
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const handleSelectSlot = (_info: {
     start: Date;
     end: Date;
@@ -124,12 +121,14 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   };
 
   // Handle drag and drop (resize/move) – basic implementation
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const handleEventDrop = (_info: {
     event: Shift;
     start: Date;
     end: Date;
     resource?: any;
   }) => {
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     const _updatedShift = {
       ..._info.event,
       start: _info.start,
@@ -186,21 +185,16 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
       event.id,
       session?.user?.id,
     );
-    const userIsResp = isUserResponsible(
-      assignments,
-      event.id,
-      session?.user?.id,
-    );
 
     return {
       style: {
         backgroundColor: responsible
-          ? "#3b82f6" // blue for responsible
+          ? colors.blue
           : helpers.length > 0
-            ? "#10b981" // green for helpers
-            : "#6b7280", // grey for unassigned
+            ? colors.green
+            : colors.gray,
         color: "#fff",
-        borderRadius: "4px",
+        borderRadius: "0.25rem",
         border: isUnderMin || isOverMax ? "2px solid #ef4444" : "none",
         opacity: userIsAssigned ? 1 : 0.9,
         // highlight own assignment
