@@ -89,20 +89,20 @@ export default function HelperDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-background via-backgroundSecondary to-background">
       {/* Apple-Style Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-b border-white/40 dark:border-slate-700/50 shadow-sm">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border/50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#007AFF] to-[#5856D6] rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue to-purple rounded-xl flex items-center justify-center shadow-lg shadow-blue/20">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-[#1D1D1F] dark:text-white">
+                <h1 className="text-lg font-semibold text-foregroundPrimary">
                   {session?.user?.name || 'User'}
                 </h1>
-                <p className="text-xs text-[#6E6E73] dark:text-slate-400">{userRole}</p>
+                <p className="text-xs text-foregroundSecondary">{userRole}</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -111,7 +111,7 @@ export default function HelperDashboard() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-[#E5E5EA] dark:border-slate-600 text-[#1D1D1F] dark:text-slate-200 hover:bg-[#F5F5F7] dark:hover:bg-slate-700"
+                  className="border-border text-foregroundPrimary hover:bg-backgroundSecondary"
                 >
                   <User className="w-4 h-4 mr-2" />
                   Edit Profile
@@ -122,7 +122,7 @@ export default function HelperDashboard() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowEditAvailability(true)}
-                  className="border-[#E5E5EA] dark:border-slate-600 text-[#1D1D1F] dark:text-slate-200 hover:bg-[#F5F5F7] dark:hover:bg-slate-700"
+                  className="border-border text-foregroundPrimary hover:bg-backgroundSecondary"
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Availability
@@ -132,7 +132,7 @@ export default function HelperDashboard() {
                 variant="ghost"
                 size="sm"
                 onClick={handleSignOut}
-                className="text-[#6E6E73] hover:text-[#1D1D1F] dark:text-slate-300 dark:hover:text-white"
+                className="text-foregroundSecondary hover:text-foregroundPrimary"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign out
@@ -145,10 +145,10 @@ export default function HelperDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold tracking-tight text-[#1D1D1F] dark:text-white mb-2">
+          <h2 className="text-2xl font-semibold tracking-tight text-foregroundPrimary mb-2">
             My Schedule
           </h2>
-          <p className="text-[#6E6E73] dark:text-slate-400">
+          <p className="text-foregroundSecondary">
             View your assigned shifts
           </p>
         </div>
@@ -158,11 +158,11 @@ export default function HelperDashboard() {
         {/* Available Events Section - For volunteers to apply */}
         {isVolunteer && (
           <div className="mt-12">
-            <h3 className="text-xl font-semibold text-[#1D1D1F] dark:text-white mb-4 flex items-center">
-              <Search className="w-5 h-5 mr-2 text-[#007AFF]" />
+            <h3 className="text-xl font-semibold text-foregroundPrimary mb-4 flex items-center">
+              <Search className="w-5 h-5 mr-2 text-blue" />
               Available Events
             </h3>
-            <p className="text-sm text-[#6E6E73] dark:text-slate-400 mb-4">
+            <p className="text-sm text-foregroundSecondary mb-4">
               Browse events accepting volunteers and submit your application
             </p>
             <AvailableEvents />
@@ -171,20 +171,20 @@ export default function HelperDashboard() {
 
         {/* My Events Section */}
         <div className="mt-12">
-          <h3 className="text-xl font-semibold text-[#1D1D1F] dark:text-white mb-4 flex items-center">
-            <CalendarDays className="w-5 h-5 mr-2 text-[#34C759]" />
+          <h3 className="text-xl font-semibold text-foregroundPrimary mb-4 flex items-center">
+            <CalendarDays className="w-5 h-5 mr-2 text-green" />
             My Events
           </h3>
           {eventsLoading ? (
-            <Card className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50">
+            <Card className="backdrop-blur-xl bg-background/70 border-border/50">
               <CardContent className="flex items-center justify-center py-8">
-                <p className="text-[#6E6E73] dark:text-slate-400">Loading events...</p>
+                <p className="text-foregroundSecondary">Loading events...</p>
               </CardContent>
             </Card>
           ) : myEvents.length === 0 ? (
-            <Card className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50">
+            <Card className="backdrop-blur-xl bg-background/70 border-border/50">
               <CardContent className="flex items-center justify-center py-8">
-                <p className="text-[#6E6E73] dark:text-slate-400">You are not assigned to any events yet</p>
+                <p className="text-foregroundSecondary">You are not assigned to any events yet</p>
               </CardContent>
             </Card>
           ) : (
@@ -192,31 +192,31 @@ export default function HelperDashboard() {
               {myEvents.map((event) => (
                 <Card
                   key={event.id}
-                  className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300"
+                  className="backdrop-blur-xl bg-background/70 border-border/50 hover:shadow-xl transition-all duration-300"
                 >
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg text-[#1D1D1F] dark:text-white">
+                    <CardTitle className="text-lg text-foregroundPrimary">
                       {event.name}
                     </CardTitle>
-                    <CardDescription className="flex items-center gap-1 text-[#6E6E73] dark:text-slate-400">
+                    <CardDescription className="flex items-center gap-1 text-foregroundSecondary">
                       <Calendar className="w-3 h-3" />
                       {new Date(event.startDate).toLocaleDateString()} - {new Date(event.endDate).toLocaleDateString()}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {event.location && (
-                      <p className="text-sm text-[#6E6E73] dark:text-slate-400 mb-2 flex items-center gap-1">
+                      <p className="text-sm text-foregroundSecondary mb-2 flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {event.location}
                       </p>
                     )}
                     {event.description && (
-                      <p className="text-sm text-[#AEAEB2] dark:text-slate-500 mb-3 line-clamp-2">
+                      <p className="text-sm text-foregroundTertiary mb-3 line-clamp-2">
                         {event.description}
                       </p>
                     )}
                     <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="text-[#0051D5] border-[#0051D5]">
+                      <Badge variant="outline" className="text-blue border-blue">
                         {event.myShiftsCount} of {event.totalShiftsCount} shifts
                       </Badge>
                     </div>
@@ -230,8 +230,8 @@ export default function HelperDashboard() {
         {/* My Applications Section - For volunteers to track their event applications */}
         {isVolunteer && (
           <div className="mt-12">
-            <h3 className="text-xl font-semibold text-[#1D1D1F] dark:text-white mb-4 flex items-center">
-              <FileText className="w-5 h-5 mr-2 text-[#AF52DE]" />
+            <h3 className="text-xl font-semibold text-foregroundPrimary mb-4 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-purple" />
               My Applications
             </h3>
             <MyApplications />
@@ -240,20 +240,20 @@ export default function HelperDashboard() {
 
         {isVolunteer && (
           <div className="mt-12">
-            <h3 className="text-xl font-semibold text-[#1D1D1F] dark:text-white mb-4 flex items-center">
-              <ClipboardList className="w-5 h-5 mr-2 text-[#FF9500]" />
+            <h3 className="text-xl font-semibold text-foregroundPrimary mb-4 flex items-center">
+              <ClipboardList className="w-5 h-5 mr-2 text-orange" />
               My Shift Requests
             </h3>
             <Tabs defaultValue="pending" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-[#F5F5F7] dark:bg-slate-800">
+              <TabsList className="grid w-full grid-cols-2 bg-backgroundSecondary">
                 <TabsTrigger value="pending">Pending</TabsTrigger>
                 <TabsTrigger value="approved">Approved</TabsTrigger>
               </TabsList>
               <TabsContent value="pending">
                 {requests.filter(r => r.status === 'PENDING').length === 0 ? (
-                  <Card className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50">
+                  <Card className="backdrop-blur-xl bg-background/70 border-border/50">
                     <CardContent className="flex items-center justify-center py-8">
-                      <p className="text-[#6E6E73] dark:text-slate-400">No pending shift requests</p>
+                      <p className="text-foregroundSecondary">No pending shift requests</p>
                     </CardContent>
                   </Card>
                 ) : (
@@ -261,26 +261,26 @@ export default function HelperDashboard() {
                     {requests.filter(r => r.status === 'PENDING').map((request) => (
                       <Card
                         key={request.id}
-                        className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50"
+                        className="backdrop-blur-xl bg-background/70 border-border/50"
                       >
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div>
-                              <CardTitle className="text-lg text-[#1D1D1F] dark:text-white">
+                              <CardTitle className="text-lg text-foregroundPrimary">
                                 {request.shift.title}
                               </CardTitle>
-                              <CardDescription className="text-[#6E6E73] dark:text-slate-400">
+                              <CardDescription className="text-foregroundSecondary">
                                 {new Date(request.shift.start).toLocaleString()} - {new Date(request.shift.end).toLocaleString()}
                               </CardDescription>
                             </div>
                             <div className="flex gap-2">
-                              <Badge className="bg-[#FF9500]/10 text-[#B36B00] border-[#FF9500]/20">
+                              <Badge className="bg-yellow/10 text-yellow border-yellow/20">
                                 {request.status}
                               </Badge>
                               <Badge className={`${
-                                request.type === 'CANCEL' ? 'bg-red-100 text-red-800' :
-                                request.type === 'SWAP' ? 'bg-blue-100 text-blue-800' :
-                                'bg-purple-100 text-purple-800'
+                                request.type === 'CANCEL' ? 'bg-red/10 text-red' :
+                                request.type === 'SWAP' ? 'bg-blue/10 text-blue' :
+                                'bg-purple/10 text-purple'
                               }`}>
                                 {request.type}
                               </Badge>
@@ -288,10 +288,10 @@ export default function HelperDashboard() {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-[#6E6E73] dark:text-slate-400 mb-2">
+                          <p className="text-sm text-foregroundSecondary mb-2">
                             <strong>Reason:</strong> {request.reason}
                           </p>
-                          <p className="text-xs text-[#AEAEB2] dark:text-slate-500">
+                          <p className="text-xs text-foregroundTertiary">
                             Requested: {new Date(request.createdAt).toLocaleString()}
                           </p>
                         </CardContent>
@@ -302,9 +302,9 @@ export default function HelperDashboard() {
               </TabsContent>
               <TabsContent value="approved">
                 {requests.filter(r => r.status === 'APPROVED').length === 0 ? (
-                  <Card className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50">
+                  <Card className="backdrop-blur-xl bg-background/70 border-border/50">
                     <CardContent className="flex items-center justify-center py-8">
-                      <p className="text-[#6E6E73] dark:text-slate-400">No approved shift requests</p>
+                      <p className="text-foregroundSecondary">No approved shift requests</p>
                     </CardContent>
                   </Card>
                 ) : (
@@ -312,26 +312,26 @@ export default function HelperDashboard() {
                     {requests.filter(r => r.status === 'APPROVED').map((request) => (
                       <Card
                         key={request.id}
-                        className="backdrop-blur-xl bg-white/70 dark:bg-slate-800/70 border-white/40 dark:border-slate-700/50"
+                        className="backdrop-blur-xl bg-background/70 border-border/50"
                       >
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div>
-                              <CardTitle className="text-lg text-[#1D1D1F] dark:text-white">
+                              <CardTitle className="text-lg text-foregroundPrimary">
                                 {request.shift.title}
                               </CardTitle>
-                              <CardDescription className="text-[#6E6E73] dark:text-slate-400">
+                              <CardDescription className="text-foregroundSecondary">
                                 {new Date(request.shift.start).toLocaleString()} - {new Date(request.shift.end).toLocaleString()}
                               </CardDescription>
                             </div>
                             <div className="flex gap-2">
-                              <Badge className="bg-[#34C759]/10 text-[#1E8733] border-[#34C759]/20">
+                              <Badge className="bg-green/10 text-green border-green/20">
                                 {request.status}
                               </Badge>
                               <Badge className={`${
-                                request.type === 'CANCEL' ? 'bg-red-100 text-red-800' :
-                                request.type === 'SWAP' ? 'bg-blue-100 text-blue-800' :
-                                'bg-purple-100 text-purple-800'
+                                request.type === 'CANCEL' ? 'bg-red/10 text-red' :
+                                request.type === 'SWAP' ? 'bg-blue/10 text-blue' :
+                                'bg-purple/10 text-purple'
                               }`}>
                                 {request.type}
                               </Badge>
@@ -339,10 +339,10 @@ export default function HelperDashboard() {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-[#6E6E73] dark:text-slate-400 mb-2">
+                          <p className="text-sm text-foregroundSecondary mb-2">
                             <strong>Reason:</strong> {request.reason}
                           </p>
-                          <p className="text-xs text-[#AEAEB2] dark:text-slate-500">
+                          <p className="text-xs text-foregroundTertiary">
                             Requested: {new Date(request.createdAt).toLocaleString()}
                             {request.reviewedAt && (
                               <> • Approved: {new Date(request.reviewedAt).toLocaleString()}</>
