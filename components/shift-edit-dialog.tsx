@@ -53,6 +53,7 @@ interface ShiftEditDialogProps {
   crew: CrewMember[];
   onClose: () => void;
   onSuccess: () => void;
+  checkHelperAvailability: (userId: string, shiftStart: Date, shiftEnd: Date) => boolean;
 }
 
 export default function ShiftEditDialog({
@@ -66,8 +67,8 @@ export default function ShiftEditDialog({
   const [error, setError] = useState('');
   const [currentShift, setCurrentShift] = useState(shift);
 
-  const currentUserId = (session?.user as AuthUser)?.id;
-  const currentUserRole = (session?.user as AuthUser)?.role;
+  const currentUserId = session?.user?.id;
+  const currentUserRole = session?.user?.role;
   const isAdmin = currentUserRole === 'ADMIN';
 
   // Check if current user is the responsible person

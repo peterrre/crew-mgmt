@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,8 +43,8 @@ function useAddHelperForm() {
   );
 
   const handleSubmit = useCallback(
-    async (onClose: () => void, onSuccess: () => void) => {
-      e.preventDefault(); // Note: e will be passed from caller
+    async (e: React.FormEvent, onClose: () => void, onSuccess: () => void) => {
+      e.preventDefault();
       setLoading(true);
       setError("");
 
@@ -104,13 +104,11 @@ export default function AddHelperDialog({
     loading,
     error,
     handleSubmit,
-    _resetForm,
   } = useAddHelperForm();
 
   // Wrap handleSubmit to pass e and call with onClose/onSuccess
   const handleSubmitWrapper = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleSubmit(onClose, onSuccess);
+    handleSubmit(e, onClose, onSuccess);
   };
 
   return (

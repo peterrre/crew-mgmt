@@ -22,12 +22,6 @@ export default function HoursReport() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  useEffect(() => {
-    if (period !== 'custom') {
-      fetchReport();
-    }
-  }, [period, fetchReport]);
-
   const fetchReport = useCallback(async () => {
     setLoading(true);
     try {
@@ -46,6 +40,12 @@ export default function HoursReport() {
       setLoading(false);
     }
   }, [period, startDate, endDate]);
+
+  useEffect(() => {
+    if (period !== 'custom') {
+      fetchReport();
+    }
+  }, [period, fetchReport]);
 
   const handleCustomSearch = () => {
     if (startDate && endDate) {
