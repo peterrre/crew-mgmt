@@ -24,6 +24,8 @@ import {
 import { AssignmentPanel } from "./AssignmentPanel";
 import { colors } from "@/styles/tokens";
 
+// TODO: Replace hardcoded Tailwind classes for spacing, typography, shadows, etc. with design tokens from '@/styles/tokens'
+
 interface ShiftCalendarProps {
   eventId?: string; // optional filter by event
 }
