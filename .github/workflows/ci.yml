@@ -1,10 +1,9 @@
-name: CI
-
+name: Playwright Tests
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, sprint-2-stabilization-cicd ]
   pull_request:
-    branches: [ master, main ]
+    branches: [ master, main, sprint-2-stabilization-cicd ]
 
 jobs:
   test:
@@ -27,7 +26,7 @@ jobs:
     env:
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'test-secret' }}
       NEXTAUTH_URL: 'http://localhost:3000'
-      DATABASE_URL: 'postgresql://postgres:***@localhost:5432/crew_mgmt_test'
+      DATABASE_URL: 'postgresql://postgres:${{ secrets.POSTGRES_PASSWORD || 'postgres' }}@localhost:5432/crew_mgmt_test'
       GITHUB_ID: 'dummy'
       GITHUB_SECRET: 'dummy'
     steps:
@@ -41,24 +40,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
-      - name: Start server
-        run: npm run start &
-        env:
-          PORT: 3000
-
-      - name: Wait for server
-        run: |
-          for i in {1..30}; do
-            if curl -s http://localhost:3000 > /dev/null; then
-              echo "Server ready"
-              break
-            fi
-            sleep 1
-          done
-
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
@@ -71,7 +52,3 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
-
-      - name: Stop server
-        if: always()
-        run: pkill -f "next start" || true
