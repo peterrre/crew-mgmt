@@ -1,9 +1,10 @@
-name: Playwright Tests
+name: CI
+
 on:
   push:
-    branches: [ master, main, sprint-2-stabilization-cicd ]
+    branches: [ master, main ]
   pull_request:
-    branches: [ master, main, sprint-2-stabilization-cicd ]
+    branches: [ master, main ]
 
 jobs:
   test:
@@ -24,31 +25,18 @@ jobs:
         ports:
           - 5432:5432
     env:
-      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'test-secret' }}
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/crew_mgmt_test'
+      NEXTAUTH_SECRET: 'test-secret'
       NEXTAUTH_URL: 'http://localhost:3000'
-      DATABASE_URL: 'postgresql://postgres:${{ secrets.POSTGRES_PASSWORD || 'postgres' }}@localhost:5432/crew_mgmt_test'
-      GITHUB_ID: 'dummy'
-      GITHUB_SECRET: 'dummy'
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-node@v5
         with:
           node-version: lts/*
           cache: 'npm'
-
       - name: Install dependencies
         run: npm ci
-
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-
       - name: Run Playwright tests
         run: npx playwright test
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
