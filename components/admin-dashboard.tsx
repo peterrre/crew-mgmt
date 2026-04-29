@@ -103,7 +103,7 @@ export default function AdminDashboard() {
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
                 <Users className="w-6 h-6 text-primary" />
               </div>
-              <TrendingUp className="w-5 h-5 text-green-500" />
+              <TrendingUp className="w-5 h-5 text-green" />
             </div>
             <h3 className="text-2xl font-bold text-foreground">
               {loading ? '...' : stats.crewCount}
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
               <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center">
                 <Users className="w-6 h-6 text-accent" />
               </div>
-              <TrendingUp className="w-5 h-5 text-green-500" />
+              <TrendingUp className="w-5 h-5 text-green" />
             </div>
             <h3 className="text-2xl font-bold text-foreground">
               {loading ? '...' : stats.volunteerCount}
@@ -126,10 +126,10 @@ export default function AdminDashboard() {
 
           <div className="bg-card/70 backdrop-blur rounded-2xl p-6 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center">
-                <Users className="w-6 h-6 text-purple-500" />
+              <div className="w-12 h-12 bg-purple/10 rounded-xl flex items-center justify-center">
+                <Users className="w-6 h-6 text-purple" />
               </div>
-              <TrendingUp className="w-5 h-5 text-green-500" />
+              <TrendingUp className="w-5 h-5 text-green" />
             </div>
             <h3 className="text-2xl font-bold text-foreground">
               {loading ? '...' : stats.totalHelpers}
@@ -184,7 +184,7 @@ export default function AdminDashboard() {
 
           <Link href="/reports" className="h-full group">
             <div className="bg-card/70 backdrop-blur rounded-2xl p-8 border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 h-full">
-              <div className="w-14 h-14 bg-green-500 rounded-xl flex items-center justify-center mb-5 shadow-sm group-hover:shadow transition-shadow">
+              <div className="w-14 h-14 bg-green rounded-xl flex items-center justify-center mb-5 shadow-sm group-hover:shadow transition-shadow">
                 <TrendingUp className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">

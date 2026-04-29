@@ -69,13 +69,13 @@ export default function HelpersManagement() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'ADMIN':
-        return 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300';
+        return 'bg-purple/10 text-purple';
       case 'CREW':
-        return 'bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300';
+        return 'bg-blue/10 text-blue';
       case 'VOLUNTEER':
-        return 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300';
+        return 'bg-yellow/10 text-yellow';
       default:
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+        return 'bg-backgroundSecondary text-foregroundSecondary';
     }
   };
 
@@ -88,22 +88,22 @@ export default function HelpersManagement() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-background via-backgroundSecondary to-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-amber-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-amber-200 dark:border-slate-700 shadow-sm">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <Link href="/">
-                <Button variant="ghost" size="sm" className="dark:text-slate-300 dark:hover:text-white">
+                <Button variant="ghost" size="sm" className="text-foregroundSecondary hover:text-foregroundPrimary">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>
               </Link>
-              <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-amber-500 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue to-yellow rounded-xl flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-sky-900 dark:text-white">Helpers Management</h1>
+              <h1 className="text-xl font-bold text-foregroundPrimary">Helpers Management</h1>
             </div>
             <div className="flex items-center space-x-2">
               <ThemeToggle />
@@ -111,7 +111,7 @@ export default function HelpersManagement() {
                 variant="ghost"
                 size="sm"
                 onClick={handleSignOut}
-                className="text-sky-700 hover:text-sky-900 dark:text-slate-300 dark:hover:text-white"
+                className="text-foregroundSecondary hover:text-foregroundPrimary"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign out
@@ -125,12 +125,12 @@ export default function HelpersManagement() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-sky-900 dark:text-white mb-2">Crew & Volunteers</h2>
-            <p className="text-sky-700 dark:text-slate-400">Manage your event helpers</p>
+            <h2 className="text-3xl font-bold text-foregroundPrimary mb-2">Crew & Volunteers</h2>
+            <p className="text-foregroundSecondary">Manage your event helpers</p>
           </div>
           <Button
             onClick={() => setShowAddDialog(true)}
-            className="bg-amber-500 hover:bg-orange-600"
+            className="bg-yellow hover:bg-yellow text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Helper
@@ -159,11 +159,11 @@ export default function HelpersManagement() {
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="inline-block w-8 h-8 border-4 border-blue border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : filteredHelpers.length === 0 ? (
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-12 text-center shadow-lg border border-amber-100 dark:border-slate-700">
-            <p className="text-sky-700 dark:text-slate-400">
+          <div className="bg-background rounded-2xl p-12 text-center shadow-lg border border-border">
+            <p className="text-foregroundSecondary">
               {helpers.length === 0 ? 'No helpers yet. Add your first helper!' : 'No helpers match your search criteria.'}
             </p>
           </div>
@@ -172,29 +172,29 @@ export default function HelpersManagement() {
             {filteredHelpers.map((helper) => (
               <div
                 key={helper.id}
-                className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-amber-100 dark:border-slate-700"
+                className="bg-background rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-border"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-bold text-sky-900 dark:text-white">
+                      <h3 className="text-lg font-bold text-foregroundPrimary">
                         {helper?.name || 'Unnamed'}
                       </h3>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(helper?.role)}`}>
                         {helper?.role}
                       </span>
                     </div>
-                    <p className="text-sm text-sky-700 dark:text-slate-400">{helper?.email}</p>
+                    <p className="text-sm text-foregroundSecondary">{helper?.email}</p>
                     {helper?.role === 'VOLUNTEER' && (
                       <>
                         {helper?.availabilitySlots?.length > 0 ? (
-                          <p className="text-xs text-sky-600 dark:text-slate-500 mt-2">
+                          <p className="text-xs text-foregroundTertiary mt-2">
                             Available times: {helper.availabilitySlots.map((slot: any) =>
                               `${new Date(slot.start).toLocaleDateString()} ${new Date(slot.start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(slot.end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`
                             ).join(', ')}
                           </p>
                         ) : helper?.availability?.length > 0 ? (
-                          <p className="text-xs text-sky-600 dark:text-slate-500 mt-2">
+                          <p className="text-xs text-foregroundTertiary mt-2">
                             Available: {helper.availability.join(', ')}
                           </p>
                         ) : null}
@@ -206,7 +206,7 @@ export default function HelpersManagement() {
                       variant="outline"
                       size="sm"
                       onClick={() => setEditingHelper(helper)}
-                      className="dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+                      className="border-border text-foregroundSecondary hover:bg-backgroundSecondary"
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -214,7 +214,7 @@ export default function HelpersManagement() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDelete(helper.id)}
-                      className="text-red-600 border-red-600 hover:bg-red-50 dark:text-red-400 dark:border-red-400 dark:hover:bg-red-900/30"
+                      className="text-red border-red hover:bg-red/10"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

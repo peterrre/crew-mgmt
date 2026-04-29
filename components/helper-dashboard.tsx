@@ -109,8 +109,8 @@ export default function HelperDashboard() {
       {/* Ambient background blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/15 dark:bg-primary/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-purple-500/15 dark:bg-purple-500/10 rounded-full blur-[120px]" />
-        <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-green-500/10 dark:bg-green-500/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-purple/15 rounded-full blur-[120px]" />
+        <div className="absolute top-[40%] left-[30%] w-[300px] h-[300px] bg-green/10 rounded-full blur-[100px]" />
       </div>
 
       {/* Header */}
@@ -198,7 +198,7 @@ export default function HelperDashboard() {
         {/* My Events */}
         <div className="mt-12">
           <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center">
-            <CalendarDays className="w-5 h-5 mr-2 text-green-500" />
+            <CalendarDays className="w-5 h-5 mr-2 text-green" />
             My Events
           </h3>
           {eventsLoading ? (
@@ -263,7 +263,7 @@ export default function HelperDashboard() {
         {isVolunteer && (
           <div className="mt-12">
             <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center">
-              <FileText className="w-5 h-5 mr-2 text-purple-500" />
+              <FileText className="w-5 h-5 mr-2 text-purple" />
               My Applications
             </h3>
             <MyApplications />
@@ -367,7 +367,7 @@ function RequestCard({ request }: { request: ShiftRequest }) {
                   ? 'bg-destructive/10 text-destructive'
                   : request.type === 'SWAP'
                     ? 'bg-primary/10 text-primary'
-                    : 'bg-purple-500/10 text-purple-500'
+: 'bg-purple/10 text-purple'
               }
             `}
             >

@@ -5,6 +5,7 @@ import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './big-calendar.css';
+import { colors } from '@/styles/tokens';
 
 const locales = {
   'en-US': require('date-fns/locale/en-US'),
@@ -176,12 +177,12 @@ export default function BigCalendar({
   }, [propOnView]);
 
   const eventStyleGetter = (event: any) => {
-    let backgroundColor = '#3b82f6';
+    let backgroundColor = colors.blue;
     let opacity = 0.9;
 
     if (event.isAvailability) {
       // Availability slots - lighter, striped pattern
-      backgroundColor = '#10b981'; // green for availability
+      backgroundColor = colors.green;
       opacity = 0.6;
     } else {
       // Check assignments first for role
@@ -196,11 +197,11 @@ export default function BigCalendar({
       }
 
       if (role === 'CREW') {
-        backgroundColor = '#0ea5e9';
+        backgroundColor = colors.blue;
       } else if (role === 'VOLUNTEER') {
-        backgroundColor = '#f59e0b';
+        backgroundColor = colors.orange;
       } else {
-        backgroundColor = '#ef4444';
+        backgroundColor = colors.red;
       }
     }
 
@@ -210,7 +211,7 @@ export default function BigCalendar({
         borderRadius: '8px',
         opacity,
         color: 'white',
-        border: event.isAvailability ? '2px dashed #065f46' : '0px',
+        border: event.isAvailability ? '2px dashed ' + colors.green : '0px', // uses green token for availability border
         display: 'block',
         fontSize: '13px',
         padding: '4px 8px',

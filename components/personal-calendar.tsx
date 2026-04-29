@@ -8,7 +8,7 @@ const BigCalendar = dynamic(() => import('@/components/big-calendar'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-96">
-      <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className="inline-block w-8 h-8 border-4 border-blue border-t-transparent rounded-full animate-spin"></div>
     </div>
   ),
 });
@@ -54,14 +54,14 @@ export default function PersonalCalendar() {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border dark:border-slate-700">
+    <div className="bg-background rounded-2xl p-6 shadow-lg border border-border">
       {loading ? (
         <div className="flex items-center justify-center h-96">
-          <div className="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="inline-block w-8 h-8 border-4 border-blue border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : shifts.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-600 dark:text-slate-400">No shifts assigned yet</p>
+          <p className="text-foregroundSecondary">No shifts assigned yet</p>
         </div>
       ) : (
         <BigCalendar
@@ -79,7 +79,7 @@ export default function PersonalCalendar() {
           onClose={() => setSelectedShift(null)}
           onSuccess={() => {
             setSelectedShift(null);
-            fetchShifts(); // Refresh the calendar after successful request
+            fetchShifts();
           }}
         />
       )}

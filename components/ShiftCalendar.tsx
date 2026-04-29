@@ -170,12 +170,12 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
           : helpers.length > 0
             ? colors.green
             : colors.gray,
-        color: "#fff",
-        borderRadius: "0.25rem",
-        border: isUnderMin || isOverMax ? "2px solid #ef4444" : "none",
-        opacity: userIsAssigned ? 1 : 0.9,
-        // highlight own assignment
-        outline: userIsAssigned ? "2px solid #fbbf24" : "none",
+      color: "#fff",
+      borderRadius: "0.25rem",
+      border: isUnderMin || isOverMax ? "2px solid " + colors.red : "none",
+      opacity: userIsAssigned ? 1 : 0.9,
+      // highlight own assignment
+      outline: userIsAssigned ? "2px solid " + colors.orange : "none",
       },
     };
   };
