@@ -123,7 +123,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 bg-[#0051D5] hover:bg-[#0044B5] text-white font-semibold shadow-md transition-all duration-300"
+              className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-md transition-all duration-300"
             >
               {loading ? (
                 <>
@@ -150,7 +150,7 @@ export default function LoginPage() {
               Volunteer?{' '}
               <Link
                 href="/signup-volunteer"
-                className="font-semibold text-[#8A5300] hover:text-[#6B4100] transition-colors duration-200"
+                className="font-semibold text-primary hover:text-primary/80 transition-colors duration-200"
               >
                 Sign up here
               </Link>
