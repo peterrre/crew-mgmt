@@ -53,7 +53,7 @@ export const AssignmentPanel = ({
     if (!(isAdmin || isCrew)) return;
     setLoadingUsers(true);
     try {
-      const _users = await fetchAvailableUsers({ shiftId });
+      await fetchAvailableUsers({ shiftId });
       // users are not used in UI; fetched for side effect only
     } catch (err: unknown) {
       toast.error("Failed to load users");
@@ -118,7 +118,7 @@ export const AssignmentPanel = ({
 
         {/* Responsible */}
         <div className="flex items-center space-x-3">
-          <div className="flex-shrink-0 h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
+          <div className="flex-shrink-0 h-8 w-8 bg-blue rounded-full flex items-center justify-center text-blueForeground text-xs">
             R
           </div>
           <div>
@@ -153,7 +153,7 @@ export const AssignmentPanel = ({
                 </div>
               </>
             ) : (
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-foregroundTertiary">
                 Nobody assigned
                 {!isVolunteer && (isAdmin || isCrew) && (
                   <Button
@@ -176,20 +176,20 @@ export const AssignmentPanel = ({
         <div className="space-y-2">
           <div className="flex justify-between items-center mb-1">
             <div className="flex items-center space-x-2">
-              <div className="flex-shrink-0 h-8 w-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">
+              <div className="flex-shrink-0 h-8 w-8 bg-green rounded-full flex items-center justify-center text-greenForeground text-xs">
                 H
               </div>
               <div>
                 <div className="font-medium">Helpers ({helperCount})</div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-foregroundTertiary">
                   Min: {minHelpers} | Max: {maxHelpers}
                   {isUnderMin && (
-                    <span className="ml-2 bg-red-100 text-red-800 text-xs px-1 rounded">
+                    <span className="ml-2 bg-red/10 text-red text-xs px-1 rounded">
                       Under min
                     </span>
                   )}
                   {isOverMax && (
-                    <span className="ml-2 bg-red-100 text-red-800 text-xs px-1 rounded">
+                    <span className="ml-2 bg-red/10 text-red text-xs px-1 rounded">
                       Over max
                     </span>
                   )}
@@ -213,8 +213,8 @@ export const AssignmentPanel = ({
 
           {helpers.length > 0 ? (
             helpers.map((helper) => (
-              <div key={helper.id} className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
-                <div className="flex-shrink-0 h-6 w-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">
+              <div key={helper.id} className="flex items-center space-x-2 p-2 bg-backgroundSecondary rounded">
+                <div className="flex-shrink-0 h-6 w-6 bg-green rounded-full flex items-center justify-center text-greenForeground text-xs">
                   H
                 </div>
                 <div className="flex-1">
@@ -246,7 +246,7 @@ export const AssignmentPanel = ({
               </div>
             ))
           ) : (
-            <div className="text-sm text-muted-foreground text-center py-4">
+            <div className="text-sm text-foregroundTertiary text-center py-4">
               Nobody assigned as helper
             </div>
           )}
