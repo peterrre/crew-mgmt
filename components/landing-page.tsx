@@ -9,13 +9,13 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Ambient background blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-400/20 dark:bg-blue-500/10 rounded-full blur-[120px]" />
-        <div className="absolute top-[10%] right-[-15%] w-[500px] h-[500px] bg-purple-400/20 dark:bg-purple-500/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[20%] w-[400px] h-[400px] bg-green-400/15 dark:bg-green-500/10 rounded-full blur-[120px]" />
+        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-400/20/10 rounded-full blur-[120px]" />
+        <div className="absolute top-[10%] right-[-15%] w-[500px] h-[500px] bg-purple-400/20/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[20%] w-[400px] h-[400px] bg-green-400/15/10 rounded-full blur-[120px]" />
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-20 border-b border-border/60 backdrop-blur-xl bg-card/50 dark:bg-card/20">
+      <nav className="relative z-20 border-b border-border/60 backdrop-blur-xl bg-card/50/20">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple rounded-lg flex items-center justify-center">
@@ -46,7 +46,7 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="relative z-10 pt-24 pb-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-card/60 dark:bg-card/10 backdrop-blur-md rounded-full border border-border/80 mb-8 shadow-sm">
+          <div className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-card/60/10 backdrop-blur-md rounded-full border border-border/80 mb-8 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-orange" />
             <span className="text-xs font-medium text-muted-foreground">
               Volunteer management reimagined
@@ -76,7 +76,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/signup-volunteer"
-              className="px-8 py-4 bg-card/60 dark:bg-card/10 backdrop-blur-md border border-border/80 text-foreground rounded-2xl font-semibold text-lg hover:bg-card dark:hover:bg-card/15 transition-all duration-200"
+              className="px-8 py-4 bg-card/60/10 backdrop-blur-md border border-border/80 text-foreground rounded-2xl font-semibold text-lg hover:bg-card/15 transition-all duration-200"
             >
               Volunteer Sign Up
             </Link>
@@ -89,8 +89,8 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Feature 1 */}
-            <div className="group p-6 bg-card/60 dark:bg-card/5 backdrop-blur-xl rounded-3xl border border-border/80 dark:border-border/5 hover:border-primary/30 dark:hover:border-primary/20 transition-all duration-300 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 hover:-translate-y-1">
-              <div className="w-12 h-12 bg-primary/10 dark:bg-primary/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div className="group p-6 bg-card/60/5 backdrop-blur-xl rounded-3xl border border-border/80/5 hover:border-primary/30/20 transition-all duration-300 hover:shadow-lg hover:shadow-black/5/20 hover:-translate-y-1">
+              <div className="w-12 h-12 bg-primary/10/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Calendar className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -102,8 +102,8 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 2 */}
-            <div className="group p-6 bg-card/60 dark:bg-card/5 backdrop-blur-xl rounded-3xl border border-border/80 dark:border-border/5 hover:border-green/30 dark:hover:border-green/20 transition-all duration-300 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 hover:-translate-y-1">
-              <div className="w-12 h-12 bg-green/10 dark:bg-green/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div className="group p-6 bg-card/60/5 backdrop-blur-xl rounded-3xl border border-border/80/5 hover:border-green/30/20 transition-all duration-300 hover:shadow-lg hover:shadow-black/5/20 hover:-translate-y-1">
+              <div className="w-12 h-12 bg-green/10/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Users className="w-6 h-6 text-green" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -115,8 +115,8 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 3 */}
-            <div className="group p-6 bg-card/60 dark:bg-card/5 backdrop-blur-xl rounded-3xl border border-border/80 dark:border-border/5 hover:border-orange/30 dark:hover:border-orange/20 transition-all duration-300 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 hover:-translate-y-1">
-              <div className="w-12 h-12 bg-orange/10 dark:bg-orange/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div className="group p-6 bg-card/60/5 backdrop-blur-xl rounded-3xl border border-border/80/5 hover:border-orange/30/20 transition-all duration-300 hover:shadow-lg hover:shadow-black/5/20 hover:-translate-y-1">
+              <div className="w-12 h-12 bg-orange/10/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Clock className="w-6 h-6 text-orange" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -128,8 +128,8 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 4 */}
-            <div className="group p-6 bg-card/60 dark:bg-card/5 backdrop-blur-xl rounded-3xl border border-border/80 dark:border-border/5 hover:border-purple/30 dark:hover:border-purple/20 transition-all duration-300 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 hover:-translate-y-1">
-              <div className="w-12 h-12 bg-purple/10 dark:bg-purple/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div className="group p-6 bg-card/60/5 backdrop-blur-xl rounded-3xl border border-border/80/5 hover:border-purple/30/20 transition-all duration-300 hover:shadow-lg hover:shadow-black/5/20 hover:-translate-y-1">
+              <div className="w-12 h-12 bg-purple/10/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Shield className="w-6 h-6 text-purple" />
               </div>
               <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -141,7 +141,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 5 - Stats */}
-            <div className="md:col-span-2 lg:col-span-2 p-6 bg-gradient-to-br from-primary/5 to-green/5 dark:from-primary/10 dark:to-green/10 backdrop-blur-xl rounded-3xl border border-border/80 dark:border-border/5">
+            <div className="md:col-span-2 lg:col-span-2 p-6 bg-gradient-to-br from-primary/5 to-green/5/10/10 backdrop-blur-xl rounded-3xl border border-border/80/5">
               <div className="grid grid-cols-3 gap-6 text-center">
                 <div>
                   <div className="text-3xl font-bold text-foreground mb-1">500+</div>

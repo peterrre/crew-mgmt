@@ -8,6 +8,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { ROLES } from '@/constants/roles';
 
 const prisma = new PrismaClient();
 

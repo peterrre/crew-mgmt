@@ -6,6 +6,7 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './big-calendar.css';
 import { colors } from '@/styles/tokens';
+import { ROLES } from '@/constants/roles';
 
 const locales = {
   'en-US': require('date-fns/locale/en-US'),
@@ -47,8 +48,8 @@ const getAssignmentDisplay = (event: any): string => {
 
   // Use new assignments array if available
   if (event.assignments && event.assignments.length > 0) {
-    const responsible = event.assignments.find((a: any) => a.role === 'RESPONSIBLE');
-    const helperCount = event.assignments.filter((a: any) => a.role === 'HELPER').length;
+    const responsible = event.assignments.find((a: any) => a.role === ROLES.RESPONSIBLE);
+    const helperCount = event.assignments.filter((a: any) => a.role === ROLES.HELPER).length;
     const responsibleName = responsible?.user?.name || 'Unknown';
 
     if (helperCount > 0) {
@@ -80,22 +81,22 @@ const CustomAgenda = ({ events, onSelectEvent }: { events: any[]; onSelectEvent?
   });
 
   const getRoleColor = (event: any) => {
-    if (event.isAvailability) return 'bg-green-500 opacity-60 border-2 border-dashed border-green-800';
+    if (event.isAvailability) return 'bg-green opacity-60 border-2 border-dashed border-green';
     // Check assignments first
     if (event.assignments && event.assignments.length > 0) {
-      const responsible = event.assignments.find((a: any) => a.role === 'RESPONSIBLE');
-      if (responsible?.user?.role === 'CREW') return 'bg-sky-500';
-      if (responsible?.user?.role === 'VOLUNTEER') return 'bg-amber-500';
+      const responsible = event.assignments.find((a: any) => a.role === ROLES.RESPONSIBLE);
+      if (responsible?.user?.role === 'CREW') return 'bg-blue';
+      if (responsible?.user?.role === 'VOLUNTEER') return 'bg-yellow';
     }
     // Fall back to legacy helper
-    if (event?.helper?.role === 'CREW') return 'bg-sky-500';
-    if (event?.helper?.role === 'VOLUNTEER') return 'bg-amber-500';
-    return 'bg-red-500';
+    if (event?.helper?.role === 'CREW') return 'bg-blue';
+    if (event?.helper?.role === 'VOLUNTEER') return 'bg-yellow';
+    return 'bg-red';
   };
 
   if (sortedEvents.length === 0) {
     return (
-      <div className="p-8 text-center text-gray-500 dark:text-slate-400">
+      <div className="p-8 text-center text-foregroundTertiary">
         No events in this range.
       </div>
     );
@@ -104,33 +105,33 @@ const CustomAgenda = ({ events, onSelectEvent }: { events: any[]; onSelectEvent?
   return (
     <div className="space-y-4 p-4 max-h-[600px] overflow-y-auto">
       {Object.entries(groupedByDate).map(([dateKey, dayEvents]) => (
-        <div key={dateKey} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden">
-          <div className="bg-sky-50 dark:bg-slate-700 px-4 py-3 border-b border-gray-200 dark:border-slate-600">
-            <h3 className="font-semibold text-sky-900 dark:text-white">
+        <div key={dateKey} className="bg-background rounded-lg border border-border overflow-hidden">
+          <div className="bg-backgroundSecondary px-4 py-3 border-b border-border">
+            <h3 className="font-semibold text-foregroundPrimary">
               {format(new Date(dateKey), 'EEEE, MMMM d, yyyy')}
             </h3>
           </div>
-          <div className="divide-y divide-gray-100 dark:divide-slate-600">
+          <div className="divide-y divide-border">
             {dayEvents.map((event, idx) => {
               const eventBadge = getEventBadge(event);
               return (
                 <div
                   key={event.id || idx}
                   onClick={() => onSelectEvent?.(event)}
-                  className="flex items-center gap-4 px-4 py-3 hover:bg-amber-50 dark:hover:bg-slate-600 cursor-pointer transition-colors"
+                  className="flex items-center gap-4 px-4 py-3 hover:bg-backgroundSecondary cursor-pointer transition-colors"
                 >
                   <div className={`w-3 h-3 rounded-full ${getRoleColor(event)}`} />
-                  <div className="w-32 text-sm text-gray-600 dark:text-slate-300 font-medium">
+                  <div className="w-32 text-sm text-foregroundSecondary font-medium">
                     {format(new Date(event.start), 'HH:mm')} - {format(new Date(event.end), 'HH:mm')}
                   </div>
                   <div className="flex-1 flex items-center gap-2">
                     {eventBadge && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple/10 text-purple">
                         {eventBadge}
                       </span>
                     )}
-                    <span className="font-medium text-gray-900 dark:text-white">{event.title}</span>
-                    <span className="text-gray-500 dark:text-slate-400">
+                    <span className="font-medium text-foregroundPrimary">{event.title}</span>
+                    <span className="text-foregroundTertiary">
                       — {getAssignmentDisplay(event)}
                     </span>
                   </div>
@@ -188,7 +189,7 @@ export default function BigCalendar({
       // Check assignments first for role
       let role = null;
       if (event.assignments && event.assignments.length > 0) {
-        const responsible = event.assignments.find((a: any) => a.role === 'RESPONSIBLE');
+        const responsible = event.assignments.find((a: any) => a.role === ROLES.RESPONSIBLE);
         role = responsible?.user?.role;
       }
       // Fall back to legacy helper
@@ -211,7 +212,7 @@ export default function BigCalendar({
         borderRadius: '8px',
         opacity,
         color: 'white',
-        border: event.isAvailability ? '2px dashed ' + colors.green : '0px', // uses green token for availability border
+        border: event.isAvailability ? '2px dashed ' + colors.green : '0px',
         display: 'block',
         fontSize: '13px',
         padding: '4px 8px',
@@ -224,23 +225,23 @@ export default function BigCalendar({
   if (currentView === 'agenda') {
     return (
       <div>
-        <div className="flex items-center gap-6 mb-4 p-3 bg-amber-50 dark:bg-slate-700 rounded-lg border border-amber-100 dark:border-slate-600">
-          <span className="text-sm font-medium text-sky-900 dark:text-white">Legend:</span>
+        <div className="flex items-center gap-6 mb-4 p-3 bg-backgroundSecondary rounded-lg border border-border">
+          <span className="text-sm font-medium text-foregroundPrimary">Legend:</span>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-sky-500"></div>
-            <span className="text-sm text-sky-800 dark:text-slate-200">Crew ({counts?.crew || 0})</span>
+            <div className="w-4 h-4 rounded bg-blue"></div>
+            <span className="text-sm text-foregroundSecondary">Crew ({counts?.crew || 0})</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-amber-500"></div>
-            <span className="text-sm text-sky-800 dark:text-slate-200">Volunteer ({counts?.volunteer || 0})</span>
+            <div className="w-4 h-4 rounded bg-yellow"></div>
+            <span className="text-sm text-foregroundSecondary">Volunteer ({counts?.volunteer || 0})</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-red-500"></div>
-            <span className="text-sm text-sky-800 dark:text-slate-200">Unassigned ({counts?.unassigned || 0})</span>
+            <div className="w-4 h-4 rounded bg-red"></div>
+            <span className="text-sm text-foregroundSecondary">Unassigned ({counts?.unassigned || 0})</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-green-500 opacity-60 border-2 border-dashed border-green-800"></div>
-            <span className="text-sm text-sky-800 dark:text-slate-200">Available ({counts?.availability || 0})</span>
+            <div className="w-4 h-4 rounded bg-green opacity-60 border-2 border-dashed border-green"></div>
+            <span className="text-sm text-foregroundSecondary">Available ({counts?.availability || 0})</span>
           </div>
         </div>
         <div className="rbc-toolbar" style={{ padding: '16px 0', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
@@ -266,23 +267,23 @@ export default function BigCalendar({
 
   return (
     <div>
-      <div className="flex items-center gap-6 mb-4 p-3 bg-amber-50 dark:bg-slate-700 rounded-lg border border-amber-100 dark:border-slate-600">
-        <span className="text-sm font-medium text-sky-900 dark:text-white">Legend:</span>
+      <div className="flex items-center gap-6 mb-4 p-3 bg-backgroundSecondary rounded-lg border border-border">
+        <span className="text-sm font-medium text-foregroundPrimary">Legend:</span>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-sky-500"></div>
-          <span className="text-sm text-sky-800 dark:text-slate-200">Crew ({counts?.crew || 0})</span>
+          <div className="w-4 h-4 rounded bg-blue"></div>
+          <span className="text-sm text-foregroundSecondary">Crew ({counts?.crew || 0})</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-amber-500"></div>
-          <span className="text-sm text-sky-800 dark:text-slate-200">Volunteer ({counts?.volunteer || 0})</span>
+          <div className="w-4 h-4 rounded bg-yellow"></div>
+          <span className="text-sm text-foregroundSecondary">Volunteer ({counts?.volunteer || 0})</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-red-500"></div>
-          <span className="text-sm text-sky-800 dark:text-slate-200">Unassigned ({counts?.unassigned || 0})</span>
+          <div className="w-4 h-4 rounded bg-red"></div>
+          <span className="text-sm text-foregroundSecondary">Unassigned ({counts?.unassigned || 0})</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-green-500 opacity-60 border-2 border-dashed border-green-800"></div>
-          <span className="text-sm text-sky-800 dark:text-slate-200">Available ({counts?.availability || 0})</span>
+          <div className="w-4 h-4 rounded bg-green opacity-60 border-2 border-dashed border-green"></div>
+          <span className="text-sm text-foregroundSecondary">Available ({counts?.availability || 0})</span>
         </div>
       </div>
       <div style={{ height: '700px' }}>

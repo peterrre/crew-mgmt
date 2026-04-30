@@ -1,14 +1,14 @@
 export interface Assignment {
-  id: string;
-  userId: string;
-  role: string;
-  shiftId: string;
-  user?: {
-    id: string;
-    name: string | null;
-    email: string;
-    role: string;
-  };
+ id: string;
+ userId: string;
+ role: string;
+ shiftId: string;
+ user?: {
+ id: string;
+ name: string | null;
+ email: string;
+ role: string;
+ };
 }
 
 export interface Shift {

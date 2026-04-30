@@ -221,9 +221,9 @@ export default function CreateShiftRequestDialog({
                 Swap With
               </Label>
               {loadingHelpers ? (
-                <div className="col-span-3 text-sm text-gray-500">Loading available helpers...</div>
+                <div className="col-span-3 text-sm text-foregroundTertiary">Loading available helpers...</div>
               ) : availableHelpers.length === 0 ? (
-                <div className="col-span-3 text-sm text-red-600">No helpers available for this time slot</div>
+                <div className="col-span-3 text-sm text-red">No helpers available for this time slot</div>
               ) : (
                 <Select value={newHelperId} onValueChange={setNewHelperId}>
                   <SelectTrigger className="col-span-3">
@@ -272,7 +272,7 @@ export default function CreateShiftRequestDialog({
 
           <div className="grid grid-cols-4 items-start gap-4">
             <Label htmlFor="reason" className="text-right pt-2">
-              Reason <span className="text-red-500">*</span>
+              Reason <span className="text-red">*</span>
             </Label>
             <Textarea
               id="reason"

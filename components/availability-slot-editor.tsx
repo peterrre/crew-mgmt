@@ -84,19 +84,19 @@ export default function AvailabilitySlotEditor({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-xl max-w-md w-full shadow-2xl border dark:border-slate-700">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
+      <div className="bg-background rounded-xl max-w-md w-full shadow-2xl border">
+        <div className="flex items-center justify-between p-4 border-b border-border">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-foregroundPrimary">
               {isNew ? "Add Availability" : "Edit Availability"}
             </h3>
-            <p className="text-sm text-gray-500 dark:text-slate-400">
+            <p className="text-sm text-foregroundTertiary">
               {displayDate}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+            className="text-foregroundTertiary hover:text-foregroundSecondary transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -150,7 +150,7 @@ export default function AvailabilitySlotEditor({
           </div>
 
           {formData.isRecurring && (
-            <div className="space-y-3 pl-6 border-l-2 border-green-200 dark:border-green-800">
+            <div className="space-y-3 pl-6 border-l-2 border-green-200">
               <div>
                 <Label htmlFor="pattern">Repeat Pattern</Label>
                 <Select
@@ -207,7 +207,7 @@ export default function AvailabilitySlotEditor({
             </Button>
             <Button
               type="submit"
-              className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
+              className="bg-green-600 hover:bg-green"
             >
               {isNew ? "Add" : "Save"}
             </Button>

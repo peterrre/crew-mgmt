@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { Role } from "@/lib/role";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -110,14 +111,14 @@ export default function AddEventCrewDialog({
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case "ADMIN":
-        return "bg-purple/10 text-purple dark:bg-purple/20 dark:text-purple";
-      case "CREW":
-        return "bg-blue/10 text-blue dark:bg-blue/20 dark:text-blue";
-      case "VOLUNTEER":
-        return "bg-orange/10 text-orange dark:bg-orange/20 dark:text-orange";
+      case Role.ADMIN:
+        return "bg-purple/10 text-purple/20";
+      case Role.CREW:
+        return "bg-blue/10 text-blue/20";
+      case Role.VOLUNTEER:
+        return "bg-orange/10 text-orange/20";
       default:
-        return "bg-gray/10 text-gray dark:bg-gray/20 dark:text-gray";
+        return "bg-gray/10 text-gray/20";
     }
   };
 
@@ -181,8 +182,8 @@ export default function AddEventCrewDialog({
                     onClick={() => toggleUser(user.id)}
                     className={`w-full p-3 rounded-lg border transition-colors text-left flex items-center justify-between ${
                       selectedUserIds.includes(user.id)
-                        ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20"
-                        : "border-border hover:border-amber-300 dark:hover:border-amber-700"
+                        ? "border-yellow bg-backgroundSecondary/20"
+                        : "border-border hover:border-border"
                     }`}
                   >
                     <div>
@@ -203,7 +204,7 @@ export default function AddEventCrewDialog({
                       </p>
                     </div>
                     {selectedUserIds.includes(user.id) && (
-                      <Check className="w-5 h-5 text-amber-500" />
+                      <Check className="w-5 h-5 text-yellow" />
                     )}
                   </button>
                 ))}
@@ -230,7 +231,7 @@ export default function AddEventCrewDialog({
               <Button
                 type="submit"
                 disabled={loading || selectedUserIds.length === 0}
-                className="flex-1 bg-amber-500 hover:bg-orange-600"
+                className="flex-1 bg-backgroundSecondary0 hover:bg-yellow"
               >
                 {loading ? (
                   <>

@@ -10,6 +10,7 @@ import Link from 'next/link';
 import AddHelperDialog from '@/components/add-helper-dialog';
 import EditHelperDialog from '@/components/edit-helper-dialog';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { Role } from '@/lib/role';
 
 interface Helper {
   id: string;
@@ -68,11 +69,11 @@ export default function HelpersManagement() {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'ADMIN':
+      case Role.ADMIN:
         return 'bg-purple/10 text-purple';
-      case 'CREW':
+      case Role.CREW:
         return 'bg-blue/10 text-blue';
-      case 'VOLUNTEER':
+      case Role.VOLUNTEER:
         return 'bg-yellow/10 text-yellow';
       default:
         return 'bg-backgroundSecondary text-foregroundSecondary';
@@ -150,9 +151,9 @@ export default function HelpersManagement() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="ADMIN">Admin</SelectItem>
-              <SelectItem value="CREW">Crew</SelectItem>
-              <SelectItem value="VOLUNTEER">Volunteer</SelectItem>
+              <SelectItem value={Role.ADMIN}>Admin</SelectItem>
+              <SelectItem value={Role.CREW}>Crew</SelectItem>
+              <SelectItem value={Role.VOLUNTEER}>Volunteer</SelectItem>
             </SelectContent>
           </Select>
         </div>

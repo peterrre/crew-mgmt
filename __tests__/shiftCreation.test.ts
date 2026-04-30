@@ -77,7 +77,7 @@ describe('Shift Creation Validation', () => {
       { id: 'ec-1', eventId, userId: userId },
     ]);
 
-    const request = new Request('http://localhost/api/shifts', {
+     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'POST',
       body: JSON.stringify({
         title: 'Test Shift',
@@ -103,7 +103,7 @@ describe('Shift Creation Validation', () => {
       { id: 'ec-1', eventId, userId: userId },
     ]);
 
-    const request = new Request('http://localhost/api/shifts', {
+     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'POST',
       body: JSON.stringify({
         title: 'Test Shift',
@@ -132,7 +132,7 @@ describe('Shift Creation Validation', () => {
       { id: 'ec-4', eventId, userId: 'user-4' },
     ]);
 
-    const request = new Request('http://localhost/api/shifts', {
+     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'POST',
       body: JSON.stringify({
         title: 'Test Shift',
@@ -160,7 +160,7 @@ describe('Shift Creation Validation', () => {
       { id: 'ec-3', eventId, userId: 'user-3' },
     ]);
 
-    const request = new Request('http://localhost/api/shifts', {
+     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'POST',
       body: JSON.stringify({
         title: 'Test Shift',
@@ -186,7 +186,7 @@ describe('Shift Creation Validation', () => {
       { id: 'ec-1', eventId, userId: userId },
     ]);
 
-    const request = new Request('http://localhost/api/shifts', {
+     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'POST',
       body: JSON.stringify({
         title: 'Test Shift',

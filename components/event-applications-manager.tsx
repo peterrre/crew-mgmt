@@ -67,22 +67,22 @@ const statusConfig = {
   PENDING: {
     label: 'Pending',
     icon: Clock,
-    className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    className: 'bg-yellow/10 text-yellow',
   },
   APPROVED: {
     label: 'Approved',
     icon: CheckCircle,
-    className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    className: 'bg-green/10 text-green',
   },
   REJECTED: {
     label: 'Rejected',
     icon: XCircle,
-    className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    className: 'bg-red/10 text-red',
   },
   WITHDRAWN: {
     label: 'Withdrawn',
     icon: AlertCircle,
-    className: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+    className: 'bg-backgroundSecondary text-foregroundPrimary',
   },
 };
 
@@ -225,7 +225,7 @@ export default function EventApplicationsManager({
   return (
     <div className="space-y-6">
       {/* Settings Section */}
-      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-800 rounded-lg">
+      <div className="flex items-center justify-between p-4 bg-backgroundSecondary rounded-lg">
         <div>
           <h3 className="font-medium">Accept Volunteer Applications</h3>
           <p className="text-sm text-muted-foreground">
@@ -243,7 +243,7 @@ export default function EventApplicationsManager({
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-foregroundTertiary w-4 h-4" />
         <Input
           placeholder="Search by name, email, or message..."
           value={searchTerm}
@@ -258,7 +258,7 @@ export default function EventApplicationsManager({
           <TabsTrigger value="pending">
             Pending
             {pendingApplications.length > 0 && (
-              <Badge className="ml-2 bg-yellow-500">{pendingApplications.length}</Badge>
+              <Badge className="ml-2 bg-backgroundSecondary0">{pendingApplications.length}</Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="processed">Processed ({processedApplications.length})</TabsTrigger>
@@ -284,8 +284,8 @@ export default function EventApplicationsManager({
                   <TableRow key={app.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center">
-                          <User className="w-4 h-4 text-gray-500" />
+                        <div className="w-8 h-8 rounded-full bg-backgroundTertiary flex items-center justify-center">
+                          <User className="w-4 h-4 text-foregroundTertiary" />
                         </div>
                         <div>
                           <div className="font-medium">{app.user.name || 'Unknown'}</div>
@@ -313,7 +313,7 @@ export default function EventApplicationsManager({
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-green-600 border-green-600 hover:bg-green-50"
+                          className="text-green border-green-600 hover:bg-green-50"
                           onClick={() => {
                             setReviewingApplication(app);
                             setReviewAction('APPROVED');
@@ -325,7 +325,7 @@ export default function EventApplicationsManager({
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-red-600 border-red-600 hover:bg-red-50"
+                          className="text-red border-red hover:bg-red/10"
                           onClick={() => {
                             setReviewingApplication(app);
                             setReviewAction('REJECTED');
@@ -367,8 +367,8 @@ export default function EventApplicationsManager({
                     <TableRow key={app.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center">
-                            <User className="w-4 h-4 text-gray-500" />
+                          <div className="w-8 h-8 rounded-full bg-backgroundTertiary flex items-center justify-center">
+                            <User className="w-4 h-4 text-foregroundTertiary" />
                           </div>
                           <div>
                             <div className="font-medium">{app.user.name || 'Unknown'}</div>
@@ -434,8 +434,8 @@ export default function EventApplicationsManager({
           </DialogHeader>
           <div className="space-y-4 py-4">
             {reviewingApplication?.message && (
-              <div className="bg-gray-50 dark:bg-slate-800 rounded-md p-3">
-                <p className="text-xs text-gray-500 dark:text-slate-500 mb-1">Applicant&apos;s message:</p>
+              <div className="bg-backgroundSecondary rounded-md p-3">
+                <p className="text-xs text-foregroundTertiary mb-1">Applicant&apos;s message:</p>
                 <p className="text-sm">{reviewingApplication.message}</p>
               </div>
             )}
@@ -471,8 +471,8 @@ export default function EventApplicationsManager({
               disabled={submitting}
               className={
                 reviewAction === 'APPROVED'
-                  ? 'bg-green-600 hover:bg-green-700'
-                  : 'bg-red-600 hover:bg-red-700'
+                  ? 'bg-green-600 hover:bg-green'
+                  : 'bg-red hover:bg-red'
               }
             >
               {submitting ? (

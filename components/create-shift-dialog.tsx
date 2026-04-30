@@ -110,7 +110,7 @@ export default function CreateShiftDialog({
     formData.start;
 
   return (
-    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50/70 flex items-center justify-center z-50 p-4">
       <div className="bg-card rounded-2xl max-w-md w-full shadow-2xl border border-border">
         <div className="flex items-center justify-between p-6 border-b border-border">
           <h2 className="text-xl font-bold text-card-foreground">Create Shift</h2>
@@ -177,9 +177,9 @@ export default function CreateShiftDialog({
           </div>
 
           {showAvailabilityWarning && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-              <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">Availability Note:</p>
-              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+            <div className="bg-blue/10/20 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue font-medium">Availability Note:</p>
+              <p className="text-xs text-blue mt-1">
                 {selectedHelper?.availability?.join(', ')}
               </p>
             </div>
@@ -201,7 +201,7 @@ export default function CreateShiftDialog({
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-amber-500 hover:bg-orange-600"
+              className="flex-1 bg-backgroundSecondary0 hover:bg-yellow"
             >
               {loading ? (
                 <>

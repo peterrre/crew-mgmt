@@ -7,15 +7,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Trash2, Users } from 'lucide-react';
 import AddEventCrewDialog from '@/components/add-event-crew-dialog';
 import { useEventData } from '@/contexts/event-data-context';
+import { Role } from '@/lib/role';
 
 // Helper function for role badge colors (extracted for testability)
 const getRoleBadgeColor = (role: string): string => {
   switch (role) {
-    case 'ADMIN':
+    case Role.ADMIN:
       return 'bg-purple/10 text-purple';
-    case 'CREW':
+    case Role.CREW:
       return 'bg-blue/10 text-blue';
-    case 'VOLUNTEER':
+    case Role.VOLUNTEER:
       return 'bg-amber/10 text-amber';
     default:
       return 'bg-gray/10 text-gray';
@@ -137,9 +138,9 @@ export default function EventCrewManagement({ eventId }: EventCrewManagementProp
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="ADMIN">Admin</SelectItem>
-            <SelectItem value="CREW">Crew</SelectItem>
-            <SelectItem value="VOLUNTEER">Volunteer</SelectItem>
+            <SelectItem value={Role.ADMIN}>Admin</SelectItem>
+            <SelectItem value={Role.CREW}>Crew</SelectItem>
+            <SelectItem value={Role.VOLUNTEER}>Volunteer</SelectItem>
           </SelectContent>
         </Select>
       </div>

@@ -116,7 +116,7 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
       },
     ]);
 
-    const request = new Request('http://localhost/api/shifts', {
+     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'PATCH',
       body: JSON.stringify({ eventId }),
     });
@@ -180,7 +180,7 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
       },
     ]);
 
-    const request = new Request('http://localhost/api/shifts', {
+     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'PATCH',
       body: JSON.stringify({ eventId }),
     });
@@ -247,7 +247,7 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
       },
     ]);
 
-    const request = new Request('http://localhost/api/shifts', {
+     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'PATCH',
       body: JSON.stringify({ eventId }),
     });

@@ -24,12 +24,15 @@ import {
 } from "@/lib/api/shifts";
 import { AssignmentPanel } from "./AssignmentPanel";
 import { colors } from "@/styles/tokens";
+import { ShiftAssignmentRole } from "@/lib/shiftAssignmentRole";
+import { Role } from "@/lib/role";
 
 // TODO: Replace hardcoded Tailwind classes for spacing, typography, shadows, etc. with design tokens from '@/styles/tokens'
 
 interface ShiftCalendarProps {
   eventId?: string; // optional filter by event
 }
+
 
 export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   const localizer = momentLocalizer(moment);
@@ -42,9 +45,9 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   const [openPanel, setOpenPanel] = useState(false);
 
   // Role-based helpers (Admin only / Crew / Volunteer)
-  const isAdmin = (session?.user as any)?.role === "ADMIN";
-  const isCrew = (session?.user as any)?.role === "CREW";
-  const isVolunteer = (session?.user as any)?.role === "VOLUNTEER";
+  const isAdmin = (session?.user as any)?.role === Role.ADMIN;
+  const isCrew = (session?.user as any)?.role === Role.CREW;
+  const isVolunteer = (session?.user as any)?.role === Role.VOLUNTEER;
 
   // Load data
   useEffect(() => {
@@ -81,14 +84,14 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
 
   const getResponsible = (shiftId: string) => {
     const assign = getAssignmentsForShift(shiftId).find(
-      (a) => a.role === "RESPONSIBLE",
+      (a) => (a.role as any) === ShiftAssignmentRole.RESPONSIBLE,
     );
     return assign ? assign.user : null;
   };
 
   const getHelpers = (shiftId: string) => {
     return getAssignmentsForShift(shiftId)
-      .filter((a) => a.role === "HELPER")
+      .filter((a) => (a.role as any) === ShiftAssignmentRole.HELPER)
       .map((a) => a.user);
   };
 
@@ -120,18 +123,18 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   };
 
   // Assign current user as helper/responsible (volunteer self-service)
-  const handleSelfAssign = async (role: "RESPONSIBLE" | "HELPER") => {
+  const handleSelfAssign = async (role: ShiftAssignmentRole) => {
     if (!selectedShift) return;
     try {
-      await assignUserToShift(selectedShift.id, {
-        userId: (session?.user as any)!.id,
-        role,
-      });
+ await assignUserToShift(selectedShift.id, {
+ userId: (session?.user as any)!.id,
+ role: role as unknown as string,
+ });
       // Refetch assignments
       const updated = await fetchAssignments({ eventId });
       setAssignments(updated);
       toast.success(
-        `You are now ${role === "RESPONSIBLE" ? "Responsible" : "Helper"} for this shift`,
+        `You are now ${(role as any) === ShiftAssignmentRole.RESPONSIBLE ? "Responsible" : "Helper"} for this shift`,
       );
       setOpenPanel(false);
     } catch (err) {

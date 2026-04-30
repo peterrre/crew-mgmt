@@ -1,3 +1,4 @@
+import { ROLES } from '@/constants/roles';
 // Mock next-auth
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn(),
@@ -130,12 +131,12 @@ describe('POST /app/api/shifts (create shift)', () => {
       title,
       start: new Date(start),
       end: new Date(end),
-      helperId: { id: 'user1', name: 'Responsible', email: 'resp@test.com', role: 'RESPONSIBLE' },
+      helperId: { id: 'user1', name: 'Responsible', email: 'resp@test.com', role: ROLES.RESPONSIBLE },
       event: { id: eventId, name: 'Test Event', startDate: new Date(), endDate: new Date(), location: 'Test' },
       assignments: [
-        { userId: 'user1', user: { id: 'user1', name: 'Responsible', email: 'resp@test.com', role: 'RESPONSIBLE' }, role: 'RESPONSIBLE' },
-        { userId: 'user2', user: { id: 'user2', name: 'Helper1', email: 'help1@test.com', role: 'HELPER' }, role: 'HELPER' },
-        { userId: 'user3', user: { id: 'user3', name: 'Helper2', email: 'help2@test.com', role: 'HELPER' }, role: 'HELPER' },
+        { userId: 'user1', user: { id: 'user1', name: 'Responsible', email: 'resp@test.com', role: ROLES.RESPONSIBLE }, role: ROLES.RESPONSIBLE },
+        { userId: 'user2', user: { id: 'user2', name: 'Helper1', email: 'help1@test.com', role: ROLES.HELPER }, role: ROLES.HELPER },
+        { userId: 'user3', user: { id: 'user3', name: 'Helper2', email: 'help2@test.com', role: ROLES.HELPER }, role: ROLES.HELPER },
       ],
     });
     mockShiftAssignmentCreate.mockResolvedValue({});

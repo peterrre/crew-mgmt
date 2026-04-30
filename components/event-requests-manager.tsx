@@ -161,24 +161,24 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
   const getTypeBadgeColor = (type: string) => {
     switch (type) {
       case 'CANCEL':
-        return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+        return 'bg-red/10 text-red/30';
       case 'SWAP':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+        return 'bg-blue/10 text-blue/30';
       case 'MODIFY':
-        return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+        return 'bg-yellow/10 text-yellow/30';
       default:
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+        return 'bg-backgroundSecondary text-foregroundSecondary';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return <Clock className="w-4 h-4 text-amber-500" />;
+        return <Clock className="w-4 h-4 text-yellow" />;
       case 'APPROVED':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-green" />;
       case 'REJECTED':
-        return <XCircle className="w-4 h-4 text-red-500" />;
+        return <XCircle className="w-4 h-4 text-red" />;
       default:
         return null;
     }
@@ -211,7 +211,7 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
   if (requestsLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-sky-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue" />
       </div>
     );
   }
@@ -259,7 +259,7 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foregroundTertiary" />
           <Input
             placeholder="Search by shift, requester, or reason..."
             value={searchQuery}
@@ -285,8 +285,8 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
         {filteredRequests.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
-              <p className="text-gray-600 dark:text-slate-400 text-center">
+              <AlertCircle className="w-12 h-12 text-foregroundTertiary mb-4" />
+              <p className="text-foregroundSecondary text-center">
                 {searchQuery || typeFilter !== 'all'
                   ? 'No requests match your filters'
                   : statusFilter === 'PENDING'
@@ -310,16 +310,16 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
                           <Badge className={getTypeBadgeColor(request.type)}>
                             {request.type}
                           </Badge>
-                          <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+                          <h3 className="font-semibold text-lg text-foregroundPrimary">
                             {request.shift.title}
                           </h3>
-                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                          <span className="text-sm text-foregroundTertiary">
                             {getTimeAgo(request.createdAt)}
                           </span>
                         </div>
 
                         {/* Shift time */}
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-3">
+                        <div className="flex items-center gap-2 text-sm text-foregroundSecondary mb-3">
                           <Calendar className="w-4 h-4" />
                           <span>
                             {formatDateTime(request.shift.start)} - {formatDateTime(request.shift.end)}
@@ -328,12 +328,12 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
 
                         {/* Requester */}
                         <div className="flex items-start gap-2 text-sm mb-2">
-                          <User className="w-4 h-4 mt-0.5 text-gray-500" />
+                          <User className="w-4 h-4 mt-0.5 text-foregroundTertiary" />
                           <div>
-                            <span className="font-medium text-gray-700 dark:text-gray-300">
+                            <span className="font-medium text-foregroundSecondary">
                               {request.requester.name || request.requester.email}
                             </span>
-                            <span className="text-gray-500 dark:text-gray-400 ml-2">
+                            <span className="text-foregroundTertiary ml-2">
                               ({request.requester.role})
                             </span>
                           </div>
@@ -341,8 +341,8 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
 
                         {/* Request details based on type */}
                         {request.type === 'SWAP' && request.newHelper && (
-                          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3">
-                            <p className="text-sm text-blue-900 dark:text-blue-300">
+                          <div className="bg-blue/10/20 border border-blue-200 rounded-md p-3">
+                            <p className="text-sm text-blue-900">
                               <span className="font-medium">Swap with:</span>{' '}
                               {request.newHelper.name || request.newHelper.email}
                             </p>
@@ -350,8 +350,8 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
                         )}
 
                         {request.type === 'MODIFY' && request.newStart && request.newEnd && (
-                          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-3">
-                            <p className="text-sm text-amber-900 dark:text-amber-300">
+                          <div className="bg-backgroundSecondary/20 border border-border rounded-md p-3">
+                            <p className="text-sm text-yellow">
                               <span className="font-medium">New time:</span>{' '}
                               {formatDateTime(request.newStart)} - {formatDateTime(request.newEnd)}
                             </p>
@@ -360,8 +360,8 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
 
                         {/* Reason */}
                         {request.reason && (
-                          <div className="bg-gray-50 dark:bg-slate-700/50 rounded-md p-3">
-                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                          <div className="bg-backgroundSecondary/50 rounded-md p-3">
+                            <p className="text-sm text-foregroundSecondary">
                               <span className="font-medium">Reason:</span> {request.reason}
                             </p>
                           </div>
@@ -369,7 +369,7 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
 
                         {/* Reviewer info for processed requests */}
                         {request.status !== 'PENDING' && request.reviewer && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                          <p className="text-xs text-foregroundTertiary mt-2">
                             {request.status.charAt(0) + request.status.slice(1).toLowerCase()} by{' '}
                             {request.reviewer.name} {request.reviewedAt && `on ${formatDateTime(request.reviewedAt)}`}
                           </p>
@@ -384,7 +384,7 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
                       <Button
                         onClick={() => handleApprove(request.id)}
                         disabled={processingId === request.id}
-                        className="flex-1 lg:flex-none bg-green-600 hover:bg-green-700 text-white"
+                        className="flex-1 lg:flex-none bg-green-600 hover:bg-green text-white"
                       >
                         {processingId === request.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -399,7 +399,7 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
                         variant="outline"
                         onClick={() => handleReject(request.id)}
                         disabled={processingId === request.id}
-                        className="flex-1 lg:flex-none border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
+                        className="flex-1 lg:flex-none border-red-300 text-red hover:bg-red/10/30"
                       >
                         {processingId === request.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />

@@ -1,10 +1,11 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import { ROLES, Role } from '@/constants/roles';
 
 interface ShiftAssignment {
   id: string;
-  role: 'RESPONSIBLE' | 'HELPER';
+  role: Role;
   user: {
     id: string;
     name: string | null;

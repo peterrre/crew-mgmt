@@ -12,8 +12,10 @@ import { toast } from "sonner";
 import { Assignment } from "@/types/shift";
 import { fetchAvailableUsers } from "@/lib/api/users";
 
+import { ShiftAssignmentRole } from "@/lib/shiftAssignmentRole";
+
 interface AssignmentPanelProps {
-  shiftId: string;
+ shiftId: string;
   assignments: Assignment[];
   minHelpers: number;
   maxHelpers: number;
@@ -21,7 +23,7 @@ interface AssignmentPanelProps {
   isAdmin: boolean;
   isCrew: boolean;
   isVolunteer: boolean;
-  onSelfAssign: (role: "RESPONSIBLE" | "HELPER") => Promise<void>;
+  onSelfAssign: (role: ShiftAssignmentRole) => Promise<void>;
   onRemoveAssignment: (assignmentId: string) => Promise<void>;
   onClose: () => void;
 }
@@ -42,8 +44,8 @@ export const AssignmentPanel = ({
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  const responsible = assignments.find((a) => a.role === "RESPONSIBLE");
-  const helpers = assignments.filter((a) => a.role === "HELPER");
+ const responsible = assignments.find((a) => (a.role as any) === ShiftAssignmentRole.RESPONSIBLE);
+ const helpers = assignments.filter((a) => (a.role as any) === ShiftAssignmentRole.HELPER);
   const helperCount = helpers.length;
   const isUnderMin = helperCount < minHelpers;
   const isOverMax = helperCount > maxHelpers;
@@ -260,7 +262,7 @@ export const AssignmentPanel = ({
               {!responsible && (
                 <Button
                   variant="default"
-                  onClick={() => onSelfAssign("RESPONSIBLE")}
+                  onClick={() => onSelfAssign(ShiftAssignmentRole.RESPONSIBLE)}
                   className="w-full"
                 >
                   Take as Responsible
@@ -269,7 +271,7 @@ export const AssignmentPanel = ({
               {helperCount < maxHelpers && (
                 <Button
                   variant="outline"
-                  onClick={() => onSelfAssign("HELPER")}
+                  onClick={() => onSelfAssign(ShiftAssignmentRole.HELPER)}
                   className="w-full"
                 >
                   Join as Helper

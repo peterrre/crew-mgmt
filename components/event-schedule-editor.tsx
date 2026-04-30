@@ -14,14 +14,14 @@ const BigCalendar = dynamic(() => import('@/components/big-calendar'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-96">
-      <div className="inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="inline-block w-8 h-8 border-4 border-blue border-t-transparent rounded-full animate-spin"></div>
     </div>
   ),
 });
 
 interface ShiftAssignment {
   id: string;
-  role: 'RESPONSIBLE' | 'HELPER';
+  role: "RESPONSIBLE" | "HELPER";
   user: {
     id: string;
     name: string | null;
@@ -136,8 +136,8 @@ export default function EventScheduleEditor({ eventId, eventStartDate }: EventSc
     <div>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <CalendarDays className="w-5 h-5 text-sky-600 dark:text-sky-400" />
-          <h3 className="text-lg font-semibold text-sky-900 dark:text-white">
+          <CalendarDays className="w-5 h-5 text-blue" />
+          <h3 className="text-lg font-semibold text-foregroundPrimary">
             Schedule ({shifts.length} shifts)
           </h3>
         </div>
@@ -163,7 +163,7 @@ export default function EventScheduleEditor({ eventId, eventStartDate }: EventSc
           >
             Unassigned ({counts.unassigned})
           </Button>
-          <div className="border-l border-gray-300 dark:border-slate-600 mx-1"></div>
+          <div className="border-l border-border mx-1"></div>
           <Button
             variant={showAvailability ? 'default' : 'outline'}
             size="sm"
@@ -181,14 +181,14 @@ export default function EventScheduleEditor({ eventId, eventStartDate }: EventSc
         </div>
       </div>
 
-      <p className="text-sm text-sky-700 dark:text-slate-400 mb-4">
+      <p className="text-sm text-blue mb-4">
         Click and drag on the calendar to create shifts
       </p>
 
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-amber-100 dark:border-slate-700 p-4">
+      <div className="bg-background rounded-xl border border-border p-4">
         {shiftsLoading ? (
           <div className="flex items-center justify-center h-96">
-            <div className="inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="inline-block w-8 h-8 border-4 border-blue border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : (
           <BigCalendar

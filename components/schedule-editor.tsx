@@ -82,7 +82,7 @@ const BigCalendar = dynamic(() => import('@/components/big-calendar'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-96">
-      <div className="inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="inline-block w-8 h-8 border-4 border-blue border-t-transparent rounded-full animate-spin"></div>
     </div>
   ),
 });
@@ -196,22 +196,22 @@ export default function ScheduleEditor() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-background via-backgroundSecondary to-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-amber-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-amber-200 dark:border-slate-700 shadow-sm">
+      <header className="sticky top-0 z-50 bg-backgroundSecondary/80/80 backdrop-blur-md border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <Link href="/">
-                <Button variant="ghost" size="sm" className="dark:text-slate-300 dark:hover:text-white">
+                <Button variant="ghost" size="sm" className="dark:text-foregroundTertiary">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>
               </Link>
-              <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-amber-500 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue to-yellow rounded-xl flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-sky-900 dark:text-white">Schedule Editor</h1>
+              <h1 className="text-xl font-bold text-foregroundPrimary">Schedule Editor</h1>
             </div>
             <div className="flex items-center space-x-2">
               <ThemeToggle />
@@ -219,7 +219,7 @@ export default function ScheduleEditor() {
                 variant="ghost"
                 size="sm"
                 onClick={handleSignOut}
-                className="text-sky-700 hover:text-sky-900 dark:text-slate-300 dark:hover:text-white"
+                className="text-blue hover:text-foregroundPrimary"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign out
@@ -232,8 +232,8 @@ export default function ScheduleEditor() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-sky-900 dark:text-white mb-2">Festival 2026 Schedule</h2>
-          <p className="text-sky-700 dark:text-slate-400">July 10-12, 2026 - Click and drag to create shifts</p>
+          <h2 className="text-2xl font-bold text-foregroundPrimary mb-2">Festival 2026 Schedule</h2>
+          <p className="text-blue">July 10-12, 2026 - Click and drag to create shifts</p>
           <div className="flex flex-wrap gap-2 mt-4">
             <Button variant={filter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('all'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }} title="Show all shifts and availability slots">All</Button>
             <Button variant={filter === 'assigned' ? 'default' : 'outline'} size="sm" onClick={() => { setFilter('assigned'); setCalendarView('week'); setCalendarDate(new Date(2026, 6, 5)); }} title="Show only assigned shifts">Assigned</Button>
@@ -244,10 +244,10 @@ export default function ScheduleEditor() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-amber-100 dark:border-slate-700">
+        <div className="bg-background rounded-2xl p-6 shadow-lg border border-border">
           {loading ? (
             <div className="flex items-center justify-center h-96">
-              <div className="inline-block w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="inline-block w-8 h-8 border-4 border-blue border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
             <BigCalendar

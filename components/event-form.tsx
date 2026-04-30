@@ -57,7 +57,7 @@ export function EventForm({ initialData, users, onSubmit, onCancel, submitLabel 
       <div>
         <Label htmlFor="name">Event Name</Label>
         <Input id="name" {...register('name')} />
-        {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
+        {errors.name && <p className="text-sm text-red">{errors.name.message}</p>}
       </div>
 
       <div>
@@ -69,12 +69,12 @@ export function EventForm({ initialData, users, onSubmit, onCancel, submitLabel 
         <div>
           <Label htmlFor="startDate">Start Date</Label>
           <Input id="startDate" type="datetime-local" {...register('startDate')} />
-          {errors.startDate && <p className="text-sm text-red-600">{errors.startDate.message}</p>}
+          {errors.startDate && <p className="text-sm text-red">{errors.startDate.message}</p>}
         </div>
         <div>
           <Label htmlFor="endDate">End Date</Label>
           <Input id="endDate" type="datetime-local" {...register('endDate')} />
-          {errors.endDate && <p className="text-sm text-red-600">{errors.endDate.message}</p>}
+          {errors.endDate && <p className="text-sm text-red">{errors.endDate.message}</p>}
         </div>
       </div>
 
@@ -99,7 +99,7 @@ export function EventForm({ initialData, users, onSubmit, onCancel, submitLabel 
         </Select>
       </div>
 
-      <div className="flex items-center space-x-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+      <div className="flex items-center space-x-4 p-4 bg-green-50/20 rounded-lg border border-green-200">
         <Controller
           name="acceptingVolunteers"
           control={control}
