@@ -292,7 +292,7 @@ export default function ShiftEditDialog({
                 variant="outline"
                 onClick={handleDelete}
                 disabled={loading}
-                className="text-red border-red-300 hover:bg-red/10/30"
+                className="text-red border-red/30 hover:bg-red/10"
               >
                 Delete
               </Button>

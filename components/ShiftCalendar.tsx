@@ -173,7 +173,7 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
           : helpers.length > 0
             ? colors.green
             : colors.gray,
-      color: "#fff",
+      color: colors.blueForeground,
       borderRadius: "0.25rem",
       border: isUnderMin || isOverMax ? "2px solid " + colors.red : "none",
       opacity: userIsAssigned ? 1 : 0.9,
@@ -190,7 +190,7 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
       </div>
     );
   if (error)
-    return <div className="p-4 bg-red-50 text-red-600 rounded">{error}</div>;
+    return <div className="p-4 bg-red/10 text-red rounded">{error}</div>;
 
   return (
     <div className="space-y-4">

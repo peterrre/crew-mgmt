@@ -99,7 +99,7 @@ export function EventForm({ initialData, users, onSubmit, onCancel, submitLabel 
         </Select>
       </div>
 
-      <div className="flex items-center space-x-4 p-4 bg-green-50/20 rounded-lg border border-green-200">
+      <div className="flex items-center space-x-4 p-4 bg-green/10 rounded-lg border border-green/20">
         <Controller
           name="acceptingVolunteers"
           control={control}

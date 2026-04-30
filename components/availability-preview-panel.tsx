@@ -125,7 +125,7 @@ export default function AvailabilityPreviewPanel({
                 {matchingShifts.slice(0, 5).map((shift) => (
                   <div
                     key={shift.id}
-                    className="bg-green-50/30 rounded-lg p-3 border border-green-300"
+                    className="bg-green/10 rounded-lg p-3 border border-green/30"
                   >
                     <p className="font-medium text-sm text-foregroundPrimary truncate">
                       {shift.title}

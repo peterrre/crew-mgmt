@@ -171,7 +171,7 @@ export default function EventShiftRequestsPanel({
                             size="sm"
                             onClick={() => handleApprove(request.id)}
                             disabled={processingId === request.id}
-                            className="bg-green-600 hover:bg-green text-white"
+                            className="bg-green hover:bg-green/80 text-greenForeground"
                           >
                             Approve
                           </Button>
@@ -180,7 +180,7 @@ export default function EventShiftRequestsPanel({
                             variant="outline"
                             onClick={() => handleReject(request.id)}
                             disabled={processingId === request.id}
-                            className="border-red-300 text-red hover:bg-red/10/30"
+                            className="border-red/30 text-red hover:bg-red/10"
                           >
                             Reject
                           </Button>

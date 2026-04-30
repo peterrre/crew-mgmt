@@ -150,7 +150,7 @@ export default function AvailabilitySlotEditor({
           </div>
 
           {formData.isRecurring && (
-            <div className="space-y-3 pl-6 border-l-2 border-green-200">
+            <div className="space-y-3 pl-6 border-l-2 border-green/20">
               <div>
                 <Label htmlFor="pattern">Repeat Pattern</Label>
                 <Select
@@ -207,7 +207,7 @@ export default function AvailabilitySlotEditor({
             </Button>
             <Button
               type="submit"
-              className="bg-green-600 hover:bg-green"
+              className="bg-green hover:bg-green/80"
             >
               {isNew ? "Add" : "Save"}
             </Button>

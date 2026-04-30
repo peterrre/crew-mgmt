@@ -60,7 +60,7 @@ export function TemplateBuilder({ initialData, onSubmit, submitLabel }: Template
       <div>
         <Label htmlFor="name">Template Name</Label>
         <Input id="name" {...register('name')} />
-        {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
+        {errors.name && <p className="text-sm text-red">{errors.name.message}</p>}
       </div>
 
       <div>

@@ -313,7 +313,7 @@ export default function EventApplicationsManager({
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-green border-green-600 hover:bg-green-50"
+                          className="text-green border-green hover:bg-green/10"
                           onClick={() => {
                             setReviewingApplication(app);
                             setReviewAction('APPROVED');
@@ -471,7 +471,7 @@ export default function EventApplicationsManager({
               disabled={submitting}
               className={
                 reviewAction === 'APPROVED'
-                  ? 'bg-green-600 hover:bg-green'
+                  ? 'bg-green hover:bg-green/80'
                   : 'bg-red hover:bg-red'
               }
             >

@@ -404,7 +404,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
               </div>
 
               {showAvailabilityWarning && (
-                <div className="bg-blue/10/20 border border-blue-200 rounded-lg p-3">
+                <div className="bg-blue/10 border border-blue/20 rounded-lg p-3">
                   <p className="text-sm text-blue font-medium">Availability Note:</p>
                   <p className="text-xs text-blue mt-1">
                     {selectedHelper?.availability?.join(', ')}

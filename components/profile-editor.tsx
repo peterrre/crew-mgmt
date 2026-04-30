@@ -178,7 +178,7 @@ export default function ProfileEditor() {
             )}
 
             {success && (
-              <div className="text-sm text-green bg-green-50/30 p-3 rounded-lg">{success}</div>
+              <div className="text-sm text-green bg-green/10 p-3 rounded-lg">{success}</div>
             )}
 
             <div className="pt-4">

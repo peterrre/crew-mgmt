@@ -341,8 +341,8 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
 
                         {/* Request details based on type */}
                         {request.type === 'SWAP' && request.newHelper && (
-                          <div className="bg-blue/10/20 border border-blue-200 rounded-md p-3">
-                            <p className="text-sm text-blue-900">
+                          <div className="bg-blue/10 border border-blue/20 rounded-md p-3">
+                            <p className="text-sm text-blue">
                               <span className="font-medium">Swap with:</span>{' '}
                               {request.newHelper.name || request.newHelper.email}
                             </p>
@@ -384,7 +384,7 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
                       <Button
                         onClick={() => handleApprove(request.id)}
                         disabled={processingId === request.id}
-                        className="flex-1 lg:flex-none bg-green-600 hover:bg-green text-white"
+                        className="flex-1 lg:flex-none bg-green hover:bg-green/80 text-greenForeground"
                       >
                         {processingId === request.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -399,7 +399,7 @@ export default function EventRequestsManager({ eventId }: EventRequestsManagerPr
                         variant="outline"
                         onClick={() => handleReject(request.id)}
                         disabled={processingId === request.id}
-                        className="flex-1 lg:flex-none border-red-300 text-red hover:bg-red/10/30"
+                        className="flex-1 lg:flex-none border-red/30 text-red hover:bg-red/10"
                       >
                         {processingId === request.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />

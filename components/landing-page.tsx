@@ -9,9 +9,9 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Ambient background blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-400/20/10 rounded-full blur-[120px]" />
-        <div className="absolute top-[10%] right-[-15%] w-[500px] h-[500px] bg-purple-400/20/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[20%] w-[400px] h-[400px] bg-green-400/15/10 rounded-full blur-[120px]" />
+        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue/20 rounded-full blur-[120px]" />
+        <div className="absolute top-[10%] right-[-15%] w-[500px] h-[500px] bg-purple/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[20%] w-[400px] h-[400px] bg-green/15 rounded-full blur-[120px]" />
       </div>
 
       {/* Navigation */}
