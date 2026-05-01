@@ -1,5 +1,5 @@
 // Mock prisma
-const prismaMock = {
+const prismaMock: any = {
   event: {
     findUnique: jest.fn(),
   },

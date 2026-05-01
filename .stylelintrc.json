@@ -1,6 +1,18 @@
 {
   "extends": ["stylelint-config-standard", "stylelint-config-tailwindcss"],
   "rules": {
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": ["tailwind", "apply", "variants", "responsive"]
+      }
+    ],
+    "no-descending-specificity": null,
+    "no-duplicate-selectors": null,
+    "color-function-alias-notation": null,
+    "font-family-no-duplicate-names": true,
+    "value-no-vendor-prefix": true,
+    "function-calc-no-unspaced-operator": true,
     "length-zero-no-unit": true,
     "unit-no-unknown": [
       true,
@@ -9,8 +21,7 @@
       }
     ],
     "declaration-block-no-redundant-longhand-properties": true,
-    "value-no-vendor-prefix": true,
-    "font-family-no-duplicate-names": true,
-    "function-calc-no-unspaced-operator": true
+    "rule-empty-line-before": ["always", { "except": ["first-nested"], "ignore": ["after-comment"] }],
+    "custom-property-empty-line-before": "never"
   }
 }

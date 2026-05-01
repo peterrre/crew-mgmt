@@ -126,7 +126,6 @@ export default function EventDetailTabs({ event }: EventDetailTabsProps) {
             <EventScheduleEditor
               eventId={event.id}
               eventStartDate={new Date(event.startDate)}
-              eventEndDate={new Date(event.endDate)}
             />
           </CardContent>
         </Card>

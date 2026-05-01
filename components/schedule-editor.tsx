@@ -5,6 +5,7 @@ import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Calendar, LogOut, ArrowLeft } from 'lucide-react';
 import { View } from 'react-big-calendar';
+import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import CreateShiftDialog from '@/components/create-shift-dialog';

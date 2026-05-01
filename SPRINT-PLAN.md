@@ -1,4 +1,4 @@
-# Sprint Plan: Crew Management (14 Tage)
+# Sprint Plan: Crew Management (14 Tage pro Sprint)
 
 ## Sprint 1: Overlap Prevention & Multi-Person Assignment (Tage 1-14)
 
@@ -28,3 +28,31 @@ Sichere Implementierung der Overlap-Prevention für Schichtzuordnungen und Valid
 ### Next Steps (nach Sprint 1)
 - Sprint 2: Stabilisierung, CI/CD, E2E-Tests, sowie Bugfixes aus den-Berichten.
 - Vorbereitung für Deployment (Vercel) und Monitoring-Integration.
+
+## Sprint 2: Stabilisierung, CI/CD, E2E-Tests (Tage 15-28)
+- Fix overlapping error (return 409 Conflict)
+- Add GitHub Actions CI/CD pipeline
+- Prepare for Vercel deployment
+- Monitoring integration
+- Documentation updates
+
+## Sprint 3: UX Improvements (Design‑System, Accessibility, Performance) (Tage 29-42)
+- Design‑System tokens (colors, spacing, typography)
+- Accessibility audit (WCAG AA)
+- Performance optimizations (code‑splitting, lazy loading, Lighthouse)
+- Mobile‑first refinements
+- Bugfixes from earlier sprints
+
+## Sprint 4: Benachrichtigungen & Kommunikation (Tage 43-56)
+- E‑Mail‑ (und optional SMS/Push‑) Benachrichtigungen bei:
+    * Shift‑Zuweisung
+    * Shift‑Änderung
+    * Bewerbung genehmigt/abgelehnt
+    * Shift‑Request
+    * Reminder 24 h / 2 h vor Schicht
+- In‑App‑Notifications (Bell‑Icon) + optional einfacher Chat/Kommentar‑Feld pro Shift oder Event.
+- Datenmodell: Notification, ChatMessage
+- API‑Endpunkte: POST /api/notifications, WebSocket für Echtzeit
+- Email/SMS/Push‑Integration (nodemailer, twilio, etc.)
+- Frontend: Bell‑Icon mit Badge, Benachrichtigungsliste, Kommentarfeld
+- Tests: Unit, Integration, E2E (Playwright)

@@ -103,7 +103,7 @@ describe('POST /app/api/shifts (create shift)', () => {
 
     // Override the $transaction mock to return our mock functions
     const prismaMock = jest.requireMock('@/lib/db').prisma;
-    prismaMock.$transaction.mockImplementation((fn) => 
+    prismaMock.$transaction.mockImplementation((fn: any) => 
       fn({
         shift: {
           create: mockShiftCreate,
