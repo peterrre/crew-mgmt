@@ -11,7 +11,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { X, Loader2, Trash2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Loader2, Trash2 } from 'lucide-react';
 
 interface Helper {
   id: string;
@@ -38,7 +51,7 @@ interface Shift {
 }
 
 interface EditShiftDialogProps {
-  shift: Shift;
+  shift: Shift | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -53,19 +66,19 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
   const [availabilitySlots, setAvailabilitySlots] = useState<any[]>([]);
 
   const formatLocalDateTime = (date: Date) => {
-  const d = new Date(date);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
   const [formData, setFormData] = useState({
-    title: shift.title,
-    start: formatLocalDateTime(shift.start),
-    end: formatLocalDateTime(shift.end),
-    helperId: shift.helperId || '',
+    title: shift?.title || '',
+    start: shift ? formatLocalDateTime(shift.start) : '',
+    end: shift ? formatLocalDateTime(shift.end) : '',
+    helperId: shift?.helperId || '',
   });
 
   const fetchHelpers = async () => {
@@ -98,31 +111,32 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
       if (response.ok) {
         const data = await response.json();
         let unassigned = (data?.shifts || []).filter((s: any) => !s.helperId);
-        // Filter to only shifts that overlap with the volunteer's availability slot
-        if (shift.isAvailability) {
-          unassigned = unassigned.filter((s: any) => {
-            const shiftStart = new Date(s.start);
-            const shiftEnd = new Date(s.end);
-            return shiftStart < shift.end && shiftEnd > shift.start;
-          });
-        }
-        setUnassignedShifts(unassigned);
-      }
-    } catch (error) {
-      console.error('Error fetching unassigned shifts:', error);
-    }
-  }, [shift.isAvailability, shift.start, shift.end]);
+  // Filter to only shifts that overlap with the volunteer's availability slot
+ if (shift?.isAvailability) {
+ unassigned = unassigned.filter((s: any) => {
+ const shiftStart = new Date(s.start);
+ const shiftEnd = new Date(s.end);
+ return shiftStart < new Date(shift.end) && shiftEnd > new Date(shift.start);
+ });
+ }
+ setUnassignedShifts(unassigned);
+ }
+ } catch (error) {
+ console.error('Error fetching unassigned shifts:', error);
+ }
+ }, [shift?.isAvailability, shift?.start, shift?.end]);
 
   useEffect(() => {
     fetchHelpers();
     fetchAvailabilitySlots();
-    if (shift.isAvailability) {
-      fetchUnassignedShifts();
-    }
-  }, [fetchUnassignedShifts, shift.isAvailability]);
+  if (shift?.isAvailability) {
+ fetchUnassignedShifts();
+ }
+ }, [fetchUnassignedShifts, shift?.isAvailability]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!shift) return;
     setLoading(true);
     setError('');
 
@@ -177,7 +191,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
   };
 
   const handleAssign = async () => {
-    if (!selectedShiftId) {
+    if (!selectedShiftId || !shift) {
       setError('Please select a shift');
       return;
     }
@@ -209,8 +223,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
         const response = await fetch(`/api/shifts/${selectedShiftId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ helperId: shift.userId }),
-        });
+          body: JSON.stringify({ helperId: shift?.userId }),        });
 
         const data = await response.json();
 
@@ -227,7 +240,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
           body: JSON.stringify({
             start: overlapStart.toISOString(),
             end: overlapEnd.toISOString(),
-            helperId: shift.userId,
+            helperId: shift?.userId,
           }),
         });
 
@@ -283,6 +296,7 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
   };
 
   const handleDelete = async () => {
+    if (!shift) return;
     if (!confirm('Are you sure you want to delete this shift?')) return;
 
     setDeleting(true);
@@ -312,23 +326,20 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
     selectedHelper?.availability?.length > 0 &&
     formData.start;
 
-  return (
-    <div className="fixed inset-0 bg-black/50/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-2xl max-w-md w-full shadow-2xl border border-border">
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-xl font-bold text-card-foreground">
-            {shift.isAvailability ? `Assign Shift to ${shift.helper?.name}` : 'Edit Shift'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+ return (
+ <Dialog open={!!shift} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+ <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+ <DialogHeader>
+ <DialogTitle>
+ {shift?.isAvailability ? `Assign Shift to ${shift?.helper?.name}` : 'Edit Shift'}
+ </DialogTitle>
+ <DialogDescription>
+ {shift?.isAvailability ? 'Assign an unassigned shift to this helper' : 'Update shift details'}
+ </DialogDescription>
+ </DialogHeader>
 
-        <form onSubmit={shift.isAvailability ? (e) => e.preventDefault() : handleSubmit} className="p-6 space-y-4">
-          {shift.isAvailability ? (
+ <form onSubmit={shift?.isAvailability ? (e) => e.preventDefault() : handleSubmit} className="space-y-4 py-2">
+          {shift?.isAvailability ? (
             <div className="space-y-2">
               <Label htmlFor="shift">Select Shift to Assign</Label>
               {unassignedShifts.length === 0 ? (
@@ -352,13 +363,14 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
             <>
               <div className="space-y-2">
                 <Label htmlFor="title">Shift Title</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  required
-                  placeholder="e.g., Stage Setup, Bar, Security"
-                />
+ <Input
+ id="title"
+ value={formData.title}
+ onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+ required
+ className="h-11 rounded-xl border-border bg-backgroundSecondary/60 transition-all duration-200 focus:ring-2 focus:ring-blue/30 focus:border-blue"
+ placeholder="e.g., Stage Setup, Bar, Security"
+ />
               </div>
 
               <div className="space-y-2">
@@ -418,73 +430,78 @@ export default function EditShiftDialog({ shift, onClose, onSuccess }: EditShift
             <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">{error}</div>
           )}
 
-          {shift.isAvailability ? (
-            <div className="flex space-x-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleAssign}
-                disabled={loading || unassignedShifts.length === 0}
-                className="flex-1 bg-backgroundSecondary0 hover:bg-yellow"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Assigning...
-                  </>
-                ) : (
-                  'Assign'
-                )}
-              </Button>
-            </div>
-          ) : (
-            <div className="flex space-x-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleDelete}
-                disabled={deleting}
-                className="text-destructive border-destructive hover:bg-destructive/10"
-              >
-                {deleting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="h-4 w-4" />
-                )}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="flex-1 bg-backgroundSecondary0 hover:bg-yellow"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save Changes'
-                )}
-              </Button>
-            </div>
-          )}
-        </form>
-      </div>
-    </div>
-  );
+ {shift?.isAvailability ? (
+ <DialogFooter className="gap-2 pt-2">
+ <Button
+ type="button"
+ variant="outline"
+ onClick={onClose}
+ className="flex-1"
+ >
+ Cancel
+ </Button>
+ <Button
+ type="button"
+ onClick={handleAssign}
+ disabled={loading || unassignedShifts.length === 0}
+ className="flex-1 bg-blue hover:bg-blue/90 disabled:opacity-50 disabled:cursor-not-allowed"
+ >
+ {loading ? (
+ <>
+ <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+ Assigning...
+ </>
+ ) : (
+ 'Assign'
+ )}
+ </Button>
+ </DialogFooter>
+ ) : (
+ <DialogFooter className="gap-2 pt-2">
+ <Tooltip>
+ <TooltipTrigger asChild>
+ <Button
+ type="button"
+ variant="outline"
+ onClick={handleDelete}
+ disabled={deleting}
+ className="text-destructive border-destructive hover:bg-destructive/10"
+ >
+ {deleting ? (
+ <Loader2 className="h-4 w-4 animate-spin" />
+ ) : (
+ <Trash2 className="h-4 w-4" />
+ )}
+ </Button>
+ </TooltipTrigger>
+ <TooltipContent>Delete Shift</TooltipContent>
+ </Tooltip>
+ <Button
+ type="button"
+ variant="outline"
+ onClick={onClose}
+ className="flex-1"
+ >
+ Cancel
+ </Button>
+ <Button
+ type="submit"
+ disabled={loading}
+ className="flex-1 bg-blue hover:bg-blue/90 disabled:opacity-50 disabled:cursor-not-allowed"
+ >
+ {loading ? (
+ <>
+ <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+ Saving...
+ </>
+ ) : (
+ 'Save Changes'
+ )}
+ </Button>
+ </DialogFooter>
+ )}
+ </form>
+ </DialogContent>
+ </Dialog>
+ );
 }

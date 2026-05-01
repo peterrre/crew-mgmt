@@ -42,7 +42,8 @@ jest.mock('@/lib/utils/overlap', () => ({
   checkForOverlappingShifts: jest.fn(),
 }));
 
-let PATCH: any;
+import type { PATCH as PatchType } from '@/app/api/shifts/route';
+let PATCH: PatchType;
 
 describe('Auto-Assign Validation (respects maxHelpers)', () => {
   const session = {

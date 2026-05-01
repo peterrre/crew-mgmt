@@ -264,20 +264,19 @@ export default function ScheduleEditor() {
         </div>
       </main>
 
-      {showCreateDialog && (
-        <CreateShiftDialog
-          selectedSlot={selectedSlot}
-          onClose={() => {
-            setShowCreateDialog(false);
-            setSelectedSlot(null);
-          }}
-          onSuccess={() => {
-            setShowCreateDialog(false);
-            setSelectedSlot(null);
-            fetchShifts();
-          }}
-        />
-      )}
+ <CreateShiftDialog
+ open={showCreateDialog}
+ selectedSlot={selectedSlot}
+ onClose={() => {
+ setShowCreateDialog(false);
+ setSelectedSlot(null);
+ }}
+ onSuccess={() => {
+ setShowCreateDialog(false);
+ setSelectedSlot(null);
+ fetchShifts();
+ }}
+ />
 
       {editingShift && (
         <EditShiftDialog

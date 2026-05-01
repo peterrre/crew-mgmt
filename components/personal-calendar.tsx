@@ -73,16 +73,15 @@ export default function PersonalCalendar() {
         />
       )}
 
-      {selectedShift && (
-        <CreateShiftRequestDialog
-          shift={selectedShift}
-          onClose={() => setSelectedShift(null)}
-          onSuccess={() => {
-            setSelectedShift(null);
-            fetchShifts();
-          }}
-        />
-      )}
+ <CreateShiftRequestDialog
+ open={!!selectedShift}
+ shift={selectedShift}
+ onClose={() => setSelectedShift(null)}
+ onSuccess={() => {
+ setSelectedShift(null);
+ fetchShifts();
+ }}
+ />
     </div>
   );
 }

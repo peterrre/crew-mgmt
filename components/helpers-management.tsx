@@ -5,7 +5,10 @@ import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, LogOut, Plus, ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { Calendar, LogOut, Plus, ArrowLeft, Edit, Trash2, Users } from 'lucide-react';
+import { SkeletonCard } from '@/components/ui/skeleton-card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Link from 'next/link';
 import AddHelperDialog from '@/components/add-helper-dialog';
 import EditHelperDialog from '@/components/edit-helper-dialog';
@@ -158,17 +161,19 @@ export default function HelpersManagement() {
           </Select>
         </div>
 
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block w-8 h-8 border-4 border-blue border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        ) : filteredHelpers.length === 0 ? (
-          <div className="bg-background rounded-2xl p-12 text-center shadow-lg border border-border">
-            <p className="text-foregroundSecondary">
-              {helpers.length === 0 ? 'No helpers yet. Add your first helper!' : 'No helpers match your search criteria.'}
-            </p>
-          </div>
-        ) : (
+ {loading ? (
+ <div className="grid grid-cols-1 gap-4">
+ {Array.from({ length: 3 }).map((_, i) => (
+ <SkeletonCard key={i} />
+ ))}
+ </div>
+ ) : filteredHelpers.length === 0 ? (
+ <EmptyState
+ icon={Users}
+ title={helpers.length === 0 ? 'Noch keine Helfer' : 'Keine Treffer'}
+ description={helpers.length === 0 ? 'Füge deinen ersten Helfer hinzu!' : 'Versuche andere Suchkriterien.'}
+ />
+ ) : (
           <div className="grid grid-cols-1 gap-4">
             {filteredHelpers.map((helper) => (
               <div
@@ -202,24 +207,34 @@ export default function HelpersManagement() {
                       </>
                     )}
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditingHelper(helper)}
-                      className="border-border text-foregroundSecondary hover:bg-backgroundSecondary"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDelete(helper.id)}
-                      className="text-red border-red hover:bg-red/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+ <div className="flex items-center space-x-2">
+ <Tooltip>
+ <TooltipTrigger asChild>
+ <Button
+ variant="outline"
+ size="sm"
+ onClick={() => setEditingHelper(helper)}
+ className="border-border text-foregroundSecondary hover:bg-backgroundSecondary"
+ >
+ <Edit className="w-4 h-4" />
+ </Button>
+ </TooltipTrigger>
+ <TooltipContent>Bearbeiten</TooltipContent>
+ </Tooltip>
+ <Tooltip>
+ <TooltipTrigger asChild>
+ <Button
+ variant="outline"
+ size="sm"
+ onClick={() => handleDelete(helper.id)}
+ className="text-red border-red hover:bg-red/10"
+ >
+ <Trash2 className="w-4 h-4" />
+ </Button>
+ </TooltipTrigger>
+ <TooltipContent>Löschen</TooltipContent>
+ </Tooltip>
+ </div>
                 </div>
               </div>
             ))}
@@ -227,15 +242,14 @@ export default function HelpersManagement() {
         )}
       </main>
 
-      {showAddDialog && (
-        <AddHelperDialog
-          onClose={() => setShowAddDialog(false)}
-          onSuccess={() => {
-            setShowAddDialog(false);
-            fetchHelpers();
-          }}
-        />
-      )}
+ <AddHelperDialog
+ open={showAddDialog}
+ onClose={() => setShowAddDialog(false)}
+ onSuccess={() => {
+ setShowAddDialog(false);
+ fetchHelpers();
+ }}
+ />
 
       {editingHelper && (
         <EditHelperDialog
