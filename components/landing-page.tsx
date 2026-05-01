@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Calendar, Users, Clock, Shield, ChevronRight, Sparkles } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { HeroEntrance } from '@/components/ui/motion';
 
 export default function LandingPage() {
   return (
@@ -43,28 +44,34 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative z-10 pt-24 pb-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-card/60/10 backdrop-blur-md rounded-full border border-border/80 mb-8 shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-orange" />
-            <span className="text-xs font-medium text-muted-foreground">
-              Volunteer management reimagined
-            </span>
-          </div>
+ {/* Hero Section */}
+ <section className="relative z-10 pt-24 pb-20 px-6">
+ <div className="max-w-4xl mx-auto text-center">
+ <HeroEntrance delay={0}>
+ <div className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-card/60/10 backdrop-blur-md rounded-full border border-border/80 mb-8 shadow-sm">
+ <Sparkles className="w-3.5 h-3.5 text-orange" />
+ <span className="text-xs font-medium text-muted-foreground">
+ Volunteer management reimagined
+ </span>
+ </div>
+ </HeroEntrance>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-foreground leading-[1.1] mb-6">
-            Organize events
-            <br />
-            <span className="bg-gradient-to-r from-primary to-green bg-clip-text text-transparent">
-              without the chaos
-            </span>
-          </h1>
+ <HeroEntrance delay={0.1}>
+ <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-foreground leading-[1.1] mb-6">
+ Organize events
+ <br />
+ <span className="bg-gradient-to-r from-primary to-green bg-clip-text text-transparent">
+ without the chaos
+ </span>
+ </h1>
+ </HeroEntrance>
 
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-10">
-            Effortlessly coordinate your crew, track volunteer hours, and manage shifts
-            with the elegance your team deserves.
-          </p>
+ <HeroEntrance delay={0.2}>
+ <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-10">
+ Effortlessly coordinate your crew, track volunteer hours, and manage shifts
+ with the elegance your team deserves.
+ </p>
+ </HeroEntrance>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link

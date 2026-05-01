@@ -93,7 +93,7 @@ export default function ProfileEditor() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main aria-label="Profile editor" className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-foregroundPrimary mb-2">Edit Profile</h2>
           <p className="text-blue">Update your personal information</p>

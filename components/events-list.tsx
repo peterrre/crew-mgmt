@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { format } from 'date-fns'
 import { restoreEvent } from '@/lib/actions/events'
+import { StaggerContainer, StaggerItem } from '@/components/ui/motion'
 
 interface Event {
   id: string
@@ -56,9 +57,10 @@ export function EventsList({ events, showArchived }: EventsListProps) {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {events.map((event) => (
-          <Card key={event.id} className={event.isArchived ? 'opacity-60' : ''}>
+ <StaggerContainer className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+ {events.map((event) => (
+ <StaggerItem key={event.id}>
+ <Card className={event.isArchived ? 'opacity-60' : ''}>
             <CardHeader>
               <CardTitle className="flex justify-between items-start">
                 <span>{event.name}</span>
@@ -100,9 +102,10 @@ export function EventsList({ events, showArchived }: EventsListProps) {
                 )}
               </div>
             </CardContent>
-          </Card>
-        ))}
-      </div>
+ </Card>
+ </StaggerItem>
+ ))}
+ </StaggerContainer>
 
       {events.length === 0 && (
         <div className="text-center py-8">

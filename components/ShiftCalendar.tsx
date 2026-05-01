@@ -192,37 +192,45 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   if (error)
     return <div className="p-4 bg-red/10 text-red rounded">{error}</div>;
 
-  return (
-    <div className="space-y-4">
-      <Toaster />
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Shift Calendar</h2>
-        {!isVolunteer && (isAdmin || isCrew) && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              /* TODO open create shift dialog */
-            }}
-          >
-            + Create Shift
-          </Button>
-        )}
-      </div>
+ return (
+ <section aria-label="Shift calendar" className="space-y-4">
+ <Toaster />
+ <div className="flex justify-between items-center">
+ <h2 className="text-xl font-semibold">Shift Calendar</h2>
+ {!isVolunteer && (isAdmin || isCrew) && (
+ <Button
+ variant="outline"
+ size="sm"
+ aria-label="Create new shift"
+ onClick={() => {
+ /* TODO open create shift dialog */
+ }}
+ >
+ + Create Shift
+ </Button>
+ )}
+ </div>
 
-      <Calendar
-        localizer={localizer}
-        events={shifts}
-        startAccessor="start"
-        endAccessor="end"
-        titleAccessor="title"
-        tooltipAccessor="title"
-        onSelectSlot={handleSelectSlot}
-        onSelectEvent={handleSelectEvent}
-        eventPropGetter={eventPropGetter}
-        views={["month", "week", "day"]}
-        style={{ height: 600 }}
-      />
+ <div role="region" aria-label="Calendar view" tabIndex={0}
+ onKeyDown={(e) => {
+ if (e.key === 'Escape' && openPanel) setOpenPanel(false);
+ }}
+ >
+ <Calendar
+ localizer={localizer}
+ events={shifts}
+ startAccessor="start"
+ endAccessor="end"
+ titleAccessor="title"
+ tooltipAccessor="title"
+ onSelectSlot={handleSelectSlot}
+ onSelectEvent={handleSelectEvent}
+ eventPropGetter={eventPropGetter}
+ views={["month", "week", "day"]}
+ style={{ height: 600 }}
+ aria-label="Shift calendar grid"
+ />
+ </div>
 
       {/* Assignment Panel (sidebar/modal) */}
       <Dialog open={openPanel} onOpenChange={setOpenPanel}>
@@ -276,7 +284,7 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
             Close
           </Button>
         </DialogFooter>
-      </Dialog>
-    </div>
-  );
+ </Dialog>
+ </section>
+ );
 };

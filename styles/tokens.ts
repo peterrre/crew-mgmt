@@ -18,7 +18,7 @@ export const colors = {
   greenForeground: '#FFFFFF',
   red: '#FF3B30',
   redForeground: '#FFFFFF',
-  yellow: '#FF9500',
+ yellow: '#FF9500',
   yellowForeground: '#FFFFFF',
   purple: '#AF52DE',
   purpleForeground: '#FFFFFF',

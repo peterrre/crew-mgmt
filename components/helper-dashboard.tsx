@@ -13,19 +13,20 @@ import {
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import dynamic from 'next/dynamic';
 import {
-  Calendar,
-  LogOut,
-  Edit,
-  User,
-  ClipboardList,
-  CalendarDays,
-  MapPin,
-  Search,
-  FileText,
+ Calendar,
+ LogOut,
+ Edit,
+ User,
+ ClipboardList,
+ CalendarDays,
+ MapPin,
+ Search,
+ FileText,
 } from 'lucide-react';
-import PersonalCalendar from '@/components/personal-calendar';
-import EditAvailability from '@/components/edit-availability';
+const PersonalCalendar = dynamic(() => import('@/components/personal-calendar'), { ssr: false });
+const EditAvailability = dynamic(() => import('@/components/edit-availability'), { ssr: false });
 import { ThemeToggle } from '@/components/theme-toggle';
 import AvailableEvents from '@/components/available-events';
 import MyApplications from '@/components/my-applications';

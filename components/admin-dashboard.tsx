@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
+import { MotionButton } from '@/components/ui/motion';
 import { Button } from '@/components/ui/button';
 import { Calendar, Users, LogOut, TrendingUp, ClipboardList, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
@@ -70,16 +71,18 @@ export default function AdminDashboard() {
               </h1>
             </div>
             <div className="flex items-center space-x-2">
-              <ThemeToggle />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleSignOut}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign out
-              </Button>
+ <ThemeToggle />
+ <MotionButton>
+ <Button
+ variant="ghost"
+ size="sm"
+ onClick={handleSignOut}
+ className="text-muted-foreground hover:text-foreground"
+ >
+ <LogOut className="w-4 h-4 mr-2" />
+ Sign out
+ </Button>
+ </MotionButton>
             </div>
           </div>
         </div>
