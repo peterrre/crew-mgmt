@@ -41,6 +41,8 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci
+      - name: Install PostgreSQL client
+        run: apt update && apt install -y postgresql-client
       - name: Wait for database
         run: |
           until pg_isready -h localhost -p 5432 -U postgres; do
