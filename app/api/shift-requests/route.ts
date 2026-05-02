@@ -26,11 +26,7 @@ export async function GET() {
       requests = await prisma.shiftRequest.findMany({
         include: {
           shift: {
-            include: {
-              helper: {
-                select: { id: true, name: true, email: true },
-              },
-            },
+            select: { id: true, title: true, start: true, end: true },
           },
           requester: {
             select: { id: true, name: true, email: true },
@@ -50,11 +46,7 @@ export async function GET() {
         where: { requesterId: userId },
         include: {
           shift: {
-            include: {
-              helper: {
-                select: { id: true, name: true, email: true },
-              },
-            },
+            select: { id: true, title: true, start: true, end: true },
           },
           requester: {
             select: { id: true, name: true, email: true },
@@ -209,6 +201,9 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const user = session.user as User;
+    const userId = user.id;
+
     const body = await request.json();
     const { shiftId } = body;
 
@@ -239,8 +234,9 @@ export async function PUT(request: Request) {
       },
     });
 
-    // Filter volunteers who are available during the shift time
+    // Filter volunteers who are available during the shift time and exclude the current user
     const availableVolunteers = volunteers.filter((volunteer) => {
+      if (volunteer.id === userId) return false; // Exclude the requester themselves
       return volunteer.availabilitySlots.some((slot) => {
         const slotStart = new Date(slot.start);
         const slotEnd = new Date(slot.end);

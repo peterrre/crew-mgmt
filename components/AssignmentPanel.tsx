@@ -144,27 +144,6 @@ export const AssignmentPanel = ({
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
-                  {!isVolunteer &&
-                    (isAdmin || isCrew || responsible.userId === currentUserId) && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" aria-label="More options">
-                            <UserCircle className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-36">
-                          <DropdownMenuItem
-                            onSelect={async () => {
-                              if (responsible.id) {
-                                await onRemoveAssignment(responsible.id);
-                              }
-                            }}
-                          >
-                            Remove
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
                 </div>
               </>
             ) : (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,27 +33,26 @@ export default function AvailableEvents() {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchAvailableEvents();
-  });
-
-  const fetchAvailableEvents = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/available-events');
-      if (response.ok) {
-        const data = await response.json();
-        setEvents(data.events || []);
+    const fetchAvailableEvents = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/available-events');
+        if (response.ok) {
+          const data = await response.json();
+          setEvents(data.events || []);
+        }
+      } catch (error) {
+        console.error('Error fetching available events:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load available events',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching available events:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load available events',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
+    };
+    fetchAvailableEvents();
   }, [toast]);
 
   const handleApply = async () => {
