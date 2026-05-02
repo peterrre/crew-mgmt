@@ -57,7 +57,7 @@ interface MyEvent {
 }
 
 export default function HelperDashboard() {
-  const { data: session } = useSession() || {};
+  const { data: session } = useSession();
   const [showEditAvailability, setShowEditAvailability] = useState(false);
   const [requests, setRequests] = useState<ShiftRequest[]>([]);
   const [myEvents, setMyEvents] = useState<MyEvent[]>([]);

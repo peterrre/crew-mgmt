@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import CreateShiftRequestDialog from '@/components/create-shift-request-dialog';
 
@@ -30,11 +30,7 @@ export default function PersonalCalendar() {
   const [loading, setLoading] = useState(true);
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
 
-  useEffect(() => {
-    fetchShifts();
-  }, []);
-
-  const fetchShifts = async () => {
+  const fetchShifts = useCallback(async () => {
     try {
       const response = await fetch('/api/shifts');
       if (response.ok) {
@@ -51,7 +47,11 @@ export default function PersonalCalendar() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchShifts();
+  }, [fetchShifts]);
 
   return (
     <div className="bg-background rounded-2xl p-6 shadow-lg border border-border">
