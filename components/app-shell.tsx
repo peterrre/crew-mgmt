@@ -12,6 +12,7 @@ import {
   BreadcrumbPage,
 } from '@/components/ui/breadcrumb';
 import { Calendar } from 'lucide-react';
+import { NotificationBell } from '@/components/NotificationBell';
 
 const routeLabels: Record<string, string> = {
   '': 'Home',
@@ -28,8 +29,9 @@ const routeLabels: Record<string, string> = {
   create: 'Erstellen',
 };
 
-function buildBreadcrumbs(pathname: string) {
-  const segments = pathname.split('/').filter(Boolean);
+function buildBreadcrumbs(pathname: string | null) {
+  const path = pathname ?? '/';
+  const segments = path.split('/').filter(Boolean);
   const crumbs: { label: string; href: string; isCurrent: boolean }[] = [
     { label: 'Home', href: '/', isCurrent: segments.length === 0 },
   ];
@@ -106,6 +108,9 @@ export function AppTopBar() {
           </span>
         </Link>
         <AppBreadcrumbs />
+        <div className="ml-auto">
+          <NotificationBell />
+        </div>
       </div>
     </header>
   );

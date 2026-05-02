@@ -33,9 +33,11 @@ export default function EventDetailTabs({ event }: EventDetailTabsProps) {
 
   // Set initial tab from URL parameter
   useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if (tabParam && ['overview', 'crew', 'schedule', 'requests', 'applications'].includes(tabParam)) {
-      setActiveTab(tabParam);
+    if (searchParams) {
+      const tabParam = searchParams.get('tab');
+      if (tabParam && ['overview', 'crew', 'schedule', 'requests', 'applications'].includes(tabParam)) {
+        setActiveTab(tabParam);
+      }
     }
   }, [searchParams]);
 

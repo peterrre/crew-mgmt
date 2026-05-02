@@ -1,5 +1,4 @@
 // Mock dependencies
-jest.mock('@/lib/db');
 const prismaMock = {
   shift: {
     findMany: jest.fn(),
