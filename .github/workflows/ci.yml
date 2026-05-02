@@ -8,8 +8,11 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 15
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-jammy
+      options: --user root
 
     services:
       postgres:
@@ -27,7 +30,7 @@ jobs:
           - 5432:5432
 
     env:
-      DATABASE_URL: postgresql://crewuser:crewpass@localhost:5432/crewmgmt
+      DATABASE_URL: postgresql://crewuser:crewpass@postgres:5432/crewmgmt
       NEXTAUTH_SECRET: test-secret-for-ci-only
       NEXTAUTH_URL: http://localhost:3000
 
@@ -43,8 +46,6 @@ jobs:
         run: npx prisma migrate deploy
       - name: Build Next.js App
         run: npx next build
-      - name: Install Playwright Browsers
-        run: npx playwright install chromium --with-deps
       - name: Run Playwright tests
         run: npx playwright test --project=chromium
       - uses: actions/upload-artifact@v4
