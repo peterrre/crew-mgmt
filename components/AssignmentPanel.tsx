@@ -42,7 +42,6 @@ export const AssignmentPanel = ({
   onClose,
 }: AssignmentPanelProps) => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [loadingUsers, setLoadingUsers] = useState(false);
 
  const responsible = assignments.find((a) => (a.role as any) === ShiftAssignmentRole.RESPONSIBLE);
  const helpers = assignments.filter((a) => (a.role as any) === ShiftAssignmentRole.HELPER);
@@ -53,16 +52,13 @@ export const AssignmentPanel = ({
 
   const loadAvailableUsers = useCallback(async () => {
     if (!(isAdmin || isCrew)) return;
-    setLoadingUsers(true);
     try {
       await fetchAvailableUsers({ shiftId });
       // users are not used in UI; fetched for side effect only
     } catch (err: unknown) {
       toast.error("Failed to load users");
-    } finally {
-      setLoadingUsers(false);
     }
-  }, [isAdmin, isCrew]);
+  }, [isAdmin, isCrew, shiftId]);
 
   useEffect(() => {
     if (isAdmin || isCrew) {
@@ -307,7 +303,7 @@ export const AssignmentPanel = ({
             {!responsible && (
               <Button
                 variant="default"
-                onClick={() => onSelfAssign("RESPONSIBLE")}
+                onClick={() => onSelfAssign(ShiftAssignmentRole.RESPONSIBLE)}
                 className="w-full"
               >
                 Take as Responsible
@@ -316,7 +312,7 @@ export const AssignmentPanel = ({
             {helperCount < maxHelpers && (
               <Button
                 variant="outline"
-                onClick={() => onSelfAssign("HELPER")}
+                onClick={() => onSelfAssign(ShiftAssignmentRole.HELPER)}
                 className="w-full"
               >
                 Join as Helper

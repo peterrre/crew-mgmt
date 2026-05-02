@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
-import { momentLocalizer } from "react-big-calendar";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {

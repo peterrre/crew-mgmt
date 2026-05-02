@@ -226,6 +226,7 @@ export default function EventScheduleEditor({ eventId, eventStartDate }: EventSc
         <ShiftEditDialog
           shift={editingShift}
           crew={crew}
+          checkHelperAvailability={checkHelperAvailability}
           onClose={() => setEditingShift(null)}
           onSuccess={async () => {
             setEditingShift(null);
