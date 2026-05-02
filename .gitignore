@@ -48,3 +48,11 @@ coverage/
 *.log
 playwright-report/
 test-results/
+
+# Backup files
+*.backup
+*.backup*
+*.bak
+*.tmp
+*.orig
+*~
