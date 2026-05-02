@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Assignment } from "@/types/shift";
 
 import { ShiftAssignmentRole } from "@/lib/shiftAssignmentRole";
+import { fetchAvailableUsers } from "@/lib/api/users";
 
 interface AssignmentPanelProps {
  shiftId: string;
@@ -28,6 +29,7 @@ interface AssignmentPanelProps {
 }
 
 export const AssignmentPanel = ({
+  shiftId,
   assignments,
   minHelpers,
   maxHelpers,
@@ -40,6 +42,7 @@ export const AssignmentPanel = ({
   onClose,
 }: AssignmentPanelProps) => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
  const responsible = assignments.find((a) => (a.role as any) === ShiftAssignmentRole.RESPONSIBLE);
  const helpers = assignments.filter((a) => (a.role as any) === ShiftAssignmentRole.HELPER);
