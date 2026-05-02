@@ -7,10 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { X, Loader2 } from 'lucide-react';
 import ShiftAssignmentManager from '@/components/shift-assignment-manager';
+import { ROLES } from '@/constants/roles';
+import type { Role } from '@/constants/roles';
 
 interface ShiftAssignment {
   id: string;
-  role: 'RESPONSIBLE' | 'HELPER';
+  role: Role;
   user: {
     id: string;
     name: string | null;
@@ -73,7 +75,7 @@ export default function ShiftEditDialog({
 
   // Check if current user is the responsible person
   const isResponsible = currentShift.assignments?.some(
-    (a) => a.user.id === currentUserId && a.role === 'RESPONSIBLE'
+    (a) => a.user.id === currentUserId && a.role === ROLES.RESPONSIBLE
   );
 
   const canManage = isAdmin || isResponsible;
@@ -171,7 +173,7 @@ export default function ShiftEditDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-card rounded-2xl max-w-lg w-full shadow-2xl border border-border max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-card z-10">
           <h2 className="text-xl font-bold text-card-foreground">Edit Shift</h2>
@@ -284,7 +286,7 @@ export default function ShiftEditDialog({
                 variant="outline"
                 onClick={handleDelete}
                 disabled={loading}
-                className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/30"
+                className="text-red border-red/30 hover:bg-red/10"
               >
                 Delete
               </Button>
@@ -296,7 +298,7 @@ export default function ShiftEditDialog({
               <Button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-amber-500 hover:bg-orange-600"
+                className="flex-1 bg-backgroundSecondary hover:bg-yellow"
               >
                 {loading ? (
                   <>

@@ -42,7 +42,8 @@ jest.mock('@/lib/utils/overlap', () => ({
   checkForOverlappingShifts: jest.fn(),
 }));
 
-let PATCH: any;
+import type { PATCH as PatchType } from '@/app/api/shifts/route';
+let PATCH: PatchType;
 
 describe('Auto-Assign Validation (respects maxHelpers)', () => {
   const session = {
@@ -116,7 +117,7 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
       },
     ]);
 
-    const request = new Request('http://localhost/api/shifts', {
+     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'PATCH',
       body: JSON.stringify({ eventId }),
     });
@@ -180,7 +181,7 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
       },
     ]);
 
-    const request = new Request('http://localhost/api/shifts', {
+     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'PATCH',
       body: JSON.stringify({ eventId }),
     });
@@ -247,7 +248,7 @@ describe('Auto-Assign Validation (respects maxHelpers)', () => {
       },
     ]);
 
-    const request = new Request('http://localhost/api/shifts', {
+     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'PATCH',
       body: JSON.stringify({ eventId }),
     });

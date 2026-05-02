@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState , useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -54,7 +54,7 @@ export default function AvailableEvents() {
     } finally {
       setLoading(false);
     }
-}, [toast]);
+  }, [toast]);
 
   const handleApply = async () => {
     if (!applyingTo) return;
@@ -77,7 +77,6 @@ export default function AvailableEvents() {
         });
         setApplyingTo(null);
         setMessage('');
-        // Update the event in the list to show "Applied"
         setEvents((prev) =>
           prev.map((e) =>
             e.id === applyingTo.id ? { ...e, hasApplied: true } : e
@@ -108,7 +107,7 @@ export default function AvailableEvents() {
       <Card>
         <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin mr-2" />
-          <p className="text-gray-600 dark:text-slate-400">Loading available events...</p>
+          <p className="text-foregroundSecondary">Loading available events...</p>
         </CardContent>
       </Card>
     );
@@ -118,11 +117,11 @@ export default function AvailableEvents() {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-8">
-          <ClipboardCheck className="w-12 h-12 text-gray-400 mb-3" />
-          <p className="text-gray-600 dark:text-slate-400 text-center">
+          <ClipboardCheck className="w-12 h-12 text-foregroundTertiary mb-3" />
+          <p className="text-foregroundSecondary text-center">
             No events are currently accepting volunteer applications.
           </p>
-          <p className="text-sm text-gray-500 dark:text-slate-500 text-center mt-1">
+          <p className="text-sm text-foregroundTertiary text-center mt-1">
             Check back later for new opportunities!
           </p>
         </CardContent>
@@ -139,7 +138,7 @@ export default function AvailableEvents() {
               <div className="flex items-start justify-between">
                 <CardTitle className="text-lg">{event.name}</CardTitle>
                 {event.hasApplied && (
-                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                  <Badge variant="secondary" className="bg-yellow/10 text-yellow">
                     Applied
                   </Badge>
                 )}
@@ -151,27 +150,27 @@ export default function AvailableEvents() {
             </CardHeader>
             <CardContent>
               {event.location && (
-                <p className="text-sm text-gray-600 dark:text-slate-400 mb-2 flex items-center gap-1">
+                <p className="text-sm text-foregroundSecondary mb-2 flex items-center gap-1">
                   <MapPin className="w-3 h-3" />
                   {event.location}
                 </p>
               )}
               {event.description && (
-                <p className="text-sm text-gray-500 dark:text-slate-500 mb-3 line-clamp-2">
+                <p className="text-sm text-foregroundTertiary mb-3 line-clamp-2">
                   {event.description}
                 </p>
               )}
               <div className="flex items-center gap-3 mb-4">
-                <Badge variant="outline" className="text-gray-600 border-gray-400">
+                <Badge variant="outline" className="text-foregroundSecondary border-border">
                   <Users className="w-3 h-3 mr-1" />
                   {event.crewCount} crew
                 </Badge>
-                <Badge variant="outline" className="text-gray-600 border-gray-400">
+                <Badge variant="outline" className="text-foregroundSecondary border-border">
                   {event.shiftsCount} shifts
                 </Badge>
               </div>
               {event.hasApplied ? (
-                <div className="flex items-center text-sm text-yellow-700 dark:text-yellow-400">
+                <div className="flex items-center text-sm text-yellow">
                   <CheckCircle2 className="w-4 h-4 mr-1" />
                   Application pending review
                 </div>
@@ -201,7 +200,7 @@ export default function AvailableEvents() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <div className="text-sm text-gray-600 dark:text-slate-400">
+              <div className="text-sm text-foregroundSecondary">
                 <p className="flex items-center gap-2 mb-1">
                   <Calendar className="w-4 h-4" />
                   {applyingTo && new Date(applyingTo.startDate).toLocaleDateString()} - {applyingTo && new Date(applyingTo.endDate).toLocaleDateString()}

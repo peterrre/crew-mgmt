@@ -58,7 +58,7 @@ export default function EventDetailTabs({ event }: EventDetailTabsProps) {
           <UserPlus className="w-4 h-4" />
           Applications
           {pendingApplicationsCount > 0 && (
-            <span className="ml-1 px-2 py-0.5 bg-green-500 text-white text-xs font-medium rounded-full">
+            <span className="ml-1 px-2 py-0.5 bg-green text-white text-xs font-medium rounded-full">
               {pendingApplicationsCount}
             </span>
           )}
@@ -67,7 +67,7 @@ export default function EventDetailTabs({ event }: EventDetailTabsProps) {
           <FileText className="w-4 h-4" />
           Requests
           {pendingRequestsCount > 0 && (
-            <span className="ml-1 px-2 py-0.5 bg-amber-500 text-white text-xs font-medium rounded-full">
+              <span className="ml-1 px-2 py-0.5 bg-backgroundSecondary text-white text-xs font-medium rounded-full">
               {pendingRequestsCount}
             </span>
           )}
@@ -99,12 +99,12 @@ export default function EventDetailTabs({ event }: EventDetailTabsProps) {
               </div>
             )}
             <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-              <div className="bg-sky-50 dark:bg-sky-900/20 rounded-lg p-4">
-                <div className="text-2xl font-bold text-sky-600 dark:text-sky-400">{crewCount}</div>
+              <div className="bg-backgroundSecondary/20 rounded-lg p-4">
+                <div className="text-2xl font-bold text-blue">{crewCount}</div>
                 <div className="text-sm text-muted-foreground">Crew Members</div>
               </div>
-              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4">
-                <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{shiftsCount}</div>
+              <div className="bg-backgroundSecondary/20 rounded-lg p-4">
+                <div className="text-2xl font-bold text-yellow">{shiftsCount}</div>
                 <div className="text-sm text-muted-foreground">Shifts</div>
               </div>
             </div>

@@ -108,7 +108,7 @@ export async function POST(
       );
     }
 
-    const userId = (session.user as any).id;
+    const userId = (session.user as { id: string; role: string }).id;
     const eventId = params.id;
 
     const body = await request.json();

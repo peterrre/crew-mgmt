@@ -9,157 +9,201 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Heart } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { cn } from '@/lib/utils';
+import { FormFieldMessage, PasswordStrength } from '@/components/ui/form-fields';
+import { FadeIn } from '@/components/ui/interactive';
+import { toast } from 'sonner';
+
+const volunteerSchema = z.object({
+  name: z.string().min(2, { message: 'Name muss mindestens 2 Zeichen haben' }),
+  email: z.string().email({ message: 'Ungültige E-Mail-Adresse' }),
+  password: z.string().min(6, { message: 'Passwort muss mindestens 6 Zeichen haben' }),
+});
+
+type VolunteerFormValues = z.infer<typeof volunteerSchema>;
 
 export default function SignupVolunteerPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
+  const [serverError, setServerError] = useState('');
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting, isValid },
+  } = useForm<VolunteerFormValues>({
+    resolver: zodResolver(volunteerSchema),
+    mode: 'onChange',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const passwordValue = watch('password', '');
+
+  const onSubmit = async (data: VolunteerFormValues) => {
     setLoading(true);
-    setError('');
+    setServerError('');
 
     try {
       const response = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, role: 'VOLUNTEER' }),
+        body: JSON.stringify({ ...data, role: 'VOLUNTEER' }),
       });
 
-      const data = await response.json();
+      const responseData = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Registration failed');
+        const msg = responseData.error || 'Registrierung fehlgeschlagen';
+        setServerError(msg);
+        toast.error(msg);
         return;
       }
 
-      // Sign in automatically after registration
+      toast.success('Registrierung erfolgreich!');
+
       const result = await signIn('credentials', {
-        email: formData.email,
-        password: formData.password,
+        email: data.email,
+        password: data.password,
         redirect: false,
       });
 
       if (result?.error) {
-        setError('Registration successful but login failed');
+        toast.error('Registrierung erfolgreich, aber Anmeldung fehlgeschlagen');
       } else {
         router.push('/');
         router.refresh();
       }
     } catch (err) {
-      setError('Something went wrong');
+      const msg = 'Etwas ist schiefgelaufen';
+      setServerError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4">
-      <div className="absolute top-4 right-4">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-backgroundSecondary to-background px-4 relative overflow-hidden">
+      {/* Background blur blobs */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple/10 dark:bg-purple/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue/10 dark:bg-blue/5 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Theme toggle */}
+      <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />
       </div>
-      <div className="max-w-md w-full space-y-8">
+
+      <FadeIn className="max-w-md w-full space-y-8 relative z-10">
+        {/* Logo + heading */}
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-purple to-pink rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 transition-transform duration-300">
               <Heart className="w-8 h-8 text-white" />
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Join as Volunteer</h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
-            Help make our festivals amazing!
+          <h1 className="text-3xl font-semibold tracking-tight text-foregroundPrimary">
+            Helfer werden
+          </h1>
+          <p className="mt-2 text-sm text-foregroundSecondary">
+            Mach unsere Festivals unvergesslich
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-green-100 dark:border-slate-700">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Glassmorphism card */}
+        <div className="backdrop-blur-xl bg-background/70 dark:bg-backgroundTertiary/70 rounded-2xl shadow-xl border border-border/50 p-8 transition-all duration-300">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name" className="dark:text-slate-200">Full Name</Label>
+              <Label htmlFor="name" className="text-foregroundPrimary font-medium">
+                Vollständiger Name
+              </Label>
               <Input
                 id="name"
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
+                {...register('name')}
+                className={cn(
+                  'h-12 rounded-xl border-border bg-backgroundSecondary/60 text-foregroundPrimary placeholder:text-foregroundTertiary focus:ring-2 focus:ring-purple/30 focus:border-purple transition-all duration-200',
+                  errors.name ? 'border-destructive' : ''
+                )}
+                placeholder="Max Mustermann"
                 required
-                className="h-11 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
-                placeholder="John Doe"
               />
+              <FormFieldMessage message={errors.name?.message} type="error" />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="dark:text-slate-200">Email</Label>
+              <Label htmlFor="email" className="text-foregroundPrimary font-medium">
+                E-Mail
+              </Label>
               <Input
                 id="email"
                 type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                {...register('email')}
+                className={cn(
+                  'h-12 rounded-xl border-border bg-backgroundSecondary/60 text-foregroundPrimary placeholder:text-foregroundTertiary focus:ring-2 focus:ring-purple/30 focus:border-purple transition-all duration-200',
+                  errors.email ? 'border-destructive' : ''
+                )}
+                placeholder="du@beispiel.de"
                 required
-                className="h-11 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
-                placeholder="you@example.com"
               />
+              <FormFieldMessage message={errors.email?.message} type="error" />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="dark:text-slate-200">Password</Label>
+              <Label htmlFor="password" className="text-foregroundPrimary font-medium">
+                Passwort
+              </Label>
               <Input
                 id="password"
                 type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                required
-                className="h-11 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                {...register('password')}
+                className={cn(
+                  'h-12 rounded-xl border-border bg-backgroundSecondary/60 text-foregroundPrimary placeholder:text-foregroundTertiary focus:ring-2 focus:ring-purple/30 focus:border-purple transition-all duration-200',
+                  errors.password ? 'border-destructive' : ''
+                )}
                 placeholder="••••••••"
-                minLength={6}
+                required
               />
+              <FormFieldMessage message={errors.password?.message} type="error" />
+              <PasswordStrength password={passwordValue} />
             </div>
 
-            {error && (
-              <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 p-3 rounded-lg">
-                {error}
+            {serverError && (
+              <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-xl border border-destructive/20">
+                {serverError}
               </div>
             )}
 
             <Button
               type="submit"
-              disabled={loading}
-              className="w-full h-11 bg-amber-500 hover:bg-orange-600 dark:bg-amber-600 dark:hover:bg-orange-700"
+              disabled={isSubmitting || loading || !isValid}
+              className="w-full h-11 bg-gradient-to-r from-purple to-pink hover:opacity-90 text-white font-semibold shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (
+              {isSubmitting || loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing up...
+                  Registriere...
                 </>
               ) : (
-                'Sign up as Volunteer'
+                'Als Helfer registrieren'
               )}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 dark:text-slate-400">
-              Already have an account?{' '}
+            <p className="text-sm text-foregroundSecondary">
+              Bereits ein Konto?{' '}
               <Link
                 href="/login"
-                className="font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                className="font-semibold text-purple hover:opacity-80 transition-colors duration-200"
               >
-                Sign in
+                Anmelden
               </Link>
             </p>
           </div>
         </div>
-      </div>
-    </div>
+      </FadeIn>
+    </main>
   );
 }

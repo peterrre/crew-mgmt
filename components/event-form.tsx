@@ -54,76 +54,80 @@ export function EventForm({ initialData, users, onSubmit, onCancel, submitLabel 
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-      <div>
-        <Label htmlFor="name">Event Name</Label>
-        <Input id="name" {...register('name')} />
-        {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
-      </div>
-
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" {...register('description')} />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
+      <div className="bg-background rounded-2xl shadow-lg border border-border p-6 space-y-6">
         <div>
-          <Label htmlFor="startDate">Start Date</Label>
-          <Input id="startDate" type="datetime-local" {...register('startDate')} />
-          {errors.startDate && <p className="text-sm text-red-600">{errors.startDate.message}</p>}
+          <Label htmlFor="name" className="text-foregroundPrimary">Event Name</Label>
+          <Input id="name" {...register('name')} className="mt-1.5 dark:bg-backgroundTertiary" />
+          {errors.name && <p className="text-sm text-red mt-1">{errors.name.message}</p>}
         </div>
+
         <div>
-          <Label htmlFor="endDate">End Date</Label>
-          <Input id="endDate" type="datetime-local" {...register('endDate')} />
-          {errors.endDate && <p className="text-sm text-red-600">{errors.endDate.message}</p>}
+          <Label htmlFor="description" className="text-foregroundPrimary">Description</Label>
+          <Textarea id="description" {...register('description')} className="mt-1.5 dark:bg-backgroundTertiary" />
         </div>
-      </div>
 
-      <div>
-        <Label htmlFor="location">Location</Label>
-        <Input id="location" {...register('location')} />
-      </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="startDate" className="text-foregroundPrimary">Start Date</Label>
+            <Input id="startDate" type="datetime-local" {...register('startDate')} className="mt-1.5 dark:bg-backgroundTertiary" />
+            {errors.startDate && <p className="text-sm text-red mt-1">{errors.startDate.message}</p>}
+          </div>
+          <div>
+            <Label htmlFor="endDate" className="text-foregroundPrimary">End Date</Label>
+            <Input id="endDate" type="datetime-local" {...register('endDate')} className="mt-1.5 dark:bg-backgroundTertiary" />
+            {errors.endDate && <p className="text-sm text-red mt-1">{errors.endDate.message}</p>}
+          </div>
+        </div>
 
-      <div>
-        <Label htmlFor="contactPersonId">Contact Person</Label>
-        <Select onValueChange={(value: string) => setValue('contactPersonId', value)} defaultValue={initialData?.contactPersonId}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select contact person" />
-          </SelectTrigger>
-          <SelectContent>
-            {users.map((user) => (
-              <SelectItem key={user.id} value={user.id}>
-                {user.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex items-center space-x-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-        <Controller
-          name="acceptingVolunteers"
-          control={control}
-          render={({ field }) => (
-            <Switch
-              id="acceptingVolunteers"
-              checked={field.value ?? false}
-              onCheckedChange={field.onChange}
-            />
-          )}
-        />
         <div>
-          <Label htmlFor="acceptingVolunteers" className="font-medium">Accept Volunteer Applications</Label>
-          <p className="text-sm text-muted-foreground">Allow volunteers to apply to participate in this event</p>
+          <Label htmlFor="location" className="text-foregroundPrimary">Location</Label>
+          <Input id="location" {...register('location')} className="mt-1.5 dark:bg-backgroundTertiary" />
+        </div>
+
+        <div>
+          <Label htmlFor="contactPersonId" className="text-foregroundPrimary">Contact Person</Label>
+          <Select onValueChange={(value: string) => setValue('contactPersonId', value)} defaultValue={initialData?.contactPersonId}>
+            <SelectTrigger className="mt-1.5 dark:bg-backgroundTertiary">
+              <SelectValue placeholder="Select contact person" />
+            </SelectTrigger>
+            <SelectContent>
+              {users.map((user) => (
+                <SelectItem key={user.id} value={user.id}>
+                  {user.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center space-x-4 p-4 bg-green/10 rounded-2xl border border-green/20">
+          <Controller
+            name="acceptingVolunteers"
+            control={control}
+            render={({ field }) => (
+              <Switch
+                id="acceptingVolunteers"
+                checked={field.value ?? false}
+                onCheckedChange={field.onChange}
+              />
+            )}
+          />
+          <div>
+            <Label htmlFor="acceptingVolunteers" className="font-medium text-foregroundPrimary">Accept Volunteer Applications</Label>
+            <p className="text-sm text-foregroundSecondary">Allow volunteers to apply to participate in this event</p>
+          </div>
         </div>
       </div>
 
       <div className="flex gap-4">
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={onCancel} className="border-border text-foregroundPrimary hover:bg-backgroundSecondary">
             Cancel
           </Button>
         )}
-        <Button type="submit">{submitLabel}</Button>
+        <Button type="submit" className="bg-blue hover:bg-blue/90 text-blueForeground">
+          {submitLabel}
+        </Button>
       </div>
     </form>
   )

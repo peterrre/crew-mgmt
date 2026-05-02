@@ -1,4 +1,5 @@
 name: Playwright Tests
+
 on:
   push:
     branches: [ main, master ]
@@ -7,25 +8,46 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 15
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-jammy
+      options: --user root
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: crewuser
+          POSTGRES_PASSWORD: crewpass
+          POSTGRES_DB: crewmgmt
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://crewuser:crewpass@postgres:5432/crewmgmt
+      NEXTAUTH_SECRET: test-secret-for-ci-only
+      NEXTAUTH_URL: http://localhost:3000
+
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-node@v5
         with:
           node-version: lts/*
-          cache: 'npm'  # optional but recommended
-
+          cache: 'npm'
       - name: Install dependencies
         run: npm ci
-
-      - name: Install Playwright Browsers
-        run: npx playwright install chromium --with-deps
-
+      - name: Setup database
+        run: npx prisma migrate deploy
+      - name: Build Next.js App
+        run: npx next build
       - name: Run Playwright tests
         run: npx playwright test --project=chromium
-
       - uses: actions/upload-artifact@v4
         if: always()
         with:

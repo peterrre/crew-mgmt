@@ -9,133 +9,160 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar, Loader2 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { cn } from '@/lib/utils';
+
+const registerSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
+  email: z.string().email({ message: 'Invalid email address' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+});
+
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
+  const [serverError, setServerError] = useState('');
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    mode: 'onChange',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: RegisterFormValues) => {
     setLoading(true);
-    setError('');
+    setServerError('');
 
     try {
       const response = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(data),
       });
 
-      const data = await response.json();
+      const responseData = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Registration failed');
+        setServerError(responseData.error || 'Registration failed');
         return;
       }
 
       const result = await signIn('credentials', {
-        email: formData.email,
-        password: formData.password,
+        email: data.email,
+        password: data.password,
         redirect: false,
       });
 
       if (result?.error) {
-        setError('Registration successful but login failed');
+        setServerError('Registration successful but login failed');
       } else {
         router.push('/');
         router.refresh();
       }
     } catch (err) {
-      setError('Something went wrong');
+      setServerError('Something went wrong');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4">
+    <main className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Calendar className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-md">
+              <Calendar className="w-8 h-8 text-primary-foreground" />
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Create account</h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+            Create account
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Join our event management platform
           </p>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-transparent dark:border-slate-700">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-card text-card-foreground rounded-2xl shadow-sm border border-border p-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name" className="dark:text-slate-200">Full Name</Label>
+              <Label htmlFor="name" className="text-foreground">
+                Full Name
+              </Label>
               <Input
                 id="name"
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-                className="h-11 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                {...register('name')}
+                className={cn(
+                  'h-11 bg-background border-input',
+                  errors.name ? 'border-destructive' : ''
+                )}
                 placeholder="John Doe"
               />
+              {errors.name && (
+                <p className="text-sm text-destructive">{errors.name.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="dark:text-slate-200">Email</Label>
+              <Label htmlFor="email" className="text-foreground">
+                Email
+              </Label>
               <Input
                 id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                required
-                className="h-11 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                {...register('email')}
+                className={cn(
+                  'h-11 bg-background border-input',
+                  errors.email ? 'border-destructive' : ''
+                )}
                 placeholder="you@example.com"
               />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="dark:text-slate-200">Password</Label>
+              <Label htmlFor="password" className="text-foreground">
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                required
-                className="h-11 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                {...register('password')}
+                className={cn(
+                  'h-11 bg-background border-input',
+                  errors.password ? 'border-destructive' : ''
+                )}
                 placeholder="••••••••"
-                minLength={6}
               />
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
+              )}
             </div>
 
-            {error && (
-              <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 p-3 rounded-lg">
-                {error}
+            {serverError && (
+              <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
+                {serverError}
               </div>
             )}
 
             <Button
               type="submit"
-              disabled={loading}
-              className="w-full h-11 bg-amber-500 hover:bg-orange-600 dark:bg-amber-600 dark:hover:bg-orange-700"
+              size="lg"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+              disabled={isSubmitting || loading}
             >
-              {loading ? (
+              {isSubmitting || loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Creating account...
@@ -147,11 +174,11 @@ export default function RegisterPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 dark:text-slate-400">
+            <p className="text-sm text-muted-foreground">
               Already have an account?{' '}
               <Link
                 href="/login"
-                className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                className="font-medium text-primary hover:text-primary/80 transition-colors"
               >
                 Sign in
               </Link>
@@ -159,6 +186,6 @@ export default function RegisterPage() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

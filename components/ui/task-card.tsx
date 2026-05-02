@@ -45,10 +45,10 @@ export function TaskCard({
             </CardTitle>
           </div>
           <div className="flex space-x-2">
-            <Button variant="ghost" size="icon" onClick={() => onEdit(id)}>
+            <Button variant="ghost" size="icon" aria-label="Edit task" onClick={() => onEdit(id)}>
               <Pencil className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => onDelete(id)}>
+            <Button variant="ghost" size="icon" aria-label="Delete task" onClick={() => onDelete(id)}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>

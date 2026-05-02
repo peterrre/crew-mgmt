@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { Providers } from './providers';
+import { SkipNavLink } from '@/components/ui/skip-nav';
+import { AppTopBar } from '@/components/app-shell';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -29,12 +31,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="de" suppressHydrationWarning>
       <head>
         <Script src="https://apps.abacus.ai/chatllm/appllm-lib.js" strategy="afterInteractive" />
       </head>
       <body className={inter.className} suppressHydrationWarning>
-        <Providers>{children}</Providers>
+        <Providers>
+          <SkipNavLink />
+          <AppTopBar />
+          <div id="main-content">{children}</div>
+        </Providers>
       </body>
     </html>
   );

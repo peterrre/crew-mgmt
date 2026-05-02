@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState , useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
@@ -126,24 +126,24 @@ export default function ShiftRequestsDashboard() {
 
   const getStatusColor = (status: string) => {
     return status === 'APPROVED'
-      ? 'text-green-600 dark:text-green-400'
-      : 'text-red-600 dark:text-red-400';
+      ? 'text-green'
+      : 'text-red';
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-sky-500" />
+      <div className="min-h-screen bg-gradient-to-br from-background via-backgroundSecondary to-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue" />
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
-        <Card>
+      <div className="min-h-screen bg-gradient-to-br from-background via-backgroundSecondary to-background flex items-center justify-center">
+        <Card className="bg-background rounded-2xl shadow-lg border border-border">
           <CardContent className="flex items-center justify-center py-12">
-            <p className="text-gray-600 dark:text-slate-400">Failed to load dashboard data</p>
+            <p className="text-foregroundSecondary">Failed to load dashboard data</p>
           </CardContent>
         </Card>
       </div>
@@ -151,22 +151,22 @@ export default function ShiftRequestsDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-background via-backgroundSecondary to-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-amber-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-amber-200 dark:border-slate-700 shadow-sm">
+      <header className="sticky top-0 z-50 bg-backgroundSecondary/80 backdrop-blur-md border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <Link href="/">
-                <Button variant="ghost" size="sm" className="dark:text-slate-300 dark:hover:text-white">
+                <Button variant="ghost" size="sm" className="text-foregroundSecondary hover:text-foregroundPrimary">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>
               </Link>
-              <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-amber-500 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue to-yellow rounded-xl flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-sky-900 dark:text-white">Shift Requests Dashboard</h1>
+              <h1 className="text-xl font-bold text-foregroundPrimary">Shift Requests Dashboard</h1>
             </div>
             <div className="flex items-center space-x-2">
               <ThemeToggle />
@@ -174,7 +174,7 @@ export default function ShiftRequestsDashboard() {
                 variant="ghost"
                 size="sm"
                 onClick={handleSignOut}
-                className="text-sky-700 hover:text-sky-900 dark:text-slate-300 dark:hover:text-white"
+                className="text-blue hover:text-foregroundPrimary"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign out
@@ -187,57 +187,57 @@ export default function ShiftRequestsDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-sky-900 dark:text-white mb-2">Request Overview</h2>
-          <p className="text-sky-700 dark:text-slate-400">
+          <h2 className="text-2xl font-bold text-foregroundPrimary mb-2">Request Overview</h2>
+          <p className="text-foregroundSecondary">
             Monitor and manage shift requests across all events
           </p>
         </div>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
+          <Card className="bg-background rounded-2xl shadow-lg border border-border">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-slate-400">Pending</p>
-                  <p className="text-3xl font-bold text-amber-600 dark:text-amber-400 mt-2">
+                  <p className="text-sm font-medium text-foregroundSecondary">Pending</p>
+                  <p className="text-3xl font-bold text-yellow mt-2">
                     {data.stats.pending}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                <div className="w-12 h-12 bg-yellow/10 rounded-full flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-yellow" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-background rounded-2xl shadow-lg border border-border">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-slate-400">Today</p>
-                  <p className="text-3xl font-bold text-sky-600 dark:text-sky-400 mt-2">
+                  <p className="text-sm font-medium text-foregroundSecondary">Today</p>
+                  <p className="text-3xl font-bold text-blue mt-2">
                     {data.stats.today}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-sky-100 dark:bg-sky-900/30 rounded-full flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-sky-600 dark:text-sky-400" />
+                <div className="w-12 h-12 bg-blue/10 rounded-full flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-blue" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-background rounded-2xl shadow-lg border border-border">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-slate-400">This Week</p>
-                  <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">
+                  <p className="text-sm font-medium text-foregroundSecondary">This Week</p>
+                  <p className="text-3xl font-bold text-purple mt-2">
                     {data.stats.week}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                <div className="w-12 h-12 bg-purple/10 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-purple" />
                 </div>
               </div>
             </CardContent>
@@ -245,18 +245,18 @@ export default function ShiftRequestsDashboard() {
         </div>
 
         {/* Events with Pending Requests */}
-        <Card className="mb-8">
+        <Card className="bg-background rounded-2xl shadow-lg border border-border mb-8">
           <CardHeader>
-            <CardTitle>Events with Pending Requests</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-foregroundPrimary">Events with Pending Requests</CardTitle>
+            <CardDescription className="text-foregroundSecondary">
               Click on an event to view and manage its shift requests
             </CardDescription>
           </CardHeader>
           <CardContent>
             {data.eventsWithRequests.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <CheckCircle className="w-12 h-12 text-green-500 mb-4" />
-                <p className="text-gray-600 dark:text-slate-400 text-center">
+                <CheckCircle className="w-12 h-12 text-green mb-4" />
+                <p className="text-foregroundSecondary text-center">
                   All caught up! No pending requests at the moment.
                 </p>
               </div>
@@ -268,15 +268,15 @@ export default function ShiftRequestsDashboard() {
                     href={`/admin/events/${event.id}?tab=requests`}
                     className="block"
                   >
-                    <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-slate-800 rounded-lg border border-amber-100 dark:border-slate-700 hover:border-amber-300 dark:hover:border-slate-600 transition-colors group">
+                    <div className="flex items-center justify-between p-4 bg-backgroundSecondary rounded-2xl border border-border hover:border-yellow/40 transition-colors group">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <Calendar className="w-5 h-5 text-sky-600 dark:text-sky-400" />
-                          <h3 className="font-semibold text-sky-900 dark:text-white group-hover:text-sky-700 dark:group-hover:text-sky-300">
+                          <Calendar className="w-5 h-5 text-blue" />
+                          <h3 className="font-semibold text-foregroundPrimary group-hover:text-blue transition-colors">
                             {event.name}
                           </h3>
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-slate-400">
+                        <div className="flex items-center gap-4 text-sm text-foregroundSecondary">
                           <span>
                             {formatDate(event.startDate)} - {formatDate(event.endDate)}
                           </span>
@@ -285,11 +285,11 @@ export default function ShiftRequestsDashboard() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
-                          <span className="px-3 py-1 bg-amber-500 text-white text-sm font-medium rounded-full">
+                          <span className="px-3 py-1 bg-yellow text-white text-sm font-medium rounded-full">
                             {event._count.shiftRequests} pending
                           </span>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" />
+                        <ChevronRight className="w-5 h-5 text-foregroundTertiary group-hover:text-foregroundSecondary transition-colors" />
                       </div>
                     </div>
                   </Link>
@@ -300,25 +300,25 @@ export default function ShiftRequestsDashboard() {
         </Card>
 
         {/* Recent Activity */}
-        <Card>
+        <Card className="bg-background rounded-2xl shadow-lg border border-border">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-foregroundPrimary">Recent Activity</CardTitle>
+            <CardDescription className="text-foregroundSecondary">
               Last 10 processed requests across all events
             </CardDescription>
           </CardHeader>
           <CardContent>
             {data.recentActivity.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <AlertCircle className="w-12 h-12 text-gray-400 mb-4" />
-                <p className="text-gray-600 dark:text-slate-400">No recent activity</p>
+                <AlertCircle className="w-12 h-12 text-foregroundTertiary mb-4" />
+                <p className="text-foregroundSecondary">No recent activity</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {data.recentActivity.map((activity) => (
                   <div
                     key={activity.id}
-                    className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-lg"
+                    className="flex items-start gap-3 p-4 bg-backgroundSecondary rounded-2xl border border-border"
                   >
                     <div className="text-2xl mt-1">{getTypeIcon(activity.type)}</div>
                     <div className="flex-1 min-w-0">
@@ -326,21 +326,21 @@ export default function ShiftRequestsDashboard() {
                         <span className={`font-medium ${getStatusColor(activity.status)}`}>
                           {activity.status}
                         </span>
-                        <span className="text-sm text-gray-500 dark:text-slate-500">•</span>
-                        <span className="text-sm text-gray-600 dark:text-slate-400">
+                        <span className="text-sm text-foregroundTertiary">•</span>
+                        <span className="text-sm text-foregroundSecondary">
                           {activity.type}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-900 dark:text-white mb-1">
+                      <p className="text-sm text-foregroundPrimary mb-1">
                         <span className="font-medium">{activity.shift.title}</span> -{' '}
                         <Link
                           href={`/admin/events/${activity.shift.event.id}`}
-                          className="text-sky-600 dark:text-sky-400 hover:underline"
+                          className="text-blue hover:underline"
                         >
                           {activity.shift.event.name}
                         </Link>
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-slate-500">
+                      <p className="text-xs text-foregroundTertiary">
                         Requested by {activity.requester.name || activity.requester.email} •{' '}
                         {activity.status.toLowerCase()} by{' '}
                         {activity.reviewer?.name || 'Admin'} •{' '}

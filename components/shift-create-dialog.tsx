@@ -144,7 +144,7 @@ export default function ShiftCreateDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-card rounded-2xl max-w-lg w-full shadow-2xl border border-border max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-card z-10">
           <h2 className="text-xl font-bold text-card-foreground">Create Shift</h2>
@@ -226,7 +226,7 @@ export default function ShiftCreateDialog({
           {/* Responsible Person */}
           <div className="space-y-2">
             <Label htmlFor="responsible" className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-amber-500" />
+              <Star className="w-4 h-4 text-yellow" />
               Responsible Person (optional)
             </Label>
             <Select
@@ -252,7 +252,7 @@ export default function ShiftCreateDialog({
               </SelectContent>
             </Select>
             {availabilityWarning && (
-              <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2 rounded border border-amber-200 dark:border-amber-800">
+              <div className="text-xs text-yellow bg-backgroundSecondary/20 p-2 rounded border border-border">
                 Warning: {availabilityWarning}
               </div>
             )}
@@ -280,7 +280,7 @@ export default function ShiftCreateDialog({
                       <button
                         type="button"
                         onClick={() => handleRemoveHelper(userId)}
-                        className="ml-1 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full p-0.5"
+                        className="ml-1 hover:bg-backgroundTertiary rounded-full p-0.5"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -318,7 +318,7 @@ export default function ShiftCreateDialog({
             )}
 
             {crew.length === 0 && (
-              <p className="text-xs text-amber-600 dark:text-amber-400">
+              <p className="text-xs text-yellow">
                 No crew assigned to this event yet. Add crew members first.
               </p>
             )}
@@ -337,7 +337,7 @@ export default function ShiftCreateDialog({
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-amber-500 hover:bg-orange-600"
+              className="flex-1 bg-backgroundSecondary hover:bg-yellow"
             >
               {loading ? (
                 <>

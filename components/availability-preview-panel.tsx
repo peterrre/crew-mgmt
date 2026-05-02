@@ -88,13 +88,13 @@ export default function AvailabilityPreviewPanel({
 
   if (loading) {
     return (
-      <div className="w-64 border-l border-gray-200 dark:border-slate-700 p-4 bg-gray-50 dark:bg-slate-900">
-        <h4 className="font-semibold text-sm mb-3 text-gray-900 dark:text-white flex items-center gap-2">
+      <div className="w-64 border-l border-border p-4 bg-backgroundSecondary">
+        <h4 className="font-semibold text-sm mb-3 text-foregroundPrimary flex items-center gap-2">
           <Calendar className="w-4 h-4" />
           Available Shifts
         </h4>
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+          <Loader2 className="w-5 h-5 animate-spin text-foregroundTertiary" />
         </div>
       </div>
     );
@@ -103,21 +103,21 @@ export default function AvailabilityPreviewPanel({
   const totalShifts = shifts.length;
 
   return (
-    <div className="w-64 border-l border-gray-200 dark:border-slate-700 p-4 bg-gray-50 dark:bg-slate-900 overflow-y-auto">
-      <h4 className="font-semibold text-sm mb-3 text-gray-900 dark:text-white flex items-center gap-2">
+    <div className="w-64 border-l border-border p-4 bg-backgroundSecondary overflow-y-auto">
+      <h4 className="font-semibold text-sm mb-3 text-foregroundPrimary flex items-center gap-2">
         <Calendar className="w-4 h-4" />
         Available Shifts
       </h4>
 
       {totalShifts === 0 ? (
-        <p className="text-gray-500 dark:text-slate-400 text-sm">
+        <p className="text-foregroundTertiary text-sm">
           No unassigned shifts available
         </p>
       ) : (
         <div className="space-y-3">
           {matchingShifts.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-green-600 dark:text-green-400 mb-2 flex items-center gap-1">
+              <p className="text-xs font-medium text-green mb-2 flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3" />
                 {matchingShifts.length} matching your availability
               </p>
@@ -125,17 +125,17 @@ export default function AvailabilityPreviewPanel({
                 {matchingShifts.slice(0, 5).map((shift) => (
                   <div
                     key={shift.id}
-                    className="bg-green-50 dark:bg-green-900/30 rounded-lg p-3 border border-green-300 dark:border-green-700"
+                    className="bg-green/10 rounded-lg p-3 border border-green/30"
                   >
-                    <p className="font-medium text-sm text-gray-900 dark:text-white truncate">
+                    <p className="font-medium text-sm text-foregroundPrimary truncate">
                       {shift.title}
                     </p>
                     {shift.event?.name && (
-                      <p className="text-xs text-gray-500 dark:text-slate-400 truncate">
+                      <p className="text-xs text-foregroundTertiary truncate">
                         {shift.event.name}
                       </p>
                     )}
-                    <div className="flex items-center gap-1 mt-1 text-xs text-gray-600 dark:text-slate-400">
+                    <div className="flex items-center gap-1 mt-1 text-xs text-foregroundSecondary">
                       <Clock className="w-3 h-3" />
                       {format(new Date(shift.start), "MMM d, HH:mm")} -{" "}
                       {format(new Date(shift.end), "HH:mm")}
@@ -148,7 +148,7 @@ export default function AvailabilityPreviewPanel({
 
           {nonMatchingShifts.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-2">
+              <p className="text-xs font-medium text-foregroundTertiary mb-2">
                 {availability.length === 0 ? "All" : "Other"} open shifts (
                 {nonMatchingShifts.length})
               </p>
@@ -158,17 +158,17 @@ export default function AvailabilityPreviewPanel({
                   .map((shift) => (
                     <div
                       key={shift.id}
-                      className="bg-gray-100 dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700 opacity-75"
+                      className="bg-backgroundSecondary rounded-lg p-3 border border-border opacity-75"
                     >
-                      <p className="font-medium text-sm text-gray-700 dark:text-slate-300 truncate">
+                      <p className="font-medium text-sm text-foregroundSecondary truncate">
                         {shift.title}
                       </p>
                       {shift.event?.name && (
-                        <p className="text-xs text-gray-500 dark:text-slate-400 truncate">
+                        <p className="text-xs text-foregroundTertiary truncate">
                           {shift.event.name}
                         </p>
                       )}
-                      <div className="flex items-center gap-1 mt-1 text-xs text-gray-500 dark:text-slate-500">
+                      <div className="flex items-center gap-1 mt-1 text-xs text-foregroundTertiary">
                         <Clock className="w-3 h-3" />
                         {format(new Date(shift.start), "MMM d, HH:mm")} -{" "}
                         {format(new Date(shift.end), "HH:mm")}
@@ -177,7 +177,7 @@ export default function AvailabilityPreviewPanel({
                   ))}
                 {nonMatchingShifts.length >
                   (matchingShifts.length > 0 ? 3 : 8) && (
-                  <p className="text-xs text-gray-400 dark:text-slate-500 text-center">
+                  <p className="text-xs text-foregroundTertiary text-center">
                     +
                     {nonMatchingShifts.length -
                       (matchingShifts.length > 0 ? 3 : 8)}{" "}
@@ -189,7 +189,7 @@ export default function AvailabilityPreviewPanel({
           )}
 
           {availability.length === 0 && (
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+            <p className="text-xs text-blue mt-2">
               Add availability to see which shifts match
             </p>
           )}
