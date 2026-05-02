@@ -3,11 +3,13 @@
 import { SessionProvider } from 'next-auth/react';
 import { ThemeProvider } from 'next-themes';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { AnimatePresence } from 'framer-motion';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
@@ -22,7 +24,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <SessionProvider>
         <TooltipProvider delayDuration={300}>
           <AnimatePresence mode="wait">
-            {children}
+            <div key={pathname}>{children}</div>
           </AnimatePresence>
         </TooltipProvider>
       </SessionProvider>

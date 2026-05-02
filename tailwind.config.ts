@@ -9,18 +9,57 @@ import {
   zIndex,
 } from "./styles/tokens";
 
-const colors = Object.fromEntries(
-  Object.entries(allColors).filter(
-    ([key]) =>
-      ![
-        "shadow",
-        "shadowMedium",
-        "shadowLarge",
-        "gradientPrimary",
-        "gradientSecondary",
-      ].includes(key),
+const semanticColors = {
+  background: "hsl(var(--background))",
+  foreground: "hsl(var(--foreground))",
+  card: {
+    DEFAULT: "hsl(var(--card))",
+    foreground: "hsl(var(--card-foreground))",
+  },
+  popover: {
+    DEFAULT: "hsl(var(--popover))",
+    foreground: "hsl(var(--popover-foreground))",
+  },
+  primary: {
+    DEFAULT: allColors.blue,
+    foreground: allColors.blueForeground,
+  },
+  secondary: {
+    DEFAULT: allColors.backgroundSecondary,
+    foreground: allColors.foregroundPrimary,
+  },
+  muted: {
+    DEFAULT: allColors.backgroundTertiary,
+    foreground: allColors.foregroundSecondary,
+  },
+  accent: {
+    DEFAULT: allColors.blue,
+    foreground: allColors.blueForeground,
+  },
+  destructive: {
+    DEFAULT: allColors.red,
+    foreground: allColors.redForeground,
+  },
+  border: allColors.border,
+  input: allColors.border,
+  ring: allColors.blue,
+};
+
+const colors = {
+  ...Object.fromEntries(
+    Object.entries(allColors).filter(
+      ([key]) =>
+        ![
+          "shadow",
+          "shadowMedium",
+          "shadowLarge",
+          "gradientPrimary",
+          "gradientSecondary",
+        ].includes(key),
+    ),
   ),
-);
+  ...semanticColors,
+};
 
 const config: Config = {
   darkMode: ["class"],

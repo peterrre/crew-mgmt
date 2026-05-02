@@ -258,7 +258,7 @@ export default function EventApplicationsManager({
           <TabsTrigger value="pending">
             Pending
             {pendingApplications.length > 0 && (
-              <Badge className="ml-2 bg-backgroundSecondary0">{pendingApplications.length}</Badge>
+              <Badge className="ml-2 bg-backgroundSecondary">{pendingApplications.length}</Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="processed">Processed ({processedApplications.length})</TabsTrigger>

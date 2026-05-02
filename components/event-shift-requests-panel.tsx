@@ -121,7 +121,7 @@ export default function EventShiftRequestsPanel({
             Shift Requests
           </h3>
           {pendingRequests.length > 0 && (
-            <span className="px-2 py-1 bg-backgroundSecondary0 text-white text-xs font-medium rounded-full">
+            <span className="px-2 py-1 bg-backgroundSecondary text-white text-xs font-medium rounded-full">
               {pendingRequests.length} pending
             </span>
           )}

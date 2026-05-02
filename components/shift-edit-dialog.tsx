@@ -173,7 +173,7 @@ export default function ShiftEditDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50/70 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-card rounded-2xl max-w-lg w-full shadow-2xl border border-border max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-card z-10">
           <h2 className="text-xl font-bold text-card-foreground">Edit Shift</h2>
@@ -298,7 +298,7 @@ export default function ShiftEditDialog({
               <Button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-backgroundSecondary0 hover:bg-yellow"
+                className="flex-1 bg-backgroundSecondary hover:bg-yellow"
               >
                 {loading ? (
                   <>

@@ -67,11 +67,17 @@ export default function EditEventPage({ params }: EditEventPageProps) {
     )
   }
 
+  const toLocalDateTimeInputValue = (dateValue: Date | string | null | undefined) => {
+    const date = dateValue ? new Date(dateValue) : null
+    if (!date || isNaN(date.getTime())) return ''
+    return date.toISOString().slice(0, 16)
+  }
+
   const initialData = {
     name: event.name,
     description: event.description || '',
-    startDate: new Date(event.startDate).toISOString().slice(0, 16),
-    endDate: new Date(event.endDate).toISOString().slice(0, 16),
+    startDate: toLocalDateTimeInputValue(event.startDate),
+    endDate: toLocalDateTimeInputValue(event.endDate),
     location: event.location || '',
     contactPersonId: event.contactPersonId || '',
     acceptingVolunteers: event.acceptingVolunteers,

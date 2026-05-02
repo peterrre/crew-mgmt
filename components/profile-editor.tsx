@@ -81,7 +81,7 @@ export default function ProfileEditor() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-backgroundSecondary to-background">
-      <header className="sticky top-0 z-50 bg-backgroundSecondary/80/80 backdrop-blur-md border-b border-border shadow-sm">
+      <header className="sticky top-0 z-50 bg-backgroundSecondary/80 backdrop-blur-md border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center space-x-2 text-blue hover:text-foregroundPrimary">
@@ -174,7 +174,7 @@ export default function ProfileEditor() {
             </div>
 
             {error && (
-              <div className="text-sm text-red bg-red/10/30 p-3 rounded-lg">{error}</div>
+              <div className="text-sm text-red bg-red/10 p-3 rounded-lg">{error}</div>
             )}
 
             {success && (
@@ -185,7 +185,7 @@ export default function ProfileEditor() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-backgroundSecondary0 hover:bg-yellow"
+                className="w-full bg-backgroundSecondary hover:bg-yellow"
               >
                 {loading ? (
                   <>

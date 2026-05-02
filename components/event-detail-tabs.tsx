@@ -67,7 +67,7 @@ export default function EventDetailTabs({ event }: EventDetailTabsProps) {
           <FileText className="w-4 h-4" />
           Requests
           {pendingRequestsCount > 0 && (
-            <span className="ml-1 px-2 py-0.5 bg-backgroundSecondary0 text-white text-xs font-medium rounded-full">
+              <span className="ml-1 px-2 py-0.5 bg-backgroundSecondary text-white text-xs font-medium rounded-full">
               {pendingRequestsCount}
             </span>
           )}
