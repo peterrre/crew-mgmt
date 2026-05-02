@@ -59,7 +59,7 @@ export const AssignmentPanel = ({
     } finally {
       setLoadingUsers(false);
     }
-  }, [isAdmin, isCrew, shiftId]);
+  }, [isAdmin, isCrew]);
 
   useEffect(() => {
     if (isAdmin || isCrew) {

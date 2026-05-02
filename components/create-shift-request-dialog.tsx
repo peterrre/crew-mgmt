@@ -115,7 +115,7 @@ export default function CreateShiftRequestDialog({
     } finally {
       setLoadingHelpers(false);
     }
-}, [shift?.id]);
+  }, [shift]);
 
   useEffect(() => {
     if (requestType === 'SWAP') {

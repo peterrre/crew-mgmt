@@ -58,13 +58,6 @@ interface ShiftEditDialogProps {
   checkHelperAvailability: (userId: string, shiftStart: Date, shiftEnd: Date) => boolean;
 }
 
-interface AuthUser {
-  id: string;
-  role: string;
-  name?: string | null;
-  email?: string | null;
-}
-
 export default function ShiftEditDialog({
   shift,
   crew,
