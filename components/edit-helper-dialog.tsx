@@ -12,7 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { X, Loader2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Loader2 } from 'lucide-react';
+import { Role } from '@/lib/role';
+import { toast } from 'sonner';
 
 interface Helper {
   id: string;
@@ -24,7 +34,7 @@ interface Helper {
 }
 
 interface EditHelperDialogProps {
-  helper: Helper;
+  helper: Helper | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -36,22 +46,23 @@ export default function EditHelperDialog({
 }: EditHelperDialogProps) {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [serverError, setServerError] = useState('');
   const [formData, setFormData] = useState({
-    name: helper.name || '',
-    role: helper.role,
+    name: helper?.name || '',
+    role: helper?.role || Role.VOLUNTEER,
     password: '',
     availability: helper?.availability?.join(', ') || '',
   });
 
-  const isAdmin = (session?.user as any)?.role === 'ADMIN';
-  const isOwnProfile = (session?.user as any)?.id === helper.id;
+  const isAdmin = (session?.user as any)?.role === Role.ADMIN;
+  const isOwnProfile = (session?.user as any)?.id === helper?.id;
   const canEditName = isAdmin || isOwnProfile;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!helper) return;
     setLoading(true);
-    setError('');
+    setServerError('');
 
     try {
       const updateData: any = { role: formData.role };
@@ -64,7 +75,7 @@ export default function EditHelperDialog({
         updateData.password = formData.password;
       }
 
-      if (formData.role === 'VOLUNTEER') {
+      if (formData.role === Role.VOLUNTEER) {
         updateData.availability = formData.availability
           ? formData.availability.split(',').map((s) => s.trim())
           : [];
@@ -79,76 +90,87 @@ export default function EditHelperDialog({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Failed to update helper');
+        const msg = data.error || 'Failed to update helper';
+        setServerError(msg);
+        toast.error(msg);
         return;
       }
 
+      toast.success('Helfer aktualisiert');
       onSuccess();
     } catch (err) {
-      setError('Something went wrong');
+      const msg = 'Something went wrong';
+      setServerError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-2xl max-w-md w-full shadow-2xl border">
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-xl font-bold text-card-foreground">Edit Helper</h2>
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setServerError('');
+      onClose();
+    }
+  };
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+  if (!helper) return null;
+
+  return (
+    <Dialog open={!!helper} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit Helper</DialogTitle>
+          <DialogDescription>Update helper information</DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="edit-name">Name</Label>
             {canEditName ? (
               <Input
-                id="name"
+                id="edit-name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="h-11 rounded-xl border-border bg-backgroundSecondary/60 transition-all duration-200 focus:ring-2 focus:ring-blue/30 focus:border-blue"
                 placeholder="Enter name"
               />
             ) : (
-              <p className="text-sm text-muted-foreground">{helper?.name || 'Unnamed'}</p>
+              <p className="text-sm text-foregroundSecondary">{helper?.name || 'Unnamed'}</p>
             )}
           </div>
 
           <div className="space-y-2">
             <Label>Email</Label>
-            <p className="text-sm text-muted-foreground">{helper?.email}</p>
+            <p className="text-sm text-foregroundSecondary">{helper?.email}</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
+            <Label htmlFor="edit-role">Role</Label>
             <Select
               value={formData.role}
               onValueChange={(value) => setFormData({ ...formData, role: value })}
               disabled={!isAdmin}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-11 rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ADMIN">Admin</SelectItem>
-                <SelectItem value="CREW">Crew</SelectItem>
-                <SelectItem value="VOLUNTEER">Volunteer</SelectItem>
+                <SelectItem value={Role.ADMIN}>Admin</SelectItem>
+                <SelectItem value={Role.CREW}>Crew</SelectItem>
+                <SelectItem value={Role.VOLUNTEER}>Volunteer</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">New Password (optional)</Label>
+            <Label htmlFor="edit-password">New Password (optional)</Label>
             <Input
-              id="password"
+              id="edit-password"
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="h-11 rounded-xl border-border bg-backgroundSecondary/60 transition-all duration-200 focus:ring-2 focus:ring-blue/30 focus:border-blue"
               placeholder="Leave blank to keep current"
               minLength={6}
             />
@@ -159,9 +181,9 @@ export default function EditHelperDialog({
               {helper?.availabilitySlots?.length > 0 && (
                 <div className="space-y-2">
                   <Label>Current Availability Times</Label>
-                  <div className="border rounded-lg overflow-hidden">
+                  <div className="border rounded-xl overflow-hidden">
                     <table className="w-full text-sm">
-                      <thead className="bg-muted">
+                      <thead className="bg-backgroundSecondary">
                         <tr>
                           <th className="px-3 py-2 text-left">Date</th>
                           <th className="px-3 py-2 text-left">Start</th>
@@ -171,7 +193,7 @@ export default function EditHelperDialog({
                       </thead>
                       <tbody>
                         {helper.availabilitySlots.map((slot: any, index: number) => (
-                          <tr key={index} className="border-t">
+                          <tr key={index} className="border-t border-border/30">
                             <td className="px-3 py-2">{new Date(slot.start).toLocaleDateString()}</td>
                             <td className="px-3 py-2">{new Date(slot.start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
                             <td className="px-3 py-2">{new Date(slot.end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</td>
@@ -184,25 +206,26 @@ export default function EditHelperDialog({
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="availability">Availability</Label>
+                <Label htmlFor="edit-availability">Availability</Label>
                 <Input
-                  id="availability"
+                  id="edit-availability"
                   value={formData.availability}
-                  onChange={(e) =>
-                    setFormData({ ...formData, availability: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, availability: e.target.value })}
+                  className="h-11 rounded-xl border-border bg-backgroundSecondary/60 transition-all duration-200 focus:ring-2 focus:ring-blue/30 focus:border-blue"
                   placeholder="e.g., Weekends, Evenings"
                 />
-                <p className="text-xs text-muted-foreground">Separate with commas</p>
+                <p className="text-xs text-foregroundTertiary">Separate with commas</p>
               </div>
             </>
           )}
 
-          {error && (
-            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">{error}</div>
+          {serverError && (
+            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-xl border border-destructive/20">
+              {serverError}
+            </div>
           )}
 
-          <div className="flex space-x-3 pt-4">
+          <DialogFooter className="gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
@@ -214,7 +237,7 @@ export default function EditHelperDialog({
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-amber-500 hover:bg-orange-600"
+              className="flex-1 bg-blue hover:bg-blue/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -225,9 +248,9 @@ export default function EditHelperDialog({
                 'Save Changes'
               )}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

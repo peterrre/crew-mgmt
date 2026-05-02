@@ -73,24 +73,24 @@ export default function EventShiftRequestsPanel({
   const getTypeBadgeColor = (type: string) => {
     switch (type) {
       case 'CANCEL':
-        return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+        return 'bg-red/10 text-red/30';
       case 'SWAP':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+        return 'bg-blue/10 text-blue/30';
       case 'MODIFY':
-        return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+        return 'bg-yellow/10 text-yellow/30';
       default:
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+        return 'bg-backgroundSecondary text-foregroundSecondary';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return <Clock className="w-4 h-4 text-amber-500" />;
+        return <Clock className="w-4 h-4 text-yellow" />;
       case 'APPROVED':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-green" />;
       case 'REJECTED':
-        return <XCircle className="w-4 h-4 text-red-500" />;
+        return <XCircle className="w-4 h-4 text-red" />;
       default:
         return null;
     }
@@ -110,33 +110,33 @@ export default function EventShiftRequestsPanel({
   }
 
   return (
-    <div className="mb-6 bg-white dark:bg-slate-800 rounded-xl border border-amber-100 dark:border-slate-700 overflow-hidden">
+    <div className="mb-6 bg-background rounded-xl border border-border overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-backgroundSecondary/50 transition-colors"
       >
         <div className="flex items-center space-x-3">
-          <AlertCircle className="w-5 h-5 text-amber-500" />
-          <h3 className="font-semibold text-sky-900 dark:text-white">
+          <AlertCircle className="w-5 h-5 text-yellow" />
+          <h3 className="font-semibold text-foregroundPrimary">
             Shift Requests
           </h3>
           {pendingRequests.length > 0 && (
-            <span className="px-2 py-1 bg-amber-500 text-white text-xs font-medium rounded-full">
+            <span className="px-2 py-1 bg-backgroundSecondary text-white text-xs font-medium rounded-full">
               {pendingRequests.length} pending
             </span>
           )}
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-5 h-5 text-gray-500" />
+          <ChevronUp className="w-5 h-5 text-foregroundTertiary" />
         ) : (
-          <ChevronDown className="w-5 h-5 text-gray-500" />
+          <ChevronDown className="w-5 h-5 text-foregroundTertiary" />
         )}
       </button>
 
       {isExpanded && (
         <div className="p-4 pt-0 space-y-4">
           {pendingRequests.length === 0 && recentRequests.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">
+            <p className="text-sm text-foregroundTertiary py-4 text-center">
               No shift requests for this event
             </p>
           ) : (
@@ -144,13 +144,13 @@ export default function EventShiftRequestsPanel({
               {/* Pending Requests */}
               {pendingRequests.length > 0 && (
                 <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <h4 className="text-sm font-medium text-foregroundSecondary">
                     Pending Approval
                   </h4>
                   {pendingRequests.map((request) => (
                     <div
                       key={request.id}
-                      className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4"
+                      className="bg-backgroundSecondary/20 border border-border rounded-lg p-4"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
@@ -158,11 +158,11 @@ export default function EventShiftRequestsPanel({
                             <span className={`px-2 py-0.5 rounded text-xs font-medium ${getTypeBadgeColor(request.type)}`}>
                               {request.type}
                             </span>
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            <span className="text-sm font-medium text-foregroundPrimary">
                               {request.shift.title}
                             </span>
                           </div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                          <p className="text-xs text-foregroundSecondary">
                             {formatDateTime(request.shift.start)} - {formatDateTime(request.shift.end)}
                           </p>
                         </div>
@@ -171,7 +171,7 @@ export default function EventShiftRequestsPanel({
                             size="sm"
                             onClick={() => handleApprove(request.id)}
                             disabled={processingId === request.id}
-                            className="bg-green-600 hover:bg-green-700 text-white"
+                            className="bg-green hover:bg-green/80 text-greenForeground"
                           >
                             Approve
                           </Button>
@@ -180,7 +180,7 @@ export default function EventShiftRequestsPanel({
                             variant="outline"
                             onClick={() => handleReject(request.id)}
                             disabled={processingId === request.id}
-                            className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
+                            className="border-red/30 text-red hover:bg-red/10"
                           >
                             Reject
                           </Button>
@@ -189,16 +189,16 @@ export default function EventShiftRequestsPanel({
 
                       <div className="space-y-1">
                         <div className="flex items-start space-x-2 text-sm">
-                          <span className="text-gray-500 dark:text-gray-400 font-medium">Requested by:</span>
-                          <span className="text-gray-700 dark:text-gray-300">
+                          <span className="text-foregroundTertiary font-medium">Requested by:</span>
+                          <span className="text-foregroundSecondary">
                             {request.requester.name || request.requester.email}
                           </span>
                         </div>
 
                         {request.type === 'SWAP' && request.newHelper && (
                           <div className="flex items-start space-x-2 text-sm">
-                            <span className="text-gray-500 dark:text-gray-400 font-medium">Swap with:</span>
-                            <span className="text-gray-700 dark:text-gray-300">
+                            <span className="text-foregroundTertiary font-medium">Swap with:</span>
+                            <span className="text-foregroundSecondary">
                               {request.newHelper.name || request.newHelper.email}
                             </span>
                           </div>
@@ -206,8 +206,8 @@ export default function EventShiftRequestsPanel({
 
                         {request.type === 'MODIFY' && request.newStart && request.newEnd && (
                           <div className="flex items-start space-x-2 text-sm">
-                            <span className="text-gray-500 dark:text-gray-400 font-medium">New time:</span>
-                            <span className="text-gray-700 dark:text-gray-300">
+                            <span className="text-foregroundTertiary font-medium">New time:</span>
+                            <span className="text-foregroundSecondary">
                               {formatDateTime(request.newStart)} - {formatDateTime(request.newEnd)}
                             </span>
                           </div>
@@ -215,8 +215,8 @@ export default function EventShiftRequestsPanel({
 
                         {request.reason && (
                           <div className="flex items-start space-x-2 text-sm">
-                            <span className="text-gray-500 dark:text-gray-400 font-medium">Reason:</span>
-                            <span className="text-gray-700 dark:text-gray-300">{request.reason}</span>
+                            <span className="text-foregroundTertiary font-medium">Reason:</span>
+                            <span className="text-foregroundSecondary">{request.reason}</span>
                           </div>
                         )}
                       </div>
@@ -227,14 +227,14 @@ export default function EventShiftRequestsPanel({
 
               {/* Recent Processed Requests */}
               {recentRequests.length > 0 && (
-                <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="space-y-3 pt-4 border-t border-border">
+                  <h4 className="text-sm font-medium text-foregroundSecondary">
                     Recently Processed
                   </h4>
                   {recentRequests.map((request) => (
                     <div
                       key={request.id}
-                      className="bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-lg p-3"
+                      className="bg-backgroundSecondary/50 border border-border rounded-lg p-3"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -243,11 +243,11 @@ export default function EventShiftRequestsPanel({
                             <span className={`px-2 py-0.5 rounded text-xs font-medium ${getTypeBadgeColor(request.type)}`}>
                               {request.type}
                             </span>
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                            <span className="text-sm font-medium text-foregroundPrimary">
                               {request.shift.title}
                             </span>
                           </div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                          <p className="text-xs text-foregroundSecondary">
                             {request.status} by {request.reviewer?.name || 'Admin'}
                           </p>
                         </div>

@@ -12,7 +12,8 @@ export function ThemeToggle() {
       variant="ghost"
       size="sm"
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="text-sky-700 hover:text-sky-900 dark:text-amber-400 dark:hover:text-amber-300"
+      className="text-foregroundSecondary hover:text-foregroundPrimary"
+      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {theme === 'dark' ? (
         <Sun className="w-5 h-5" />

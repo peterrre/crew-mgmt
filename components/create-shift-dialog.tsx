@@ -11,7 +11,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { X, Loader2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { cn } from '@/lib/utils';
+import { FormFieldMessage } from '@/components/ui/form-fields';
+import { toast } from 'sonner';
 
 interface Helper {
   id: string;
@@ -21,19 +35,30 @@ interface Helper {
   availability: string[];
 }
 
+const shiftSchema = z.object({
+  title: z.string().min(1, { message: 'Shift title is required' }),
+  start: z.string().min(1, { message: 'Start time is required' }),
+  end: z.string().min(1, { message: 'End time is required' }),
+  helperId: z.string().default('unassigned'),
+});
+
+type ShiftFormValues = z.infer<typeof shiftSchema>;
+
 interface CreateShiftDialogProps {
+  open: boolean;
   selectedSlot: any;
   onClose: () => void;
   onSuccess: () => void;
 }
 
 export default function CreateShiftDialog({
+  open,
   selectedSlot,
   onClose,
   onSuccess,
 }: CreateShiftDialogProps) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [serverError, setServerError] = useState('');
   const [helpers, setHelpers] = useState<Helper[]>([]);
 
   const formatLocalDateTime = (date: Date) => {
@@ -46,12 +71,26 @@ export default function CreateShiftDialog({
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  const [formData, setFormData] = useState({
-    title: '',
-    start: selectedSlot?.start ? formatLocalDateTime(selectedSlot.start) : '',
-    end: selectedSlot?.end ? formatLocalDateTime(selectedSlot.end) : '',
-    helperId: 'unassigned',
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors, isValid },
+  } = useForm<ShiftFormValues>({
+    resolver: zodResolver(shiftSchema),
+    mode: 'onChange',
+    defaultValues: {
+      title: '',
+      start: selectedSlot?.start ? formatLocalDateTime(selectedSlot.start) : '',
+      end: selectedSlot?.end ? formatLocalDateTime(selectedSlot.end) : '',
+      helperId: 'unassigned',
+    },
   });
+
+  const selectedHelperId = watch('helperId');
+  const startValue = watch('start');
 
   useEffect(() => {
     fetchHelpers();
@@ -69,100 +108,118 @@ export default function CreateShiftDialog({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const selectedHelper = helpers.find((h) => h.id === selectedHelperId);
+  const showAvailabilityWarning =
+    selectedHelper?.role === 'VOLUNTEER' &&
+    selectedHelper?.availability?.length > 0 &&
+    startValue;
+
+  const onSubmit = async (data: ShiftFormValues) => {
     setLoading(true);
-    setError('');
+    setServerError('');
 
     try {
-      const helperIdToSend = formData.helperId === 'unassigned' || formData.helperId === '' ? null : formData.helperId;
+      const helperIdToSend =
+        data.helperId === 'unassigned' || data.helperId === '' ? null : data.helperId;
 
       const response = await fetch('/api/shifts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: formData.title,
-          start: new Date(formData.start).toISOString(),
-          end: new Date(formData.end).toISOString(),
+          title: data.title,
+          start: new Date(data.start).toISOString(),
+          end: new Date(data.end).toISOString(),
           helperId: helperIdToSend,
         }),
       });
 
-      const data = await response.json();
+      const responseData = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Failed to create shift');
+        const msg = responseData.error || 'Failed to create shift';
+        setServerError(msg);
+        toast.error(msg);
         return;
       }
 
+      toast.success('Shift created successfully');
+      reset();
       onSuccess();
     } catch (err) {
-      setError('Something went wrong');
+      const msg = 'Something went wrong';
+      setServerError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  const selectedHelper = helpers.find((h) => h.id === formData.helperId);
-  const showAvailabilityWarning =
-    selectedHelper?.role === 'VOLUNTEER' &&
-    selectedHelper?.availability?.length > 0 &&
-    formData.start;
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      reset();
+      setServerError('');
+      onClose();
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-2xl max-w-md w-full shadow-2xl border border-border">
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-xl font-bold text-card-foreground">Create Shift</h2>
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Create Shift</DialogTitle>
+          <DialogDescription>Schedule a new shift for an event</DialogDescription>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="title">Shift Title</Label>
+            <Label htmlFor="shift-title">Shift Title</Label>
             <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
+              id="shift-title"
+              {...register('title')}
+              className={cn(
+                'h-11 rounded-xl border-border bg-backgroundSecondary/60 transition-all duration-200 focus:ring-2 focus:ring-blue/30 focus:border-blue',
+                errors.title ? 'border-destructive' : ''
+              )}
               placeholder="e.g., Stage Setup, Bar, Security"
             />
+            <FormFieldMessage message={errors.title?.message} type="error" />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="start">Start Time</Label>
+            <Label htmlFor="shift-start">Start Time</Label>
             <Input
-              id="start"
+              id="shift-start"
               type="datetime-local"
-              value={formData.start}
-              onChange={(e) => setFormData({ ...formData, start: e.target.value })}
-              required
+              {...register('start')}
+              className={cn(
+                'h-11 rounded-xl border-border bg-backgroundSecondary/60 transition-all duration-200 focus:ring-2 focus:ring-blue/30 focus:border-blue',
+                errors.start ? 'border-destructive' : ''
+              )}
             />
+            <FormFieldMessage message={errors.start?.message} type="error" />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="end">End Time</Label>
+            <Label htmlFor="shift-end">End Time</Label>
             <Input
-              id="end"
+              id="shift-end"
               type="datetime-local"
-              value={formData.end}
-              onChange={(e) => setFormData({ ...formData, end: e.target.value })}
-              required
+              {...register('end')}
+              className={cn(
+                'h-11 rounded-xl border-border bg-backgroundSecondary/60 transition-all duration-200 focus:ring-2 focus:ring-blue/30 focus:border-blue',
+                errors.end ? 'border-destructive' : ''
+              )}
             />
+            <FormFieldMessage message={errors.end?.message} type="error" />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="helper">Assign Helper (optional)</Label>
+            <Label htmlFor="shift-helper">Assign Helper (optional)</Label>
             <Select
-              value={formData.helperId}
-              onValueChange={(value) => setFormData({ ...formData, helperId: value })}
+              value={selectedHelperId}
+              onValueChange={(value) => setValue('helperId', value, { shouldValidate: true })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-11 rounded-xl">
                 <SelectValue placeholder="Select a helper" />
               </SelectTrigger>
               <SelectContent>
@@ -177,19 +234,21 @@ export default function CreateShiftDialog({
           </div>
 
           {showAvailabilityWarning && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-              <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">Availability Note:</p>
-              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+            <div className="bg-blue/10 border border-blue/20 rounded-xl p-3">
+              <p className="text-sm text-blue font-medium">Availability Note:</p>
+              <p className="text-xs text-blue mt-1">
                 {selectedHelper?.availability?.join(', ')}
               </p>
             </div>
           )}
 
-          {error && (
-            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg border border-destructive/20">{error}</div>
+          {serverError && (
+            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-xl border border-destructive/20">
+              {serverError}
+            </div>
           )}
 
-          <div className="flex space-x-3 pt-4">
+          <DialogFooter className="gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
@@ -200,8 +259,8 @@ export default function CreateShiftDialog({
             </Button>
             <Button
               type="submit"
-              disabled={loading}
-              className="flex-1 bg-amber-500 hover:bg-orange-600"
+              disabled={loading || !isValid}
+              className="flex-1 bg-blue hover:bg-blue/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -212,9 +271,9 @@ export default function CreateShiftDialog({
                 'Create Shift'
               )}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

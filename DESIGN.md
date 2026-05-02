@@ -18,18 +18,18 @@ The design system is built around a set of **design tokens** (colors, typography
 | `foregroundPrimary` | `#1D1D1F` | Primary text |
 | `foregroundSecondary` | `#6E6E73` | Secondary text, captions |
 | `foregroundTertiary` | `#AEAEB2` | Disabled text, placeholders |
-| `blue` | `#0A84FF` | Primary action, links |
+| `blue` | `#007AFF` | Primary action, links |
 | `blueForeground` | `#FFFFFF` | Text on blue background |
 | `green` | `#34C759` | Success, confirmation |
 | `greenForeground` | `#FFFFFF` | Text on green background |
 | `red` | `#FF3B30` | Error, destructive actions |
 | `redForeground` | `#FFFFFF` | Text on red background |
-| `yellow` | `#FF9F0A` | Warnings, highlights |
+| `yellow` | `#FF9500` | Warnings, highlights |
 | `yellowForeground` | `#FFFFFF` | Text on yellow background |
-| `purple` | `#BF5AF2` | Secondary accent, creative highlights |
+| `purple` | `#AF52DE` | Secondary accent, creative highlights |
 | `purpleForeground` | `#FFFFFF` | Text on purple background |
-| `orange` | `#FF9F0A` | (same as yellow) |
-| `orangeForeground` | `#FFFFFF` |  |
+| `orange` | `#FF9500` | (same as yellow) |
+| `orangeForeground` | `#FFFFFF` | |
 | `border` | `#E5E5EA` | Dividers, input borders |
 | `borderLight` | `#D2D2D7` | Subtle separators |
 | `separator` | `#C6C6C8` | Stronger dividers |

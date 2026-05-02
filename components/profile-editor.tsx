@@ -80,11 +80,11 @@ export default function ProfileEditor() {
   const userRole = (session?.user as any)?.role;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <header className="sticky top-0 z-50 bg-amber-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-amber-200 dark:border-slate-700 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-background via-backgroundSecondary to-background">
+      <header className="sticky top-0 z-50 bg-backgroundSecondary/80 backdrop-blur-md border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center space-x-2 text-sky-700 hover:text-sky-900 dark:text-sky-400 dark:hover:text-sky-300">
+            <Link href="/" className="flex items-center space-x-2 text-blue hover:text-foregroundPrimary">
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Dashboard</span>
             </Link>
@@ -93,24 +93,24 @@ export default function ProfileEditor() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main aria-label="Profile editor" className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-sky-900 dark:text-white mb-2">Edit Profile</h2>
-          <p className="text-sky-700 dark:text-slate-400">Update your personal information</p>
+          <h2 className="text-3xl font-bold text-foregroundPrimary mb-2">Edit Profile</h2>
+          <p className="text-blue">Update your personal information</p>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-amber-100 dark:border-slate-700 p-8">
-          <div className="flex items-center space-x-4 mb-8 pb-6 border-b border-gray-100 dark:border-slate-700">
-            <div className="w-16 h-16 bg-gradient-to-br from-sky-400 to-amber-400 rounded-full flex items-center justify-center">
+        <div className="bg-background rounded-2xl shadow-lg border border-border p-8">
+          <div className="flex items-center space-x-4 mb-8 pb-6 border-b border-border">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue to-yellow rounded-full flex items-center justify-center">
               <User className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{session?.user?.name || 'User'}</h3>
-              <div className="flex items-center space-x-2 text-gray-500 dark:text-slate-400">
+              <h3 className="text-xl font-semibold text-foregroundPrimary">{session?.user?.name || 'User'}</h3>
+              <div className="flex items-center space-x-2 text-foregroundTertiary">
                 <Mail className="w-4 h-4" />
                 <span>{session?.user?.email}</span>
               </div>
-              <div className="flex items-center space-x-2 text-gray-500 dark:text-slate-400 mt-1">
+              <div className="flex items-center space-x-2 text-foregroundTertiary mt-1">
                 <Shield className="w-4 h-4" />
                 <span className="capitalize">{userRole?.toLowerCase()}</span>
               </div>
@@ -119,34 +119,34 @@ export default function ProfileEditor() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name" className="dark:text-slate-200">Full Name</Label>
+              <Label htmlFor="name" className="">Full Name</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Enter your name"
-                className="dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                className="dark:bg-backgroundTertiary"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="dark:text-slate-200">Email</Label>
+              <Label htmlFor="email" className="">Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={session?.user?.email || ''}
                 disabled
-                className="bg-gray-50 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-400"
+                className="bg-backgroundSecondary"
               />
-              <p className="text-xs text-gray-500 dark:text-slate-500">Email cannot be changed</p>
+              <p className="text-xs text-foregroundTertiary">Email cannot be changed</p>
             </div>
 
-            <div className="border-t border-gray-100 dark:border-slate-700 pt-6">
-              <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Change Password</h4>
+            <div className="border-t border-border pt-6">
+              <h4 className="text-lg font-medium text-foregroundPrimary mb-4">Change Password</h4>
               
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="dark:text-slate-200">New Password</Label>
+                  <Label htmlFor="password" className="">New Password</Label>
                   <Input
                     id="password"
                     type="password"
@@ -154,12 +154,12 @@ export default function ProfileEditor() {
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder="Leave blank to keep current"
                     minLength={6}
-                    className="dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                    className="dark:bg-backgroundTertiary"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="dark:text-slate-200">Confirm New Password</Label>
+                  <Label htmlFor="confirmPassword" className="">Confirm New Password</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
@@ -167,25 +167,25 @@ export default function ProfileEditor() {
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     placeholder="Confirm new password"
                     minLength={6}
-                    className="dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                    className="dark:bg-backgroundTertiary"
                   />
                 </div>
               </div>
             </div>
 
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400 p-3 rounded-lg">{error}</div>
+              <div className="text-sm text-red bg-red/10 p-3 rounded-lg">{error}</div>
             )}
 
             {success && (
-              <div className="text-sm text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400 p-3 rounded-lg">{success}</div>
+              <div className="text-sm text-green bg-green/10 p-3 rounded-lg">{success}</div>
             )}
 
             <div className="pt-4">
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-amber-500 hover:bg-orange-600"
+                className="w-full bg-backgroundSecondary hover:bg-yellow"
               >
                 {loading ? (
                   <>

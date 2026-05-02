@@ -74,22 +74,22 @@ export default function HoursReport() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'ADMIN':
-        return 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300';
+        return 'bg-purple/10 text-purple';
       case 'CREW':
-        return 'bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300';
+        return 'bg-blue/10 text-blue';
       case 'VOLUNTEER':
-        return 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300';
+        return 'bg-yellow/10 text-yellow';
       default:
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
+        return 'bg-backgroundSecondary text-foregroundSecondary';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <header className="sticky top-0 z-50 bg-amber-50/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-amber-200 dark:border-slate-700 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-background via-backgroundSecondary to-background">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center space-x-2 text-sky-700 hover:text-sky-900 dark:text-sky-400 dark:hover:text-sky-300">
+            <Link href="/" className="flex items-center space-x-2 text-blue hover:text-blue">
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Dashboard</span>
             </Link>
@@ -100,74 +100,74 @@ export default function HoursReport() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-sky-900 dark:text-white mb-2">Hours Worked Report</h2>
-          <p className="text-sky-700 dark:text-slate-400">View total hours worked by each helper</p>
+          <h2 className="text-3xl font-bold text-foregroundPrimary mb-2">Hours Worked Report</h2>
+          <p className="text-foregroundSecondary">View total hours worked by each helper</p>
         </div>
 
         <div className="mb-6 flex flex-wrap gap-2">
           <Button
             variant={period === 'week' ? 'default' : 'outline'}
             onClick={() => setPeriod('week')}
-            className={period === 'week' ? 'bg-amber-500 hover:bg-orange-600' : 'dark:border-slate-600 dark:text-slate-300'}
+            className={period === 'week' ? 'bg-yellow hover:bg-yellow text-white' : 'border-border text-foregroundSecondary'}
           >
             This Week
           </Button>
           <Button
             variant={period === 'month' ? 'default' : 'outline'}
             onClick={() => setPeriod('month')}
-            className={period === 'month' ? 'bg-amber-500 hover:bg-orange-600' : 'dark:border-slate-600 dark:text-slate-300'}
+            className={period === 'month' ? 'bg-yellow hover:bg-yellow text-white' : 'border-border text-foregroundSecondary'}
           >
             This Month
           </Button>
           <Button
             variant={period === 'all' ? 'default' : 'outline'}
             onClick={() => setPeriod('all')}
-            className={period === 'all' ? 'bg-amber-500 hover:bg-orange-600' : 'dark:border-slate-600 dark:text-slate-300'}
+            className={period === 'all' ? 'bg-yellow hover:bg-yellow text-white' : 'border-border text-foregroundSecondary'}
           >
             All Time
           </Button>
           <Button
             variant={period === 'custom' ? 'default' : 'outline'}
             onClick={() => setPeriod('custom')}
-            className={period === 'custom' ? 'bg-amber-500 hover:bg-orange-600' : 'dark:border-slate-600 dark:text-slate-300'}
+            className={period === 'custom' ? 'bg-yellow hover:bg-yellow text-white' : 'border-border text-foregroundSecondary'}
           >
             Custom Range
           </Button>
         </div>
 
         {getDateRangeText() && (
-          <div className="mb-4 text-sm text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-slate-800 px-4 py-2 rounded-lg inline-block">
+          <div className="mb-4 text-sm text-blue bg-blue/10 px-4 py-2 rounded-lg inline-block">
             Showing data from: <span className="font-semibold">{getDateRangeText()}</span>
           </div>
         )}
 
         {period === 'custom' && (
-          <div className="mb-6 p-4 bg-white dark:bg-slate-800 rounded-xl border border-amber-100 dark:border-slate-700 shadow-sm">
+          <div className="mb-6 p-4 bg-background rounded-xl border border-border shadow-sm">
             <div className="flex flex-wrap items-end gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startDate" className="dark:text-slate-200">Start Date</Label>
+                <Label htmlFor="startDate">Start Date</Label>
                 <Input
                   id="startDate"
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-40 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                  className="w-40"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="endDate" className="dark:text-slate-200">End Date</Label>
+                <Label htmlFor="endDate">End Date</Label>
                 <Input
                   id="endDate"
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-40 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                  className="w-40"
                 />
               </div>
               <Button
                 onClick={handleCustomSearch}
                 disabled={!startDate || !endDate}
-                className="bg-amber-500 hover:bg-orange-600"
+                className="bg-yellow hover:bg-yellow text-white"
               >
                 Apply
               </Button>
@@ -175,33 +175,33 @@ export default function HoursReport() {
           </div>
         )}
 
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-amber-100 dark:border-slate-700 overflow-hidden">
+        <div className="bg-background rounded-2xl shadow-lg border border-border overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-gray-500 dark:text-slate-400">Loading...</div>
+            <div className="p-8 text-center text-foregroundTertiary">Loading...</div>
           ) : report.length === 0 ? (
-            <div className="p-8 text-center text-gray-500 dark:text-slate-400">No shifts found for this period</div>
+            <div className="p-8 text-center text-foregroundTertiary">No shifts found for this period</div>
           ) : (
             <>
               <table className="w-full">
-                <thead className="bg-sky-50 dark:bg-slate-700 border-b border-sky-100 dark:border-slate-600">
+                <thead className="bg-backgroundSecondary border-b border-border">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900 dark:text-white">#</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900 dark:text-white">Name</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-sky-900 dark:text-white">Role</th>
-                    <th className="px-6 py-4 text-right text-sm font-semibold text-sky-900 dark:text-white">Hours</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-foregroundPrimary">#</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-foregroundPrimary">Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-foregroundPrimary">Role</th>
+                    <th className="px-6 py-4 text-right text-sm font-semibold text-foregroundPrimary">Hours</th>
                   </tr>
                 </thead>
                 <tbody>
                   {report.map((entry, index) => (
-                    <tr key={entry.id} className="border-b border-gray-100 dark:border-slate-700 hover:bg-amber-50/50 dark:hover:bg-slate-700/50">
+                    <tr key={entry.id} className="border-b border-border hover:bg-backgroundSecondary/50">
                       <td className="px-6 py-4">
                         {index === 0 ? (
-                          <Trophy className="w-5 h-5 text-amber-500" />
+                          <Trophy className="w-5 h-5 text-yellow" />
                         ) : (
-                          <span className="text-gray-500 dark:text-slate-400">{index + 1}</span>
+                          <span className="text-foregroundTertiary">{index + 1}</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{entry.name}</td>
+                      <td className="px-6 py-4 font-medium text-foregroundPrimary">{entry.name}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(entry.role)}`}>
                           {entry.role}
@@ -209,32 +209,32 @@ export default function HoursReport() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Clock className="w-4 h-4 text-gray-400 dark:text-slate-500" />
-                          <span className="font-semibold text-gray-900 dark:text-white">{entry.hours}h</span>
+                          <Clock className="w-4 h-4 text-foregroundTertiary" />
+                          <span className="font-semibold text-foregroundPrimary">{entry.hours}h</span>
                         </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <div className="bg-sky-50 dark:bg-slate-700 border-t border-sky-100 dark:border-slate-600 px-6 py-4">
+              <div className="bg-backgroundSecondary border-t border-border px-6 py-4">
                 <div className="flex justify-between items-center">
                   <div className="flex gap-8">
                     <div>
-                      <span className="text-sm text-sky-700 dark:text-slate-300">Total Hours:</span>
-                      <span className="ml-2 font-bold text-sky-900 dark:text-white">
+                      <span className="text-sm text-foregroundSecondary">Total Hours:</span>
+                      <span className="ml-2 font-bold text-foregroundPrimary">
                         {Math.round(report.reduce((sum, entry) => sum + entry.hours, 0) * 100) / 100}h
                       </span>
                     </div>
                     <div>
-                      <span className="text-sm text-sky-700 dark:text-slate-300">Average per Helper:</span>
-                      <span className="ml-2 font-bold text-sky-900 dark:text-white">
+                      <span className="text-sm text-foregroundSecondary">Average per Helper:</span>
+                      <span className="ml-2 font-bold text-foregroundPrimary">
                         {Math.round((report.reduce((sum, entry) => sum + entry.hours, 0) / report.length) * 100) / 100}h
                       </span>
                     </div>
                     <div>
-                      <span className="text-sm text-sky-700 dark:text-slate-300">Helpers:</span>
-                      <span className="ml-2 font-bold text-sky-900 dark:text-white">{report.length}</span>
+                      <span className="text-sm text-foregroundSecondary">Helpers:</span>
+                      <span className="ml-2 font-bold text-foregroundPrimary">{report.length}</span>
                     </div>
                   </div>
                 </div>

@@ -74,46 +74,44 @@ export async function PATCH(
       )
     }
 
-    // Update the application
-    const updatedApplication = await prisma.volunteerApplication.update({
-      where: { id: applicationId },
-      data: {
-        status,
-        reviewedBy: userId,
-        reviewedAt: new Date(),
-        reviewNote: reviewNote ?? null,
-      },
-      include: {
-        event: {
-          select: { id: true, name: true },
-        },
-        user: {
-          select: { id: true, name: true, email: true },
-        },
-      },
-    })
-
-    // If approved, add user to event crew
-    if (status === 'APPROVED') {
-      await prisma.eventCrew.create({
+    // Update application and auto-add to event crew atomically (transaction)
+    const updatedApplication = await prisma.$transaction(async (tx) => {
+      const updated = await tx.volunteerApplication.update({
+        where: { id: applicationId },
         data: {
-          eventId: application.eventId,
-          userId: application.userId,
+          status,
+          reviewedBy: userId,
+          reviewedAt: new Date(),
+          reviewNote: reviewNote ?? null,
         },
-        // Ignore if already exists (duplicate key)
-        // In a real app, we might want to check first, but for now we rely on unique constraint
-        // and catch the error if needed. However, we can use upsert or check first.
-        // Let's check first to avoid error.
-      }).catch(async (error) => {
-        // If the error is a unique constraint violation, we can ignore it
-        if (error.code === 'P2002') {
-          // Already exists, ignore
-          return
-        }
-        // Otherwise, rethrow
-        throw error
+        include: {
+          event: { select: { id: true, name: true } },
+          user: { select: { id: true, name: true, email: true } },
+        },
       })
-    }
+
+      if (status === 'APPROVED') {
+        const existingCrew = await tx.eventCrew.findUnique({
+          where: {
+            eventId_userId: {
+              eventId: application.eventId,
+              userId: application.userId,
+            },
+          },
+        })
+
+        if (!existingCrew) {
+          await tx.eventCrew.create({
+            data: {
+              eventId: application.eventId,
+              userId: application.userId,
+            },
+          })
+        }
+      }
+
+      return updated
+    })
 
     return NextResponse.json({ application: updatedApplication })
   } catch (error) {
@@ -182,10 +180,7 @@ export async function DELETE(
       where: { id: applicationId },
       data: {
         status: 'WITHDRAWN',
-        reviewedAt: new Date(), // Optional, but we can set it to indicate when withdrawn
-        // Note: We don't set reviewedBy because it's the user withdrawing, not an admin reviewing
-        // We can leave reviewedBy as null, or set it to the userId? The skill doesn't specify.
-        // We'll leave it as null to indicate no admin review.
+        reviewedAt: new Date(),
         reviewNote: null,
       },
     })

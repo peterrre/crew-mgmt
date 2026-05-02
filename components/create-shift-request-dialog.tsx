@@ -20,10 +20,16 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { cn } from '@/lib/utils';
+import { FormFieldMessage } from '@/components/ui/form-fields';
 
 interface CreateShiftRequestDialogProps {
+  open: boolean;
   shift: {
     id: string;
     title: string;
@@ -33,7 +39,7 @@ interface CreateShiftRequestDialogProps {
       id: string;
       name: string | null;
     } | null;
-  };
+  } | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -44,41 +50,57 @@ interface Helper {
   email: string;
 }
 
-// Define the missing types
 type RequestType = 'CANCEL' | 'SWAP' | 'MODIFY';
 
-interface ShiftRequestBody {
-  shiftId: string;
-  type: RequestType;
-  reason: string;
-  newHelperId?: string;
-  newStart?: Date | string;
-  newEnd?: Date | string;
-}
+const requestSchema = z.object({
+  type: z.enum(['CANCEL', 'SWAP', 'MODIFY']),
+  reason: z.string().min(1, { message: 'Grund ist erforderlich' }),
+  newHelperId: z.string().optional(),
+  newStart: z.string().optional(),
+  newEnd: z.string().optional(),
+});
+
+type RequestFormValues = z.infer<typeof requestSchema>;
 
 export default function CreateShiftRequestDialog({
+  open,
   shift,
   onClose,
   onSuccess,
 }: CreateShiftRequestDialogProps) {
-  const [type, setType] = useState<RequestType>('CANCEL');
-  const [reason, setReason] = useState('');
-  const [newHelperId, setNewHelperId] = useState('');
-  const [newStart, setNewStart] = useState('');
-  const [newEnd, setNewEnd] = useState('');
   const [availableHelpers, setAvailableHelpers] = useState<Helper[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingHelpers, setLoadingHelpers] = useState(false);
-  const { toast } = useToast();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors, isValid },
+  } = useForm<RequestFormValues>({
+    resolver: zodResolver(requestSchema),
+    mode: 'onChange',
+    defaultValues: {
+      type: 'CANCEL',
+      reason: '',
+      newHelperId: '',
+      newStart: '',
+      newEnd: '',
+    },
+  });
+
+  const requestType = watch('type');
+  const newHelperId = watch('newHelperId');
 
   const fetchAvailableHelpers = useCallback(async () => {
+    if (!shift) return;
     setLoadingHelpers(true);
     try {
       const response = await fetch('/api/shift-requests', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ shiftId: shift.id }),
       });
 
@@ -86,148 +108,109 @@ export default function CreateShiftRequestDialog({
         const data = await response.json();
         setAvailableHelpers(data.helpers || []);
       } else {
-        toast({
-          title: 'Error',
-          description: 'Failed to load available helpers.',
-          variant: 'destructive',
-        });
+        toast.error('Fehler beim Laden der verfügbaren Helfer.');
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred.',
-        variant: 'destructive',
-      });
+      toast.error('Ein unerwarteter Fehler ist aufgetreten.');
     } finally {
       setLoadingHelpers(false);
     }
-  }, [shift.id, toast]);
+  }, [shift]);
 
   useEffect(() => {
-    if (type === 'SWAP') {
+    if (requestType === 'SWAP') {
       fetchAvailableHelpers();
     }
-  }, [type, shift.id, fetchAvailableHelpers]);
+  }, [requestType, fetchAvailableHelpers]);
 
-  const handleSubmit = async () => {
-    if (!reason.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Please provide a reason for your request.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (type === 'SWAP' && !newHelperId) {
-      toast({
-        title: 'Error',
-        description: 'Please select a helper to swap with.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (type === 'MODIFY' && (!newStart || !newEnd)) {
-      toast({
-        title: 'Error',
-        description: 'Please provide new start and end times.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
+  const onSubmit = async (data: RequestFormValues) => {
+    if (!shift) return;
     setLoading(true);
     try {
-      const body: ShiftRequestBody = {
+      const body: any = {
         shiftId: shift.id,
-        type,
-        reason,
+        type: data.type,
+        reason: data.reason,
       };
 
-      if (type === 'SWAP') {
-        body.newHelperId = newHelperId;
-      } else if (type === 'MODIFY') {
-        body.newStart = new Date(newStart);
-        body.newEnd = new Date(newEnd);
+      if (data.type === 'SWAP') {
+        body.newHelperId = data.newHelperId;
+      } else if (data.type === 'MODIFY') {
+        body.newStart = new Date(data.newStart || '');
+        body.newEnd = new Date(data.newEnd || '');
       }
 
       const response = await fetch('/api/shift-requests', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
 
       if (response.ok) {
-        toast({
-          title: 'Request Submitted',
-          description: 'Your shift change request has been submitted for review.',
-        });
+        toast.success('Anfrage eingereicht — wird überprüft.');
+        reset();
         onSuccess();
         onClose();
       } else {
         const error = await response.json();
-        toast({
-          title: 'Error',
-          description: error.error || 'Failed to submit request.',
-          variant: 'destructive',
-        });
+        toast.error(error.error || 'Anfrage konnte nicht gesendet werden.');
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred.',
-        variant: 'destructive',
-      });
+      toast.error('Ein unerwarteter Fehler ist aufgetreten.');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      reset();
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open onOpenChange={onClose}>
+    <Dialog open={open && !!shift} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Request Shift Change</DialogTitle>
+          <DialogTitle>Schicht-Änderung anfragen</DialogTitle>
           <DialogDescription>
-            Request a change for your shift: {shift.title}
-            <br />
-            {new Date(shift.start).toLocaleString()} - {new Date(shift.end).toLocaleString()}
+            {shift ? `${shift.title} · ${new Date(shift.start).toLocaleString('de-DE')} – ${new Date(shift.end).toLocaleTimeString('de-DE')}` : ''}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="type" className="text-right">
-              Type
-            </Label>
-            <Select value={type} onValueChange={(value: RequestType) => setType(value)}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select request type" />
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="req-type">Art der Anfrage</Label>
+            <Select
+              value={requestType}
+              onValueChange={(value) => setValue('type', value as RequestType, { shouldValidate: true })}
+            >
+              <SelectTrigger className="h-11 rounded-xl">
+                <SelectValue placeholder="Art auswählen" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="CANCEL">Cancel Shift</SelectItem>
-                <SelectItem value="SWAP">Swap with Another Helper</SelectItem>
-                <SelectItem value="MODIFY">Modify Time</SelectItem>
+                <SelectItem value="CANCEL">Schicht absagen</SelectItem>
+                <SelectItem value="SWAP">Mit anderem Helfer tauschen</SelectItem>
+                <SelectItem value="MODIFY">Zeit ändern</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {type === 'SWAP' && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="newHelper" className="text-right">
-                Swap With
-              </Label>
+          {requestType === 'SWAP' && (
+            <div className="space-y-2">
+              <Label>Tauschen mit</Label>
               {loadingHelpers ? (
-                <div className="col-span-3 text-sm text-gray-500">Loading available helpers...</div>
+                <p className="text-sm text-foregroundTertiary">Lade verfügbare Helfer…</p>
               ) : availableHelpers.length === 0 ? (
-                <div className="col-span-3 text-sm text-red-600">No helpers available for this time slot</div>
+                <p className="text-sm text-red">Keine Helfer für dieses Zeitfenster verfügbar</p>
               ) : (
-                <Select value={newHelperId} onValueChange={setNewHelperId}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select a helper to swap with" />
+                <Select
+                  value={newHelperId}
+                  onValueChange={(value) => setValue('newHelperId', value, { shouldValidate: true })}
+                >
+                  <SelectTrigger className="h-11 rounded-xl">
+                    <SelectValue placeholder="Helfer auswählen" />
                   </SelectTrigger>
                   <SelectContent>
                     {availableHelpers.map((helper) => (
@@ -241,59 +224,65 @@ export default function CreateShiftRequestDialog({
             </div>
           )}
 
-          {type === 'MODIFY' && (
+          {requestType === 'MODIFY' && (
             <>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="newStart" className="text-right">
-                  New Start
-                </Label>
+              <div className="space-y-2">
+                <Label htmlFor="req-newStart">Neue Startzeit</Label>
                 <Input
-                  id="newStart"
+                  id="req-newStart"
                   type="datetime-local"
-                  value={newStart}
-                  onChange={(e) => setNewStart(e.target.value)}
-                  className="col-span-3"
+                  {...register('newStart')}
+                  className="h-11 rounded-xl border-border bg-backgroundSecondary/60 transition-all duration-200 focus:ring-2 focus:ring-blue/30 focus:border-blue"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="newEnd" className="text-right">
-                  New End
-                </Label>
+              <div className="space-y-2">
+                <Label htmlFor="req-newEnd">Neue Endzeit</Label>
                 <Input
-                  id="newEnd"
+                  id="req-newEnd"
                   type="datetime-local"
-                  value={newEnd}
-                  onChange={(e) => setNewEnd(e.target.value)}
-                  className="col-span-3"
+                  {...register('newEnd')}
+                  className="h-11 rounded-xl border-border bg-backgroundSecondary/60 transition-all duration-200 focus:ring-2 focus:ring-blue/30 focus:border-blue"
                 />
               </div>
             </>
           )}
 
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label htmlFor="reason" className="text-right pt-2">
-              Reason <span className="text-red-500">*</span>
+          <div className="space-y-2">
+            <Label htmlFor="req-reason">
+              Grund <span className="text-red">*</span>
             </Label>
             <Textarea
-              id="reason"
-              placeholder="Please explain why you need this change..."
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="col-span-3"
+              id="req-reason"
+              {...register('reason')}
+              className={cn(
+                'rounded-xl border-border bg-backgroundSecondary/60 transition-all duration-200 focus:ring-2 focus:ring-blue/30 focus:border-blue',
+                errors.reason ? 'border-destructive' : ''
+              )}
+              placeholder="Bitte erkläre, warum du diese Änderung brauchst…"
               rows={3}
             />
+            <FormFieldMessage message={errors.reason?.message} type="error" />
           </div>
-        </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={loading || !reason.trim()}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Submit Request
-          </Button>
-        </DialogFooter>
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Abbrechen
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading || !isValid}
+              className="bg-blue hover:bg-blue/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Anfrage senden
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

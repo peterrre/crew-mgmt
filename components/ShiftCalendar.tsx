@@ -22,14 +22,19 @@ import {
   removeUserFromShift,
 } from "@/lib/api/shifts";
 import { AssignmentPanel } from "./AssignmentPanel";
+import { colors } from "@/styles/tokens";
+import { ShiftAssignmentRole } from "@/lib/shiftAssignmentRole";
+import { Role } from "@/lib/role";
+
+// TODO: Replace hardcoded Tailwind classes for spacing, typography, shadows, etc. with design tokens from '@/styles/tokens'
 
 interface ShiftCalendarProps {
   eventId?: string; // optional filter by event
 }
 
-const localizer = momentLocalizer(moment);
 
 export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
+  const localizer = momentLocalizer(moment);
   const { data: session, status } = useSession();
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -39,9 +44,9 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   const [openPanel, setOpenPanel] = useState(false);
 
   // Role-based helpers (Admin only / Crew / Volunteer)
-  const isAdmin = session?.user?.role === "ADMIN";
-  const isCrew = session?.user?.role === "CREW";
-  const isVolunteer = session?.user?.role === "VOLUNTEER";
+  const isAdmin = (session?.user as any)?.role === Role.ADMIN;
+  const isCrew = (session?.user as any)?.role === Role.CREW;
+  const isVolunteer = (session?.user as any)?.role === Role.VOLUNTEER;
 
   // Load data
   useEffect(() => {
@@ -78,32 +83,27 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
 
   const getResponsible = (shiftId: string) => {
     const assign = getAssignmentsForShift(shiftId).find(
-      (a) => a.role === "RESPONSIBLE",
+      (a) => (a.role as any) === ShiftAssignmentRole.RESPONSIBLE,
     );
     return assign ? assign.user : null;
   };
 
   const getHelpers = (shiftId: string) => {
     return getAssignmentsForShift(shiftId)
-      .filter((a) => a.role === "HELPER")
+      .filter((a) => (a.role as any) === ShiftAssignmentRole.HELPER)
       .map((a) => a.user);
   };
 
   // Check if current user is assigned to shift (any role)
   const isUserAssigned = (shiftId: string) => {
     return getAssignmentsForShift(shiftId).some(
-      (a) => a.userId === session?.user?.id,
+      (a) => a.userId === (session?.user as any)?.id,
     );
   };
 
-  // Check if user is responsible for shift
-  const isUserResponsible = (shiftId: string) => {
-    const resp = getResponsible(shiftId);
-    return resp?.id === session?.user?.id;
-  };
 
   // Handle shift select (click)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const handleSelectSlot = (_info: {
     start: Date;
     end: Date;
@@ -122,18 +122,18 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   };
 
   // Assign current user as helper/responsible (volunteer self-service)
-  const handleSelfAssign = async (role: "RESPONSIBLE" | "HELPER") => {
+  const handleSelfAssign = async (role: ShiftAssignmentRole) => {
     if (!selectedShift) return;
     try {
-      await assignUserToShift(selectedShift.id, {
-        userId: session?.user!.id,
-        role,
-      });
+ await assignUserToShift(selectedShift.id, {
+ userId: (session?.user as any)!.id,
+ role: role as unknown as string,
+ });
       // Refetch assignments
       const updated = await fetchAssignments({ eventId });
       setAssignments(updated);
       toast.success(
-        `You are now ${role === "RESPONSIBLE" ? "Responsible" : "Helper"} for this shift`,
+        `You are now ${(role as any) === ShiftAssignmentRole.RESPONSIBLE ? "Responsible" : "Helper"} for this shift`,
       );
       setOpenPanel(false);
     } catch (err) {
@@ -164,22 +164,20 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
     const isUnderMin = helperCount < minHelpers;
     const isOverMax = helperCount > maxHelpers;
     const userIsAssigned = isUserAssigned(event.id);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const userIsResp = isUserResponsible(event.id);
 
     return {
       style: {
         backgroundColor: responsible
-          ? "#3b82f6" // blue for responsible
+          ? colors.blue
           : helpers.length > 0
-            ? "#10b981" // green for helpers
-            : "#6b7280", // grey for unassigned
-        color: "#fff",
-        borderRadius: "4px",
-        border: isUnderMin || isOverMax ? "2px solid #ef4444" : "none",
-        opacity: userIsAssigned ? 1 : 0.9,
-        // highlight own assignment
-        outline: userIsAssigned ? "2px solid #fbbf24" : "none",
+            ? colors.green
+            : colors.gray,
+      color: colors.blueForeground,
+      borderRadius: "0.25rem",
+      border: isUnderMin || isOverMax ? "2px solid " + colors.red : "none",
+      opacity: userIsAssigned ? 1 : 0.9,
+      // highlight own assignment
+      outline: userIsAssigned ? "2px solid " + colors.orange : "none",
       },
     };
   };
@@ -191,39 +189,47 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
       </div>
     );
   if (error)
-    return <div className="p-4 bg-red-50 text-red-600 rounded">{error}</div>;
+    return <div className="p-4 bg-red/10 text-red rounded">{error}</div>;
 
-  return (
-    <div className="space-y-4">
-      <Toaster />
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Shift Calendar</h2>
-        {!isVolunteer && (isAdmin || isCrew) && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              /* TODO open create shift dialog */
-            }}
-          >
-            + Create Shift
-          </Button>
-        )}
-      </div>
+ return (
+ <section aria-label="Shift calendar" className="space-y-4">
+ <Toaster />
+ <div className="flex justify-between items-center">
+ <h2 className="text-xl font-semibold">Shift Calendar</h2>
+ {!isVolunteer && (isAdmin || isCrew) && (
+ <Button
+ variant="outline"
+ size="sm"
+ aria-label="Create new shift"
+ onClick={() => {
+ /* TODO open create shift dialog */
+ }}
+ >
+ + Create Shift
+ </Button>
+ )}
+ </div>
 
-        <Calendar
-        localizer={localizer}
-        events={shifts}
-        startAccessor="start"
-        endAccessor="end"
-        titleAccessor="title"
-        tooltipAccessor="title"
-        onSelectSlot={handleSelectSlot}
-        onSelectEvent={handleSelectEvent}
-        eventPropGetter={eventPropGetter}
-        views={["month", "week", "day"]}
-        style={{ height: 600 }}
-      />
+ <div role="region" aria-label="Calendar view" tabIndex={0}
+ onKeyDown={(e) => {
+ if (e.key === 'Escape' && openPanel) setOpenPanel(false);
+ }}
+ >
+ <Calendar
+ localizer={localizer}
+ events={shifts}
+ startAccessor="start"
+ endAccessor="end"
+ titleAccessor="title"
+ tooltipAccessor="title"
+ onSelectSlot={handleSelectSlot}
+ onSelectEvent={handleSelectEvent}
+ eventPropGetter={eventPropGetter}
+ views={["month", "week", "day"]}
+ style={{ height: 600 }}
+ aria-label="Shift calendar grid"
+ />
+ </div>
 
       {/* Assignment Panel (sidebar/modal) */}
       <Dialog open={openPanel} onOpenChange={setOpenPanel}>
@@ -256,10 +262,11 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
           {/* Assignment list */}
           {selectedShift ? (
             <AssignmentPanel
+              shiftId={selectedShift.id}
               assignments={getAssignmentsForShift(selectedShift.id)}
               minHelpers={selectedShift.minHelpers ?? 0}
               maxHelpers={selectedShift.maxHelpers ?? 999}
-              currentUserId={session?.user?.id}
+              currentUserId={(session?.user as any)?.id}
               isAdmin={isAdmin}
               isCrew={isCrew}
               isVolunteer={isVolunteer}
@@ -276,7 +283,7 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
             Close
           </Button>
         </DialogFooter>
-      </Dialog>
-    </div>
-  );
+ </Dialog>
+ </section>
+ );
 };
