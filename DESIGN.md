@@ -4,7 +4,7 @@ This document outlines the design tokens and guidelines used to create an Appleâ
 
 ## Overview
 
-The design system is built around a set of **design tokens** (colors, typography, spacing, shadows, etc.) that are defined in `src/styles/tokens.ts` and consumed via Tailwind CSS. By centralizing these values we ensure consistency, ease of theming, and a clear visual language.
+The design system is built around a set of **design tokens** (colors, typography, spacing, shadows, etc.) that are defined in `styles/tokens.ts` and consumed via Tailwind CSS. By centralizing these values we ensure consistency, ease of theming, and a clear visual language.
 
 ## Tokens
 
@@ -18,7 +18,7 @@ The design system is built around a set of **design tokens** (colors, typography
 | `foregroundPrimary` | `#1D1D1F` | Primary text |
 | `foregroundSecondary` | `#6E6E73` | Secondary text, captions |
 | `foregroundTertiary` | `#AEAEB2` | Disabled text, placeholders |
-| `blue` | `#007AFF` | Primary action, links |
+| `blue` | `#0062CC` | Primary action, links |
 | `blueForeground` | `#FFFFFF` | Text on blue background |
 | `green` | `#34C759` | Success, confirmation |
 | `greenForeground` | `#FFFFFF` | Text on green background |
@@ -126,7 +126,7 @@ Use `z-*' utilities.
 
 ## Updating the Design System
 
-- Add new tokens to `src/styles/tokens.ts`.
+- Add new tokens to `styles/tokens.ts`.
 - Map them to Tailwind in `tailwind.config.ts` under `theme.extend`.
 - Document the addition in this file.
 - Run `npm run lint` and `npm run build` to verify no regressions.

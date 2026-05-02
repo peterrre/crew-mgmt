@@ -1,42 +1,56 @@
-# Task Summary: Define Apple-like Design Tokens
+# Task Summary: Sprint 3 – UX Improvements (Design System, Accessibility, Performance)
 
 ## Objective
-Define Apple-like design tokens (spacing, typography, color, elevation) for the crew management app, output as Tailwind config or CSS variables, and update documentation.
+Zusammenfassung der im Sprint 3 erledigten Arbeiten im Bereich Design System, Accessibility, Performance, Testing und UX Polish. Sprint 3 wurde über den Branch `sprint-3` via PR #17 in `master` gemergt (Commit `4cba7dd`).
 
-## Findings
-Upon examination, the repository already had:
-- Design tokens defined in `styles/tokens.ts`
-- Tailwind configuration in `tailwind.config.ts` that consumes these tokens
-- Design documentation in `DESIGN.md`
+## Sprint 3 Deliverables
 
-However, the color palette did not fully match an Apple-like aesthetic.
+### 1. Design System & Tokens
+- **`styles/tokens.ts`**: Apple-inspired Farbpalette etabliert
+  - `blue: '#0062CC'` (Primary Action)
+  - `green: '#34C759'`, `red: '#FF3B30'`, `yellow/orange: '#FF9500'`, `purple: '#AF52DE'`
+  - System font stack, 4px-basiertes Spacing, subtile Shadow-Hierarchie, sanfte Border-Radii
+  - Gradient-Definitionen (`gradientPrimary`, `gradientSecondary`)
+- **`tailwind.config.ts`**: Konsumiert alle Tokens nahtlos über `theme.extend`
+- **`DESIGN.md` & `DESIGN_TOKENS_SUMMARY.md`**: Dokumentation aktualisiert mit korrekten Werten und Pfaden (`styles/tokens.ts`, nicht `src/styles/tokens.ts`)
+- **Hardcoded Colors eliminiert**: Primäre Komponenten verwenden ausschließlich Token-basierte Tailwind-Utilities (`bg-background`, `text-foregroundPrimary`, `text-blue`, etc.)
 
-## Actions Taken
+### 2. Accessibility (WCAG AA)
+- **Axe-Core Integration**: `@axe-core/playwright` als DevDependency installiert
+- **`tests/e2e/axe.homepage.test.ts`**: Automatisierter Accessibility-Audit der Landing Page
+- **Radix UI Komponenten**: Eingesetzt für native Accessibility (Keyboard Navigation, Fokus-Management, ARIA-Attribute) in Dialogs, Dropdowns, Tooltips, etc.
 
-### 1. Updated Design Tokens (styles/tokens.ts)
-- **Colors**: Updated to Apple-inspired palette
-  - Blue: `#0A84FF` → `#007AFF` (Apple's system blue)
-  - Yellow: `#FF9F0A` → `#FF9500` (Apple's system orange/yellow)
-  - Purple: `#BF5AF2` → `#AF52DE` (softer Apple-inspired purple)
-  - Orange: `#FF9F0A` → `#FF9500` (consistent with yellow)
-- Updated gradients to use the new colors
-- Maintained existing spacing, typography, radius, shadows, transition, and zIndex tokens (already Apple-appropriate)
+### 3. Performance
+- **Code-Splitting & Lazy Loading**: Schwere Komponenten werden dynamisch nachgeladen
+- **Framer Motion**: Für Micro-Interactions und flüssige Animationen
+- **Skeleton Loading States**: Verbesserte wahrgenommene Performance bei Datenladezeiten
 
-### 2. Updated Documentation (DESIGN.md)
-- Updated the color reference table to match the new token values
-- Ensured documentation accurately reflects the token definitions
+### 4. E2E & Testing
+- **Playwright E2E Tests** erweitert:
+  - `tests/e2e/volunteer-application.test.ts`
+  - `tests/e2e/axe.homepage.test.ts`
+  - `tests/e2e/visual-regression.test.ts`
+- **Visual Regression Tests**: Playwright-Snapshots für konsistentes UI-Monitoring
+- **CI/CD Integration**: GitHub Actions (`.github/workflows/ci.yml`) führt Build und Playwright-Tests auf `push`/`pull_request` zu `master` aus (PostgreSQL Service Container)
 
-### 3. Created Summary Document
-- Added `DESIGN_TOKENS_SUMMARY.md` detailing the changes made
+### 5. UX Polish
+- **Radix Dialogs, Tooltips, Popovers**: Konsistente, accessible UI-Patterns im gesamten App-Shell
+- **Mobile-First Refinements**: Responsive Layouts, touch-freundliche Interaktionen
+- **Landing Page & App Shell Verbesserungen**: Visuelle Aufwertung und konsistentere Navigation
 
-### 4. Version Control
-- Added and committed the changed files
-- Pushed to the sprint-3 branch
+---
 
 ## Files Modified
-1. `styles/tokens.ts` - Updated color values and gradients
-2. `DESIGN.md` - Updated color reference table
-3. `DESIGN_TOKENS_SUMMARY.md` - New file summarizing changes
+- `styles/tokens.ts`
+- `tailwind.config.ts`
+- `DESIGN.md`
+- `DESIGN_TOKENS_SUMMARY.md`
+- `app/globals.css`
+- `components/ui/*`
+- `tests/e2e/*`
+- `.github/workflows/ci.yml`
+
+---
 
 ## Design System Overview
 The design system now provides an Apple-like experience through:
@@ -71,3 +85,8 @@ To update tokens in the future:
 1. Edit `styles/tokens.ts`
 2. Update `DESIGN.md` documentation
 3. Tailwind configuration automatically incorporates changes
+4. Run `npm run lint` and `npm run build` to verify no regressions
+
+---
+
+*Letzte Aktualisierung: Sprint 3 abgeschlossen und in `master` gemergt (PR #17, Commit `4cba7dd`).*

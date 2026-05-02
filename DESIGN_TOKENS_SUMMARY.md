@@ -3,7 +3,7 @@
 ## Changes Made
 
 ### 1. Updated Color Palette (Apple-inspired)
-- **Blue**: Changed from `#0A84FF` to `#007AFF` (Apple's system blue)
+- **Blue**: Changed from `#0A84FF` to `#0062CC` (Apple's system blue)
 - **Yellow**: Changed from `#FF9F0A` to `#FF9500` (Apple's system orange/yellow)
 - **Purple**: Changed from `#BF5AF2` to `#AF52DE` (softer Apple-inspired purple)
 - **Orange**: Changed from `#FF9F0A` to `#FF9500` (consistent with yellow)
@@ -13,12 +13,12 @@
 - Updated gradient definitions in both tokens file and documentation
 
 ### 3. Updated Token Source
-- Modified `/home/hermes/crew-mgmt/styles/tokens.ts` with the new Apple-inspired color values
+- Modified `styles/tokens.ts` with the new Apple-inspired color values
 - The Tailwind configuration (`tailwind.config.ts`) automatically consumes these tokens via the existing import
 
 ## Files Modified
-1. `/home/hermes/crew-mgmt/styles/tokens.ts` - Updated color values and gradients
-2. `/home/hermes/crew-mgmt/DESIGN.md` - Updated color reference table to match tokens
+1. `styles/tokens.ts` - Updated color values and gradients
+2. `DESIGN.md` - Updated color reference table to match tokens
 
 ## Design System Overview
 The design system now provides:
@@ -50,6 +50,6 @@ The updated tokens support the Apple-like feel through:
 
 ## Future Updates
 To add new tokens:
-1. Edit `/home/hermes/crew-mgmt/styles/tokens.ts`
-2. Update `/home/hermes/crew-mgmt/DESIGN.md` documentation
+1. Edit `styles/tokens.ts`
+2. Update `DESIGN.md` documentation
 3. The Tailwind configuration will automatically incorporate new tokens
