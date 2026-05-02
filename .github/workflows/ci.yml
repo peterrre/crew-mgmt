@@ -30,7 +30,7 @@ jobs:
     env:
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'test-secret' }}
       NEXTAUTH_URL: 'http://localhost:3000'
-       DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/crew_mgmt_test'
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/crew_mgmt_test'
       GITHUB_ID: 'dummy'
       GITHUB_SECRET: 'dummy'
     steps:
@@ -39,17 +39,17 @@ jobs:
         with:
           node-version: lts/*
           cache: 'npm'
-       - name: Install dependencies
-         run: npm ci
-       - name: Wait for database
-         run: |
-           until pg_isready -h localhost -p 5432 -U postgres; do
-             echo "Waiting for database..."
-             sleep 2
-           done
-           echo "Database is ready"
-       - name: Setup database
-         run: npx prisma migrate deploy
+      - name: Install dependencies
+        run: npm ci
+      - name: Wait for database
+        run: |
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for database..."
+            sleep 2
+          done
+          echo "Database is ready"
+      - name: Setup database
+        run: npx prisma migrate deploy
       - name: Build Next.js App
         run: npx next build
       - name: Run Playwright tests
