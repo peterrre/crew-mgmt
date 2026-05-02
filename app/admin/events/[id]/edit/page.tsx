@@ -33,7 +33,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
       const response = await fetch(`/api/events/${params.id}`)
       if (response.ok) {
         const data = await response.json()
-        setEvent(data)
+        setEvent(data.event)
       }
     } catch (error) {
       console.error('Error fetching event:', error)
