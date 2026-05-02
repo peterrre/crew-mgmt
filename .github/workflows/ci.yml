@@ -13,14 +13,13 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
       options: --user root
-
     services:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: crewuser
-          POSTGRES_PASSWORD: crewpass
-          POSTGRES_DB: crewmgmt
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: crew_mgmt_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -28,12 +27,12 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-
     env:
-      DATABASE_URL: postgresql://crewuser:crewpass@postgres:5432/crewmgmt
-      NEXTAUTH_SECRET: test-secret-for-ci-only
-      NEXTAUTH_URL: http://localhost:3000
-
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'test-secret' }}
+      NEXTAUTH_URL: 'http://localhost:3000'
+      DATABASE_URL: 'postgresql://postgres:***@localhost:5432/crew_mgmt_test'
+      GITHUB_ID: 'dummy'
+      GITHUB_SECRET: 'dummy'
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
