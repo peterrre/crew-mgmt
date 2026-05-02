@@ -37,6 +37,16 @@ Enhanced visibility of event relationships:
 - "My Events" section in volunteer dashboard
 - Event names displayed in calendar views
 
+#### Notification & Communication System
+Real-time updates and messaging for better team coordination:
+- **In-App Notifications**: Bell icon with badge showing unread count
+- **WebSocket Real-Time Updates**: Instant notifications for shift assignments and comments
+- **Email Notifications**: Optional email alerts for shift assignments, reminders, and applications (via nodemailer stub)
+- **Shift Comment Box**: Discussion thread per shift for volunteers and coordinators
+- **Reminder System**: Configurable 24h and 2h pre-shift notifications
+- **API Endpoints**: POST /api/notifications, POST /api/chatmessages, WebSocket /api/ws/notifications
+- **Frontend Components**: NotificationBell, NotificationContext, ShiftCommentBox
+
 ### Event Management
 - **Create Events**: Create events with name, description, dates, location, and contact person
 - **Edit Events**: Modify event details with consistent UI experience
