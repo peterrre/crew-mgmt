@@ -27,15 +27,15 @@ test.describe('Volunteer Application Flow', () => {
     await expect(page).toHaveURL(/\/signup-volunteer/, { timeout: 10000 });
 
     // Fill out the form with all required fields
-    await page.getByLabel(/name/i).fill(testName);
-    await page.getByLabel(/email/i).fill(testEmail);
-    await page.getByLabel(/password/i).fill(testPassword);
+    await page.locator('#name').fill(testName);
+    await page.locator('#email').fill(testEmail);
+    await page.locator('#password').fill(testPassword);
 
     // Add a small delay to ensure form is ready
     await page.waitForTimeout(500);
 
     // Submit the form
-    await page.getByRole('button', { name: /sign up/i }).click();
+    await page.getByRole('button', { name: /registrieren/i }).click();
 
     // Wait for either success message OR redirect to a known page
     try {

@@ -12,7 +12,7 @@ export const colors = {
   foregroundTertiary: '#AEAEB2',
 
   // Accent colors (Apple-inspired)
-  blue: '#007AFF',
+  blue: '#0062CC',
   blueForeground: '#FFFFFF',
   green: '#34C759',
   greenForeground: '#FFFFFF',
@@ -66,7 +66,7 @@ export const colors = {
   shadowLarge: '0px 10px 15px -3px rgba(0, 0, 0, 0.1), 0px 4px 6px -2px rgba(0, 0, 0, 0.05)',
 
   // Gradients (for subtle UI accents)
-  gradientPrimary: 'linear-gradient(135deg, #007AFF 0%, #34C759 100%)',
+  gradientPrimary: 'linear-gradient(135deg, #0062CC 0%, #34C759 100%)',
   gradientSecondary: 'linear-gradient(135deg, #AF52DE 0%, #FF9500 100%)',
 };
 
