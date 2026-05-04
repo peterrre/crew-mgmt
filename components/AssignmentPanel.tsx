@@ -15,7 +15,7 @@ import { ShiftAssignmentRole } from "@/lib/shiftAssignmentRole";
 import { fetchAvailableUsers } from "@/lib/api/users";
 
 interface AssignmentPanelProps {
- shiftId: string;
+  shiftId: string;
   assignments: Assignment[];
   minHelpers: number;
   maxHelpers: number;
@@ -43,8 +43,8 @@ export const AssignmentPanel = ({
 }: AssignmentPanelProps) => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
- const responsible = assignments.find((a) => (a.role as any) === ShiftAssignmentRole.RESPONSIBLE);
- const helpers = assignments.filter((a) => (a.role as any) === ShiftAssignmentRole.HELPER);
+  const responsible = assignments.find((a) => (a.role as any) === ShiftAssignmentRole.RESPONSIBLE);
+  const helpers = assignments.filter((a) => (a.role as any) === ShiftAssignmentRole.HELPER);
   const helperCount = helpers.length;
   const isUnderMin = helperCount < minHelpers;
   const isOverMax = helperCount > maxHelpers;
@@ -273,33 +273,6 @@ export const AssignmentPanel = ({
           </div>
         )}
       </div>
-
-      {/* Volunteer self-assign section */}
-      {isVolunteer && !isUserAssigned && (
-        <div className="border-t pt-4">
-          <h3 className="font-medium mb-2">Join this shift</h3>
-          <div className="space-y-2">
-            {!responsible && (
-              <Button
-                variant="default"
-                onClick={() => onSelfAssign(ShiftAssignmentRole.RESPONSIBLE)}
-                className="w-full"
-              >
-                Take as Responsible
-              </Button>
-            )}
-            {helperCount < maxHelpers && (
-              <Button
-                variant="outline"
-                onClick={() => onSelfAssign(ShiftAssignmentRole.HELPER)}
-                className="w-full"
-              >
-                Join as Helper
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

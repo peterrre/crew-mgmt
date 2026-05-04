@@ -1,75 +1,86 @@
-// Mock prisma
-const prismaMock: any = {
-  event: {
-    findUnique: jest.fn(),
-  },
-  eventCrew: {
-    findMany: jest.fn(),
-  },
-  shift: {
-    findMany: jest.fn(),
-    create: jest.fn().mockResolvedValue({ id: 'new-shift-id' }),
-    findUnique: jest.fn().mockResolvedValue({
-      id: 'new-shift-id',
-      title: 'Test Shift',
-      start: new Date('2026-04-25T10:00:00Z'),
-      end: new Date('2026-04-25T12:00:00Z'),
-      eventId: 'event-1',
-      helperId: 'user-1',
-      minHelpers: 1,
-      maxHelpers: 3,
-      assignments: [],
-    }),
-  },
-  shiftAssignment: {
-    create: jest.fn().mockResolvedValue({}),
-  },
-  $transaction: jest.fn((callback) => callback(prismaMock)),
-};
-
-// Mock dependencies
+// Mock dependencies first
 jest.mock('next/server', () => ({
   NextResponse: {
     json: (body: unknown, init?: { status?: number }) => {
       return {
         json: async () => body,
         status: init?.status ?? 200,
+        headers: new Map(),
       };
     },
   },
 }));
-jest.mock('next-auth');
+jest.mock('next-auth', () => ({
+  getServerSession: jest.fn(),
+}));
 jest.mock('@/lib/auth-options', () => ({
   authOptions: {},
 }));
+
+let prismaMock = {} as any;
+
 jest.mock('@/lib/db', () => ({
   prisma: prismaMock,
 }));
 
-// Now import the module under test
-import { POST } from '../app/api/shifts/route';
+let POST: any;
 
-describe('Shift Creation Validation', () => {
+// We will import the module under test in a beforeAll
+beforeAll(() => {
+  // Set up the mock object
+  prismaMock.event = { findUnique: jest.fn() };
+  prismaMock.eventCrew = { findMany: jest.fn() };
+  prismaMock.shift = {
+    findMany: jest.fn(),
+    create: jest.fn(),
+    findUnique: jest.fn(),
+  };
+  prismaMock.shiftAssignment = { create: jest.fn() };
+  prismaMock.$transaction = jest.fn((callback) => callback(prismaMock));
+  
+  // Import after mocks are set up
+  const { POST: importedPost } = require('../app/api/shifts/route');
+  POST = importedPost;
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  // Set up prismaMock return values
+  const eventId = 'event-1';
+  const userId = 'user-1';
+  prismaMock.event.findUnique.mockResolvedValue({ id: eventId });
+  prismaMock.eventCrew.findMany.mockResolvedValue([]);
+  prismaMock.shift.findMany.mockResolvedValue([]);
+  prismaMock.shift.create.mockResolvedValue({ id: 'new-shift-id' });
+  prismaMock.shift.findUnique.mockResolvedValue({
+    id: 'new-shift-id',
+    title: 'Test Shift',
+    start: new Date('2026-04-25T10:00:00Z'),
+    end: new Date('2026-04-25T12:00:00Z'),
+    eventId: 'event-1',
+    helperId: 'user-1',
+    minHelpers: 1,
+    maxHelpers: 3,
+    assignments: [],
+  });
+  prismaMock.shiftAssignment.create.mockResolvedValue({});
+  prismaMock.$transaction.mockImplementation((callback) => callback(prismaMock));
+  // Mock session: getServerSession should return our session when called with authOptions
   const session = {
     user: {
       role: 'ADMIN',
       id: 'admin-1',
     },
   };
+  const { getServerSession } = require('next-auth');
+  (getServerSession as jest.Mock).mockResolvedValue(session);
+});
+
+describe('Shift Creation Validation', () => {
   const eventId = 'event-1';
   const userId = 'user-1';
   const start = new Date('2026-04-25T10:00:00Z');
   const end = new Date('2026-04-25T12:00:00Z');
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    // Mock session
-    (jest.requireMock('next-auth').getServerSession as jest.Mock).mockResolvedValue(session);
-    // Mock event exists
-    prismaMock.event.findUnique.mockResolvedValue({ id: eventId });
-    // Mock no overlapping shifts
-    prismaMock.shift.findMany.mockResolvedValue([]);
-  });
 
   it('should create shift with valid assignments count', async () => {
     // For this test, we have 1 assignment (responsible only)
@@ -77,7 +88,7 @@ describe('Shift Creation Validation', () => {
       { id: 'ec-1', eventId, userId: userId },
     ]);
 
-     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
+    const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'POST',
       body: JSON.stringify({
         title: 'Test Shift',
@@ -103,7 +114,7 @@ describe('Shift Creation Validation', () => {
       { id: 'ec-1', eventId, userId: userId },
     ]);
 
-     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
+    const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'POST',
       body: JSON.stringify({
         title: 'Test Shift',
@@ -132,7 +143,7 @@ describe('Shift Creation Validation', () => {
       { id: 'ec-4', eventId, userId: 'user-4' },
     ]);
 
-     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
+    const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'POST',
       body: JSON.stringify({
         title: 'Test Shift',
@@ -160,7 +171,7 @@ describe('Shift Creation Validation', () => {
       { id: 'ec-3', eventId, userId: 'user-3' },
     ]);
 
-     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
+    const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'POST',
       body: JSON.stringify({
         title: 'Test Shift',
@@ -186,7 +197,7 @@ describe('Shift Creation Validation', () => {
       { id: 'ec-1', eventId, userId: userId },
     ]);
 
-     const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
+    const request = new Request(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shifts`, {
       method: 'POST',
       body: JSON.stringify({
         title: 'Test Shift',

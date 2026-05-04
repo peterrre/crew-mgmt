@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
 import { prisma } from '@/lib/db';
+console.log('prisma in route module:', prisma);
 import { checkForOverlappingShifts } from '@/lib/utils/overlap';
 
 export const dynamic = 'force-dynamic';

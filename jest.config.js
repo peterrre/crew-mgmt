@@ -13,8 +13,14 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
     '^jose$': '<rootDir>/__mocks__/jose.js',
+    '^@panva/hkdf$': '<rootDir>/node_modules/@panva/hkdf/dist/node/cjs/index.js',
+    '^preact$': '<rootDir>/node_modules/preact/dist/preact.js',
+    '^preact-render-to-string$': '<rootDir>/node_modules/preact-render-to-string/dist/index.js',
   },
   testMatch: ['**/__tests__/**/*.test.(ts|tsx)'],
+  transformIgnorePatterns: [
+    '/node_modules/(!(@panva/hkdf|preact-render-to-string|preact|next-auth)).+',
+  ],
 }
 
 module.exports = createJestConfig(customJestConfig)

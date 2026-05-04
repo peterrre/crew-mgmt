@@ -1,12 +1,10 @@
 // Mock dependencies
-const prismaMock = {
-  shift: {
-    findMany: jest.fn(),
-  },
-};
-
 jest.mock('@/lib/db', () => ({
-  prisma: prismaMock,
+  prisma: {
+    shift: {
+      findMany: jest.fn(),
+    },
+  },
 }));
 
 import { prisma } from '@/lib/db';

@@ -32,7 +32,6 @@ interface ShiftCalendarProps {
   eventId?: string; // optional filter by event
 }
 
-
 export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   const localizer = momentLocalizer(moment);
   const { data: session, status } = useSession();
@@ -101,9 +100,8 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
     );
   };
 
-
   // Handle shift select (click)
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const handleSelectSlot = (_info: {
     start: Date;
     end: Date;
@@ -125,10 +123,10 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   const handleSelfAssign = async (role: ShiftAssignmentRole) => {
     if (!selectedShift) return;
     try {
- await assignUserToShift(selectedShift.id, {
- userId: (session?.user as any)!.id,
- role: role as unknown as string,
- });
+      await assignUserToShift(selectedShift.id, {
+        userId: (session?.user as any)!.id,
+        role: role as unknown as string,
+      });
       // Refetch assignments
       const updated = await fetchAssignments({ eventId });
       setAssignments(updated);
@@ -172,12 +170,12 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
           : helpers.length > 0
             ? colors.green
             : colors.gray,
-      color: colors.blueForeground,
-      borderRadius: "0.25rem",
-      border: isUnderMin || isOverMax ? "2px solid " + colors.red : "none",
-      opacity: userIsAssigned ? 1 : 0.9,
-      // highlight own assignment
-      outline: userIsAssigned ? "2px solid " + colors.orange : "none",
+        color: colors.blueForeground,
+        borderRadius: "0.25rem",
+        border: isUnderMin || isOverMax ? "2px solid " + colors.red : "none",
+        opacity: userIsAssigned ? 1 : 0.9,
+        // highlight own assignment
+        outline: userIsAssigned ? "2px solid " + colors.orange : "none",
       },
     };
   };
@@ -191,50 +189,54 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
   if (error)
     return <div className="p-4 bg-red/10 text-red rounded">{error}</div>;
 
- return (
- <section aria-label="Shift calendar" className="space-y-4">
- <Toaster />
- <div className="flex justify-between items-center">
- <h2 className="text-xl font-semibold">Shift Calendar</h2>
- {!isVolunteer && (isAdmin || isCrew) && (
- <Button
- variant="outline"
- size="sm"
- aria-label="Create new shift"
- onClick={() => {
- /* TODO open create shift dialog */
- }}
- >
- + Create Shift
- </Button>
- )}
- </div>
+  return (
+    <section aria-label="Shift calendar" className="space-y-4">
+      <Toaster />
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Shift Calendar</h2>
+        {!isVolunteer && (isAdmin || isCrew) && (
+          <Button
+            variant="outline"
+            size="sm"
+            aria-label="Create new shift"
+            onClick={() => {
+              /* TODO open create shift dialog */
+            }}
+          >
+            + Create Shift
+          </Button>
+        )}
+      </div>
 
- <div role="region" aria-label="Calendar view" tabIndex={0}
- onKeyDown={(e) => {
- if (e.key === 'Escape' && openPanel) setOpenPanel(false);
- }}
- >
- <Calendar
- localizer={localizer}
- events={shifts}
- startAccessor="start"
- endAccessor="end"
- titleAccessor="title"
- tooltipAccessor="title"
- onSelectSlot={handleSelectSlot}
- onSelectEvent={handleSelectEvent}
- eventPropGetter={eventPropGetter}
- views={["month", "week", "day"]}
- style={{ height: 600 }}
- aria-label="Shift calendar grid"
- />
- </div>
+      <div
+        role="region"
+        aria-label="Calendar view"
+        tabIndex={0}
+        className="h-[35vh] min-h-[180px] sm:h-[45vh] sm:min-h-[220px] w-full"
+        onKeyDown={(e) => {
+          if (e.key === "Escape" && openPanel) setOpenPanel(false);
+        }}
+      >
+        <Calendar
+          localizer={localizer}
+          events={shifts}
+          startAccessor="start"
+          endAccessor="end"
+          titleAccessor="title"
+          tooltipAccessor="title"
+          onSelectSlot={handleSelectSlot}
+          onSelectEvent={handleSelectEvent}
+          eventPropGetter={eventPropGetter}
+          views={["month", "week", "day"]}
+          style={{ height: "100%" }}
+          aria-label="Shift calendar grid"
+        />
+      </div>
 
       {/* Assignment Panel (sidebar/modal) */}
       <Dialog open={openPanel} onOpenChange={setOpenPanel}>
         <DialogTrigger>{/* triggered by state */}</DialogTrigger>
-        <DialogContent className="w-[400px] max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-full sm:w-[90vw] sm:max-w-[350px] max-h-[60vh] sm:max-h-[65vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {selectedShift ? selectedShift.title : "Shift Details"}
@@ -283,7 +285,7 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
             Close
           </Button>
         </DialogFooter>
- </Dialog>
- </section>
- );
+      </Dialog>
+    </section>
+  );
 };

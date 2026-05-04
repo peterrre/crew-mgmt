@@ -1,15 +1,12 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import AssignmentPanel from '../components/AssignmentPanel';
+import { AssignmentPanel } from '../components/AssignmentPanel';
 import { fetchAvailableUsers } from '../lib/api/users';
 import { toast } from 'sonner';
 
 // Mocks
 jest.mock('../lib/api/users');
 jest.mock('sonner');
-
-const mockFetchAvailableUsers = fetchAvailableUsers as jest.MockedFunction<typeof fetchAvailableUsers>;
-const mockToast = toast as jest.MockedFunction<typeof toast>;
 
 const createProps = (overrides: Partial<React.ComponentProps<typeof AssignmentPanel>> = {}) => ({
   shiftId: 'shift-1',
@@ -76,29 +73,36 @@ describe('AssignmentPanel', () => {
     const baseProps = createProps({ isAdmin: true });
 
     beforeEach(() => {
-      mockFetchAvailableUsers.mockResolvedValue([]);
+      fetchAvailableUsers.mockResolvedValue([]);
     });
 
     it('loads users on mount when admin or crew', async () => {
       render(<AssignmentPanel {...baseProps} />);
-      expect(mockFetchAvailableUsers).toHaveBeenCalledWith({ shiftId: 'shift-1' });
-      await waitFor(() => expect(mockToast).not.toHaveBeenCalledWith('Failed to load users'));
+      expect(fetchAvailableUsers).toHaveBeenCalledWith({ shiftId: 'shift-1' });
+      await waitFor(() => expect(toast).not.toHaveBeenCalledWith('Failed to load users'));
     });
 
     it('shows Assign dropdown when not volunteer', () => {
       render(<AssignmentPanel {...baseProps} />);
-      const trigger = screen.getByRole('button', { name: /assign/i });
+      // Get all buttons with name "Assign"
+      const assignButtons = screen.getAllByRole('button', { name: /assign/i });
+      // Find the one that is the dropdown trigger (has aria-haspopup="menu")
+      const trigger = assignButtons.find(btn => btn.getAttribute('aria-haspopup') === 'menu');
       expect(trigger).toBeInTheDocument();
     });
 
     describe('Assign Responsible dropdown item', () => {
       it('calls handleAssignResponsible which shows placeholder toast and closes panel', async () => {
         render(<AssignmentPanel {...baseProps} />);
-        const assignBtn = screen.getByRole('button', { name: /assign/i });
+        // Get all buttons with name "Assign"
+        const assignButtons = screen.getAllByRole('button', { name: /assign/i });
+        // Find the dropdown trigger (aria-haspopup="menu")
+        const assignBtn = assignButtons.find(btn => btn.getAttribute('aria-haspopup') === 'menu');
         await fireEvent.click(assignBtn);
-        const menuItem = screen.getByRole('menuitem', { name: /assign responsible/i });
+        // Wait for the menu item to appear
+        const menuItem = await screen.findByRole('menuitem', { name: /assign responsible/i });
         await fireEvent.click(menuItem);
-        expect(mockToast).toHaveBeenCalledWith('Assigned as responsible (placeholder)');
+        expect(toast).toHaveBeenCalledWith('Assigned as responsible (placeholder)');
         expect(baseProps.onClose).toHaveBeenCalled();
       });
     });
@@ -106,29 +110,37 @@ describe('AssignmentPanel', () => {
     describe('Assign Helper dropdown item', () => {
       it('calls handleAssignHelper which shows placeholder toast and closes panel', async () => {
         render(<AssignmentPanel {...baseProps} />);
-        const assignBtn = screen.getByRole('button', { name: /assign/i });
+        // Get all buttons with name "Assign"
+        const assignButtons = screen.getAllByRole('button', { name: /assign/i });
+        // Find the dropdown trigger (aria-haspopup="menu")
+        const assignBtn = assignButtons.find(btn => btn.getAttribute('aria-haspopup') === 'menu');
         await fireEvent.click(assignBtn);
-        const menuItem = screen.getByRole('menuitem', { name: /assign helper/i });
+        // Wait for the menu item to appear
+        const menuItem = await screen.findByRole('menuitem', { name: /assign helper/i });
         await fireEvent.click(menuItem);
-        expect(mockToast).toHaveBeenCalledWith('Assigned as helper (placeholder)');
+        expect(toast).toHaveBeenCalledWith('Assigned as helper (placeholder)');
         expect(baseProps.onClose).toHaveBeenCalled();
       });
     });
 
     it('shows Assign button for Responsible when nobody assigned', () => {
       render(<AssignmentPanel {...baseProps} />);
+      // Get all buttons with name "Assign"
       const assignButtons = screen.getAllByRole('button', { name: /assign/i });
+      // There should be at least two: dropdown trigger and the button in the nobody assigned section
       expect(assignButtons.length).toBeGreaterThanOrEqual(2);
     });
 
     it('clicking Assign button for Responsible sets selectedUserId and calls handleAssignResponsible', async () => {
       render(<AssignmentPanel {...baseProps} />);
+      // Get all buttons with name "Assign"
       const assignButtons = screen.getAllByRole('button', { name: /assign/i });
-      const plainAssignBtn = assignButtons[1];
+      // The button in the nobody assigned section does NOT have aria-haspopup
+      const plainAssignBtn = assignButtons.find(btn => !btn.getAttribute('aria-haspopup'));
       await fireEvent.click(plainAssignBtn);
       // The handler will early return because selectedUserId is null, but we can verify that setSelectedUserId was called via the onClick prop.
       // Since we cannot directly spy on useState setter, we at least ensure no error.
-      expect(true).toBeTrue();
+      expect(true).toBeTruthy();
     });
   });
 
@@ -141,8 +153,17 @@ describe('AssignmentPanel', () => {
       });
       render(<AssignmentPanel {...props} />);
       const respDiv = screen.getByText('Responsible');
-      const moreBtn = screen.getByRole("button", { 'aria-label': /more options/i });
-      await fireEvent.click(moreBtn);
+      // Find the button with aria-label "More options" inside the responsible section
+      const moreBtn = screen.getByRole('button', { name: /more options/i });
+      // There might be multiple; we need the one associated with responsible.
+      // We can find by first checking that the button is a descendant of the respDiv's parent section.
+      // Simpler: find all buttons with that name and take the first one that is within the responsible's container.
+      const allMoreBtns = screen.getAllByRole('button', { name: /more options/i });
+      // Find the one that is inside the same flex items-center space-x-3 div as the respDiv
+      const respSection = respDiv.closest('div.flex.items-center.space-x-3');
+      const moreBtnInResp = Array.from(allMoreBtns).find(btn => respSection.contains(btn));
+      expect(moreBtnInResp).toBeInTheDocument();
+      await fireEvent.click(moreBtnInResp);
       const removeItem = screen.getByRole('menuitem', { name: /remove/i });
       expect(removeItem).toBeInTheDocument();
       await fireEvent.click(removeItem);
@@ -158,10 +179,14 @@ describe('AssignmentPanel', () => {
       });
       render(<AssignmentPanel {...props} />);
       const helperDiv = screen.getByText('Helpers (1)');
-      const moreBtns = screen.getAllByRole("button", { 'aria-label': /more options/i });
-      const moreBtn = moreBtns[1]; // second more btn
+      // Find the helper section (the div that contains the helper text)
+      const helperSection = helperDiv.closest('div.flex.items-center.space-x-2');
+      // Within the helper section, there is a button with aria-label "More options"
+      const moreBtn = helperSection.querySelector('button[aria-label="More options"]');
+      expect(moreBtn).toBeInTheDocument();
       await fireEvent.click(moreBtn);
       const removeItem = screen.getByRole('menuitem', { name: /remove/i });
+      expect(removeItem).toBeInTheDocument();
       await fireEvent.click(removeItem);
       expect(props.onRemoveAssignment).toHaveBeenCalledWith('h1');
     });

@@ -46,13 +46,13 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       return;
     }
 
-    try {
-      setLoading(true);
-      const data = await getUnreadNotifications(userId);
-      setNotifications(data);
-      setUnreadCount(data.length);
-      setError(null);
-    } catch (err) {
+      try {
+        setLoading(true);
+        const data = await getUnreadNotifications(userId);
+        setNotifications(data);
+        setUnreadCount(data.filter(n => !n.read).length);
+        setError(null);
+      } catch (err) {
       console.error('Failed to fetch notifications:', err);
       setError('Failed to load notifications');
     } finally {
