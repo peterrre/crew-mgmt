@@ -22,6 +22,7 @@ import {
   removeUserFromShift,
 } from "@/lib/api/shifts";
 import { AssignmentPanel } from "./AssignmentPanel";
+import { ShiftCommentBox } from "./ShiftCommentBox";
 import { colors } from "@/styles/tokens";
 import { ShiftAssignmentRole } from "@/lib/shiftAssignmentRole";
 import { Role } from "@/lib/role";
@@ -275,11 +276,14 @@ export const ShiftCalendar = ({ eventId }: ShiftCalendarProps) => {
               onSelfAssign={handleSelfAssign}
               onRemoveAssignment={handleRemoveAssignment}
               onClose={() => setOpenPanel(false)}
-            />
-          ) : (
-            <p>No shift selected.</p>
-          )}
-        </DialogContent>
+ />
+ ) : (
+ <p>No shift selected.</p>
+ )}
+ {selectedShift && (
+ <ShiftCommentBox shiftId={selectedShift.id} className="mt-4" />
+ )}
+ </DialogContent>
         <DialogFooter className="flex justify-end">
           <Button variant="secondary" onClick={() => setOpenPanel(false)}>
             Close

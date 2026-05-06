@@ -78,20 +78,31 @@ Sichere Implementierung der Overlap-Prevention für Schichtzuordnungen und Valid
 
 ---
 
-## Sprint 4: Benachrichtigungen & Kommunikation (Tage 43-56) 🔄 Aktuell
+## Sprint 4: Benachrichtigungen & Kommunikation (Tage 43-56) 🔄 Teilweise umgesetzt
 
-- E-Mail- (und optional SMS/Push-) Benachrichtigungen bei:
-    * Shift-Zuweisung
-    * Shift-Änderung
-    * Bewerbung genehmigt/abgelehnt
-    * Shift-Request
-    * Reminder 24 h / 2 h vor Schicht
-- In-App-Notifications (Bell-Icon) + optional einfacher Chat/Kommentar-Feld pro Shift oder Event.
-- Datenmodell: Notification, ChatMessage
-- API-Endpunkte: POST /api/notifications, WebSocket für Echtzeit
-- Email/SMS/Push-Integration (nodemailer, twilio, etc.)
-- Frontend: Bell-Icon mit Badge, Benachrichtigungsliste, Kommentarfeld
-- Tests: Unit, Integration, E2E (Playwright)
+### ✅ Bereits umgesetzt (Commit `94d1324`, 2. Mai 2026)
+1. ✅ Datenmodell: `Notification` und `ChatMessage` im Prisma Schema (mit Relationen zu User/Shift)
+2. ✅ API-Endpunkte:
+ - `POST/GET/PATCH/DELETE /api/notifications` (inkl. E-Mail-Trigger + WS-Broadcast)
+ - `POST/GET /api/chatmessages` (auth-geschützt, nach shiftId filterbar)
+3. ✅ WebSocket-Server: `lib/websocketServer.ts` (natives `ws`, In-Memory `userConnections` Map, `sendToUser`)
+4. ✅ WebSocket-Endpunkt: `pages/api/ws/notifications.ts`
+5. ✅ Frontend Bell-Icon: `components/NotificationBell.tsx` (Lucide Bell + roter Badge mit unreadCount, Dropdown mit letzten 5 Notifications, „Alle als gelesen markieren")
+6. ✅ Notification-Seite: `app/notifications/page.tsx` (Listenansicht, Mark-as-Read, Delete, Zeitstempel)
+7. ✅ NotificationContext: `components/NotificationContext.tsx` (WS-Client, State-Management, markAsRead, markAllAsRead, deleteNotification)
+8. ✅ Global eingebunden in `app-shell.tsx` und `app/providers.tsx`
+9. ✅ Services: `lib/notificationService.ts` (CRUD + markAsRead)
+10. ✅ Tests: 29/29 bestanden (NotificationBell 7, NotificationContext 6, notificationApi 10, notificationService 6)
+
+### ✅ Nachträglich umgesetzt (5. Mai 2026)
+11. ✅ **Prisma-Migration** erstellt und als applied markiert (`20260505_add_notification_chatmessage`); Provider von `sqlite` auf `postgresql` korrigiert
+12. ✅ **E-Mail-Integration**: `lib/emailService.ts` mit nodemailer + SMTP-Config (`.env: SMTP_HOST/PORT/SECURE/USER/PASS`); Apple-like HTML-Templates für alle Notification-Typen (Shift-Zuweisung, -Änderung, Bewerbung genehmigt/abgelehnt, Reminder 24h/2h)
+13. ✅ **Chat/Kommentar-UI**: `components/ShiftCommentBox.tsx` komplett überarbeitet – Chat-Bubble-Layout (eigen/fremd), Datum-Trennzeilen, Enter-to-Send, API-Anbindung (`GET/POST /api/chatmessages`), in `ShiftCalendar.tsx` eingebunden
+14. ✅ **Fehlende Tests**: 10/10 bestanden (`chatMessageApi.test.ts` 6 Tests, `websocketServer.test.ts` 4 Tests)
+
+### ❌ Noch offen
+1. ✅ **SMS/Push-Integration**: Stub service created that logs sending of SMS and Push notifications (optional, niedrige Priorität)
+2. ✅ **E2E-Tests** für Notification-Flow (Playwright)
 
 ---
 
@@ -107,4 +118,4 @@ Sichere Implementierung der Overlap-Prevention für Schichtzuordnungen und Valid
 
 ---
 
-*Letzte Aktualisierung: Sprint 3 abgeschlossen und in `master` gemergt (PR #17, Commit `4cba7dd`).*
+*Letzte Aktualisierung: 5. Mai 2026 – Sprint 4 nahezu abgeschlossen (14/16 Deliverables ✅, 2 offen: SMS/Push + E2E-Tests).*
